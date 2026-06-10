@@ -1,9 +1,11 @@
 "use client";
 
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Dog } from "lucide-react";
+import { Dog, LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -26,7 +28,15 @@ interface TopBarProps {
 
 export function TopBar({ className }: TopBarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, signOut } = useAuth();
   const title = getTitle(pathname);
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header
@@ -49,9 +59,21 @@ export function TopBar({ className }: TopBarProps) {
           </span>
         </Link>
         <div className="h-5 w-px bg-stone-200" aria-hidden />
-        <h1 className="truncate text-base font-semibold text-stone-900">
+        <h1 className="min-w-0 flex-1 truncate text-base font-semibold text-stone-900">
           {title}
         </h1>
+        {user && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            aria-label="Sign out"
+            className="shrink-0 text-stone-600"
+          >
+            <LogOut className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline">Sign Out</span>
+          </Button>
+        )}
       </div>
     </header>
   );

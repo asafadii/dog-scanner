@@ -1,5 +1,10 @@
+"use client";
+
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Building2, Bell, User } from "lucide-react";
+import { Building2, Bell, LogOut, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const PLACEHOLDER_SECTIONS = [
   {
@@ -20,6 +25,15 @@ const PLACEHOLDER_SECTIONS = [
 ];
 
 export default function SettingsPage() {
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  }
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
@@ -30,6 +44,21 @@ export default function SettingsPage() {
           Facility and account preferences — coming in a future sprint.
         </p>
       </div>
+
+      {user && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Account</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            <p className="text-sm text-stone-600">{user.email}</p>
+            <Button variant="outline" onClick={handleSignOut} className="w-full sm:w-auto">
+              <LogOut className="h-4 w-4" aria-hidden />
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-4">
         {PLACEHOLDER_SECTIONS.map(({ icon: Icon, title, description }) => (

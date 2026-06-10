@@ -48,7 +48,7 @@ export default function LandingPage() {
               Dog Scanner
             </span>
           </div>
-          <Link href="/dashboard">
+          <Link href="/login">
             <Button variant="outline" size="sm">
               Sign In
             </Button>
@@ -71,14 +71,14 @@ export default function LandingPage() {
             workflows.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/dashboard">
+            <Link href="/login">
               <Button size="lg" className="min-w-[200px]">
                 Go to Dashboard
               </Button>
             </Link>
-            <Link href="/dogs">
+            <Link href="/signup">
               <Button variant="outline" size="lg" className="min-w-[200px]">
-                Browse Dogs
+                Create Account
               </Button>
             </Link>
           </div>
@@ -107,7 +107,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-stone-200/80 py-8 text-center text-sm text-stone-500">
-        Dog Scanner — Sprint 1 foundation (mock data)
+        Dog Scanner — Sprint 3 (auth + mock data)
       </footer>
     </div>
   );
