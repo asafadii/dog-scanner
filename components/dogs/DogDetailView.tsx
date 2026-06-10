@@ -9,8 +9,11 @@ import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
-import { useMockStore } from "@/lib/mockStore";
-import type { TimelineEvent } from "@/lib/types";
+import {
+  getDogById,
+  INCOMPLETE_SETUP_MESSAGE,
+} from "@/lib/dogs";
+import type { CareTask, Dog, DogStatus, TimelineEvent } from "@/lib/types";
 import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
 import {
   Activity,
@@ -21,6 +24,7 @@ import {
   FileText,
   LogIn,
   LogOut,
+  Loader2,
   Phone,
   Pill,
   Plus,
@@ -30,7 +34,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+function createId(): string {
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
 
 function TimelineIcon({ type }: { type: TimelineEvent["type"] }) {
   const className = "h-4 w-4";
@@ -58,11 +66,136 @@ interface DogDetailViewProps {
 
 export function DogDetailView({ dogId }: DogDetailViewProps) {
   const router = useRouter();
-  const { getDog, toggleCheckStatus, toggleCareTask, addTimelineNote } =
-    useMockStore();
-  const dog = getDog(dogId);
+  const [dog, setDog] = useState<Dog | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
+
+  const loadDog = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const result = await getDogById(dogId);
+    if (result.error) {
+      setDog(null);
+      setError(result.error.message);
+    } else {
+      setDog(result.data);
+    }
+
+    setLoading(false);
+  }, [dogId]);
+
+  useEffect(() => {
+    void loadDog();
+  }, [loadDog]);
+
+  const toggleCheckStatus = useCallback(() => {
+    setDog((current) => {
+      if (!current) return current;
+
+      const now = new Date().toISOString();
+      const checkingIn = current.status === "checked_out";
+
+      return {
+        ...current,
+        status: (checkingIn ? "checked_in" : "checked_out") as DogStatus,
+        lastCheckIn: checkingIn ? now : current.lastCheckIn,
+        lastCheckOut: checkingIn ? current.lastCheckOut : now,
+        timeline: [
+          {
+            id: createId(),
+            time: now,
+            type: checkingIn ? "check-in" : "check-out",
+            description: checkingIn
+              ? `Checked in — ${current.owner.name}`
+              : `Checked out — ${current.owner.name}`,
+            staff: "Staff",
+          },
+          ...current.timeline,
+        ],
+        todaysCare: checkingIn
+          ? current.todaysCare.length > 0
+            ? current.todaysCare
+            : [
+                { id: createId(), task: "Morning feeding", completed: false },
+                { id: createId(), task: "Afternoon walk", completed: false },
+              ]
+          : [],
+      };
+    });
+  }, []);
+
+  const toggleCareTask = useCallback((taskId: string) => {
+    setDog((current) => {
+      if (!current) return current;
+
+      return {
+        ...current,
+        todaysCare: current.todaysCare.map((task) => {
+          if (task.id !== taskId) return task;
+          const completed = !task.completed;
+          return {
+            ...task,
+            completed,
+            time: completed
+              ? new Intl.DateTimeFormat("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                }).format(new Date())
+              : undefined,
+          } satisfies CareTask;
+        }),
+      };
+    });
+  }, []);
+
+  const addTimelineNote = useCallback((note: string, staff = "Staff") => {
+    setDog((current) => {
+      if (!current) return current;
+
+      const event: TimelineEvent = {
+        id: createId(),
+        time: new Date().toISOString(),
+        type: "note",
+        description: note,
+        staff,
+      };
+
+      return { ...current, timeline: [event, ...current.timeline] };
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
+        <Loader2
+          className="h-8 w-8 animate-spin text-teal-600"
+          aria-hidden
+        />
+        <p className="text-sm text-stone-500">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error && error !== "Dog not found") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+        <p className="text-lg font-medium text-red-800" role="alert">
+          {error}
+        </p>
+        {error !== INCOMPLETE_SETUP_MESSAGE && (
+          <Button variant="outline" onClick={() => void loadDog()}>
+            Try again
+          </Button>
+        )}
+        <Button variant="outline" onClick={() => router.push("/dogs")}>
+          Back to Dogs
+        </Button>
+      </div>
+    );
+  }
 
   if (!dog) {
     return (
@@ -81,7 +214,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
 
   function handleSaveNote() {
     if (!noteText.trim()) return;
-    addTimelineNote(dogId, noteText.trim());
+    addTimelineNote(noteText.trim());
     setNoteText("");
     setNoteOpen(false);
   }
@@ -295,7 +428,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 <button
                   key={task.id}
                   type="button"
-                  onClick={() => toggleCareTask(dogId, task.id)}
+                  onClick={() => toggleCareTask(task.id)}
                   className={cn(
                     "flex w-full min-h-[44px] items-center gap-3 rounded-xl border p-3 text-left transition-colors",
                     task.completed
@@ -428,7 +561,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 variant={isCheckedIn ? "danger" : "primary"}
                 className="col-span-2"
                 size="lg"
-                onClick={() => toggleCheckStatus(dogId)}
+                onClick={toggleCheckStatus}
               >
                 {isCheckedIn ? (
                   <>

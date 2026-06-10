@@ -1,7 +1,6 @@
-import type { Database } from "@/lib/supabase/types";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-let browserClient: SupabaseClient<Database> | null = null;
+let browserClient: SupabaseClient | null = null;
 
 function getSupabaseEnv(): { url: string; anonKey: string } {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -16,12 +15,12 @@ function getSupabaseEnv(): { url: string; anonKey: string } {
   return { url, anonKey };
 }
 
-export function createSupabaseBrowserClient(): SupabaseClient<Database> {
+export function createSupabaseBrowserClient(): SupabaseClient {
   if (browserClient) {
     return browserClient;
   }
 
   const { url, anonKey } = getSupabaseEnv();
-  browserClient = createClient<Database>(url, anonKey);
+  browserClient = createClient(url, anonKey);
   return browserClient;
 }

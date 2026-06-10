@@ -1,7 +1,82 @@
 import type { User } from "@supabase/supabase-js";
 
 export type UserRole = "admin" | "staff";
+export type DbDogSize = "small" | "medium" | "large";
 
+export interface DogRow {
+  id: string;
+  facility_id: string;
+  name: string;
+  breed: string;
+  age: string;
+  size: DbDogSize;
+  sex: string | null;
+  photo_url: string | null;
+  owner_name: string;
+  owner_phone: string;
+  emergency_contact: string | null;
+  vet_contact: string | null;
+  behavior_notes: string | null;
+  medication_required: boolean;
+  medication_notes: string | null;
+  diet_notes: string | null;
+  allergies: string | null;
+  aggression_risk: boolean;
+  escape_risk: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DogInsert = {
+  id?: string;
+  facility_id: string;
+  name: string;
+  breed: string;
+  age: string;
+  size: DbDogSize;
+  sex?: string | null;
+  photo_url?: string | null;
+  owner_name: string;
+  owner_phone: string;
+  emergency_contact?: string | null;
+  vet_contact?: string | null;
+  behavior_notes?: string | null;
+  medication_required?: boolean;
+  medication_notes?: string | null;
+  diet_notes?: string | null;
+  allergies?: string | null;
+  aggression_risk?: boolean;
+  escape_risk?: boolean;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DogUpdate = {
+  id?: string;
+  facility_id?: string;
+  name?: string;
+  breed?: string;
+  age?: string;
+  size?: DbDogSize;
+  sex?: string | null;
+  photo_url?: string | null;
+  owner_name?: string;
+  owner_phone?: string;
+  emergency_contact?: string | null;
+  vet_contact?: string | null;
+  behavior_notes?: string | null;
+  medication_required?: boolean;
+  medication_notes?: string | null;
+  diet_notes?: string | null;
+  allergies?: string | null;
+  aggression_risk?: boolean;
+  escape_risk?: boolean;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
 export interface FacilityRow {
   id: string;
   name: string;
@@ -17,7 +92,7 @@ export interface ProfileRow {
   created_at: string;
 }
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       facilities: {
@@ -62,6 +137,12 @@ export interface Database {
           },
         ];
       };
+      dogs: {
+        Row: DogRow;
+        Insert: DogInsert;
+        Update: DogUpdate;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -69,8 +150,14 @@ export interface Database {
     Functions: {
       [_ in never]: never;
     };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
-}
+};
 
 export interface AuthContextValue {
   user: User | null;
@@ -79,9 +166,9 @@ export interface AuthContextValue {
 }
 
 export interface AuthSetupRequest {
-  fullName: string;
-  facilityName: string;
-  email: string;
+  fullName?: string;
+  facilityName?: string;
+  email?: string;
 }
 
 export interface AuthSetupSuccessResponse {

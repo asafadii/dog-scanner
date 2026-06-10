@@ -3,38 +3,12 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { runAuthSetup } from "@/lib/authSetup";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { AuthSetupResponse } from "@/lib/supabase/types";
 import { Dog } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-
-async function runOnboardingSetup(
-  accessToken: string,
-  payload: { fullName: string; facilityName: string; email: string },
-): Promise<AuthSetupResponse> {
-  const response = await fetch("/api/auth/setup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = (await response.json()) as AuthSetupResponse;
-
-  if (!response.ok || !data.ok) {
-    const message =
-      !data.ok && "error" in data
-        ? data.error
-        : "Failed to complete account setup";
-    throw new Error(message);
-  }
-
-  return data;
-}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -74,14 +48,19 @@ export default function SignupPage() {
         return;
       }
 
+      if (!data.user) {
+        setError("Account could not be created. Please try again.");
+        return;
+      }
+
       if (!data.session?.access_token) {
         setInfo(
-          "Check your email to confirm your account, then sign in to finish setup.",
+          "Check your email to confirm your account. After you confirm and sign in, we'll finish setting up your facility automatically.",
         );
         return;
       }
 
-      await runOnboardingSetup(data.session.access_token, {
+      await runAuthSetup(data.session.access_token, {
         fullName: trimmedFullName,
         facilityName: trimmedFacilityName,
         email: trimmedEmail,

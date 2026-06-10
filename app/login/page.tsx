@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { runAuthSetup } from "@/lib/authSetup";
+import { getCurrentUserProfile } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Dog } from "lucide-react";
 import Link from "next/link";
@@ -21,22 +23,39 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
+    const trimmedEmail = email.trim().toLowerCase();
+
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+      const { data, error: signInError } = await supabase.auth.signInWithPassword(
+        {
+          email: trimmedEmail,
+          password,
+        },
+      );
 
       if (signInError) {
         setError(signInError.message);
         return;
       }
 
+      const accessToken = data.session?.access_token;
+      if (!accessToken) {
+        setError("Sign in succeeded but no session was returned. Please try again.");
+        return;
+      }
+
+      const profileResult = await getCurrentUserProfile();
+      if (profileResult.error?.code === "incomplete_setup") {
+        await runAuthSetup(accessToken, { email: trimmedEmail });
+      }
+
       router.push("/dashboard");
       router.refresh();
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again.",
+      );
     } finally {
       setLoading(false);
     }

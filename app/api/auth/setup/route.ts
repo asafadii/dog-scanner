@@ -13,22 +13,81 @@ import type {
   AuthSetupRequest,
   AuthSetupSuccessResponse,
 } from "@/lib/supabase/types";
+import type { User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-function isValidSetupBody(body: unknown): body is AuthSetupRequest {
-  if (!body || typeof body !== "object") return false;
+const DEFAULT_FACILITY_NAME = "My Dog Daycare";
+
+function devLog(message: string, details?: unknown) {
+  if (process.env.NODE_ENV !== "development") return;
+  if (details !== undefined) {
+    console.log(`[auth/setup] ${message}`, details);
+  } else {
+    console.log(`[auth/setup] ${message}`);
+  }
+}
+
+function parseSetupBody(body: unknown): AuthSetupRequest {
+  if (!body || typeof body !== "object") return {};
   const record = body as Record<string, unknown>;
-  return (
-    typeof record.fullName === "string" &&
-    record.fullName.trim().length > 0 &&
-    typeof record.facilityName === "string" &&
-    record.facilityName.trim().length > 0 &&
-    typeof record.email === "string" &&
-    record.email.trim().length > 0
-  );
+  const payload: AuthSetupRequest = {};
+
+  if (typeof record.fullName === "string" && record.fullName.trim()) {
+    payload.fullName = record.fullName.trim();
+  }
+  if (typeof record.facilityName === "string" && record.facilityName.trim()) {
+    payload.facilityName = record.facilityName.trim();
+  }
+  if (typeof record.email === "string" && record.email.trim()) {
+    payload.email = record.email.trim().toLowerCase();
+  }
+
+  return payload;
+}
+
+function resolveSetupFields(
+  user: User,
+  body: AuthSetupRequest,
+):
+  | { ok: true; fullName: string; facilityName: string; email: string }
+  | { ok: false; error: string; status: number } {
+  const metadata = user.user_metadata ?? {};
+  const userEmail = user.email?.trim().toLowerCase() ?? "";
+
+  const email = body.email ?? userEmail;
+  if (!email) {
+    return { ok: false, error: "Authenticated user email is required", status: 400 };
+  }
+
+  if (userEmail && userEmail !== email) {
+    return {
+      ok: false,
+      error: "Email does not match authenticated user",
+      status: 403,
+    };
+  }
+
+  const metadataFullName =
+    typeof metadata.full_name === "string" ? metadata.full_name.trim() : "";
+  const metadataFacilityName =
+    typeof metadata.facility_name === "string"
+      ? metadata.facility_name.trim()
+      : "";
+
+  const fullName =
+    body.fullName ??
+    (metadataFullName || email.split("@")[0] || "User");
+
+  const facilityName =
+    body.facilityName ??
+    (metadataFacilityName || DEFAULT_FACILITY_NAME);
+
+  return { ok: true, fullName, facilityName, email };
 }
 
 export async function POST(request: Request) {
+  devLog("setup route called");
+
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return NextResponse.json(
@@ -45,26 +104,14 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: unknown;
+  let body: unknown = {};
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { ok: false, error: "Invalid JSON body" },
-      { status: 400 },
-    );
+    body = {};
   }
 
-  if (!isValidSetupBody(body)) {
-    return NextResponse.json(
-      { ok: false, error: "fullName, facilityName, and email are required" },
-      { status: 400 },
-    );
-  }
-
-  const fullName = body.fullName.trim();
-  const facilityName = body.facilityName.trim();
-  const email = body.email.trim().toLowerCase();
+  const setupBody = parseSetupBody(body);
 
   const authClient = createSupabaseAnonClient();
   const {
@@ -73,21 +120,29 @@ export async function POST(request: Request) {
   } = await authClient.auth.getUser(accessToken);
 
   if (userError || !user) {
+    devLog("setup error: user verification failed", userError?.message);
     return NextResponse.json(
       { ok: false, error: "Invalid or expired session" },
       { status: 401 },
     );
   }
 
-  if (user.email && user.email.toLowerCase() !== email) {
+  devLog("user verified", { userId: user.id, email: user.email });
+
+  const resolved = resolveSetupFields(user, setupBody);
+  if (!resolved.ok) {
+    devLog("setup error: invalid setup fields", resolved.error);
     return NextResponse.json(
-      { ok: false, error: "Email does not match authenticated user" },
-      { status: 403 },
+      { ok: false, error: resolved.error },
+      { status: resolved.status },
     );
   }
 
+  const { fullName, facilityName, email } = resolved;
+
   const db = createSupabaseAdminClient();
   if (!db) {
+    devLog("setup error: missing service role key");
     return NextResponse.json(
       { ok: false, error: "Server configuration error" },
       { status: 500 },
@@ -98,6 +153,7 @@ export async function POST(request: Request) {
     await findProfileByUserId(db, user.id);
 
   if (existingError) {
+    devLog("setup error: profile lookup failed", existingError.message);
     return NextResponse.json(
       { ok: false, error: existingError.message },
       { status: 500 },
@@ -111,11 +167,20 @@ export async function POST(request: Request) {
     );
 
     if (facilityError || !facility) {
+      devLog("setup error: profile exists but facility missing", {
+        profileId: existingProfile.id,
+        facilityId: existingProfile.facility_id,
+      });
       return NextResponse.json(
         { ok: false, error: "Profile exists but facility is missing" },
         { status: 500 },
       );
     }
+
+    devLog("profile already existed", {
+      profileId: existingProfile.id,
+      facilityId: facility.id,
+    });
 
     const response: AuthSetupSuccessResponse = {
       ok: true,
@@ -132,6 +197,7 @@ export async function POST(request: Request) {
   );
 
   if (facilityError || !facility) {
+    devLog("setup error: facility creation failed", facilityError?.message);
     return NextResponse.json(
       { ok: false, error: facilityError?.message ?? "Failed to create facility" },
       { status: 500 },
@@ -163,6 +229,10 @@ export async function POST(request: Request) {
         );
         if (racedFacility) {
           await deleteFacility(db, facility.id);
+          devLog("profile already existed (race)", {
+            profileId: racedProfile.id,
+            facilityId: racedFacility.id,
+          });
           const response: AuthSetupSuccessResponse = {
             ok: true,
             alreadyExists: true,
@@ -174,6 +244,10 @@ export async function POST(request: Request) {
       }
     }
 
+    devLog("setup error: profile creation failed", {
+      message: profileError?.message,
+      code: profileErrorCode,
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -182,6 +256,11 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  devLog("profile created", {
+    profileId: profile.id,
+    facilityId: facility.id,
+  });
 
   const response: AuthSetupSuccessResponse = {
     ok: true,
