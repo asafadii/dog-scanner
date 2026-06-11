@@ -1,3 +1,9 @@
+import {
+  enrichDogWithCheckin,
+  enrichDogsWithCheckins,
+  getActiveCheckins,
+  getDogActiveCheckin,
+} from "@/lib/checkins";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DogInsert, DogRow, DogUpdate, ProfileRow } from "@/lib/supabase/types";
 import type { Dog, NewDogFormData } from "@/lib/types";
@@ -73,6 +79,7 @@ export function mapDogRowToDog(row: DogRow): Dog {
     overnight: false,
     lastCheckIn: null,
     lastCheckOut: null,
+    activeCheckinId: null,
     todaysCare: [],
     timeline: [],
   };
@@ -200,8 +207,14 @@ export async function getDogs(): Promise<DogsResult<Dog[]>> {
     return { data: null, error: toError(error.message) };
   }
 
+  const dogs = (data as DogRow[]).map(mapDogRowToDog);
+  const checkinsResult = await getActiveCheckins();
+  if (checkinsResult.error) {
+    return { data: null, error: toError(checkinsResult.error.message) };
+  }
+
   return {
-    data: (data as DogRow[]).map(mapDogRowToDog),
+    data: enrichDogsWithCheckins(dogs, checkinsResult.data),
     error: null,
   };
 }
@@ -229,7 +242,16 @@ export async function getDogById(id: string): Promise<DogsResult<Dog>> {
     return { data: null, error: toError("Dog not found", "not_found") };
   }
 
-  return { data: mapDogRowToDog(data as DogRow), error: null };
+  const dog = mapDogRowToDog(data as DogRow);
+  const checkinResult = await getDogActiveCheckin(id);
+  if (checkinResult.error) {
+    return { data: null, error: toError(checkinResult.error.message) };
+  }
+
+  return {
+    data: enrichDogWithCheckin(dog, checkinResult.data),
+    error: null,
+  };
 }
 
 export async function createDog(

@@ -10,10 +10,16 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
 import {
+  checkInDog,
+  checkOutDog,
+  enrichDogAfterCheckout,
+  enrichDogWithCheckin,
+} from "@/lib/checkins";
+import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
-import type { CareTask, Dog, DogStatus, TimelineEvent } from "@/lib/types";
+import type { CareTask, Dog, TimelineEvent } from "@/lib/types";
 import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
 import {
   Activity,
@@ -71,6 +77,8 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [checkActionLoading, setCheckActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadDog = useCallback(async () => {
     setLoading(true);
@@ -91,41 +99,34 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
     void loadDog();
   }, [loadDog]);
 
-  const toggleCheckStatus = useCallback(() => {
-    setDog((current) => {
-      if (!current) return current;
+  const toggleCheckStatus = useCallback(async () => {
+    if (!dog || checkActionLoading) return;
 
-      const now = new Date().toISOString();
-      const checkingIn = current.status === "checked_out";
+    setCheckActionLoading(true);
+    setActionError(null);
 
-      return {
-        ...current,
-        status: (checkingIn ? "checked_in" : "checked_out") as DogStatus,
-        lastCheckIn: checkingIn ? now : current.lastCheckIn,
-        lastCheckOut: checkingIn ? current.lastCheckOut : now,
-        timeline: [
-          {
-            id: createId(),
-            time: now,
-            type: checkingIn ? "check-in" : "check-out",
-            description: checkingIn
-              ? `Checked in — ${current.owner.name}`
-              : `Checked out — ${current.owner.name}`,
-            staff: "Staff",
-          },
-          ...current.timeline,
-        ],
-        todaysCare: checkingIn
-          ? current.todaysCare.length > 0
-            ? current.todaysCare
-            : [
-                { id: createId(), task: "Morning feeding", completed: false },
-                { id: createId(), task: "Afternoon walk", completed: false },
-              ]
-          : [],
-      };
-    });
-  }, []);
+    if (dog.status === "checked_out") {
+      const result = await checkInDog(dog.id);
+      if (result.error) {
+        setActionError(result.error.message);
+      } else {
+        setDog((current) =>
+          current ? enrichDogWithCheckin(current, result.data) : current,
+        );
+      }
+    } else if (dog.activeCheckinId) {
+      const result = await checkOutDog(dog.activeCheckinId);
+      if (result.error) {
+        setActionError(result.error.message);
+      } else {
+        setDog((current) =>
+          current ? enrichDogAfterCheckout(current, result.data) : current,
+        );
+      }
+    }
+
+    setCheckActionLoading(false);
+  }, [dog, checkActionLoading]);
 
   const toggleCareTask = useCallback((taskId: string) => {
     setDog((current) => {
@@ -253,6 +254,15 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
       </div>
 
       <div className="space-y-4 p-4 pb-32">
+        {actionError && (
+          <div
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            role="alert"
+          >
+            {actionError}
+          </div>
+        )}
+
         {/* Critical alerts — always near top */}
         {criticalOnly.length > 0 && (
           <Card className="border-2 border-red-200 bg-red-50/60">
@@ -561,9 +571,15 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 variant={isCheckedIn ? "danger" : "primary"}
                 className="col-span-2"
                 size="lg"
-                onClick={toggleCheckStatus}
+                disabled={checkActionLoading}
+                onClick={() => void toggleCheckStatus()}
               >
-                {isCheckedIn ? (
+                {checkActionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    {isCheckedIn ? "Checking out..." : "Checking in..."}
+                  </>
+                ) : isCheckedIn ? (
                   <>
                     <LogOut className="h-4 w-4" aria-hidden />
                     Check Out {dog.name}

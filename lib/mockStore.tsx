@@ -124,6 +124,7 @@ export function MockStoreProvider({ children }: { children: ReactNode }) {
       overnight: data.overnight,
       lastCheckIn: null,
       lastCheckOut: null,
+      activeCheckinId: null,
       todaysCare: [],
       timeline: [],
     };

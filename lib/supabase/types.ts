@@ -92,6 +92,36 @@ export interface ProfileRow {
   created_at: string;
 }
 
+export interface DogCheckinRow {
+  id: string;
+  dog_id: string;
+  facility_id: string;
+  checked_in_at: string;
+  checked_out_at: string | null;
+  notes: string | null;
+  created_by: string;
+}
+
+export type DogCheckinInsert = {
+  id?: string;
+  dog_id: string;
+  facility_id: string;
+  checked_in_at?: string;
+  checked_out_at?: string | null;
+  notes?: string | null;
+  created_by: string;
+};
+
+export type DogCheckinUpdate = {
+  id?: string;
+  dog_id?: string;
+  facility_id?: string;
+  checked_in_at?: string;
+  checked_out_at?: string | null;
+  notes?: string | null;
+  created_by?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -141,6 +171,12 @@ export type Database = {
         Row: DogRow;
         Insert: DogInsert;
         Update: DogUpdate;
+        Relationships: [];
+      };
+      dog_checkins: {
+        Row: DogCheckinRow;
+        Insert: DogCheckinInsert;
+        Update: DogCheckinUpdate;
         Relationships: [];
       };
     };

@@ -56,6 +56,7 @@ export interface Dog {
   overnight: boolean;
   lastCheckIn: string | null;
   lastCheckOut: string | null;
+  activeCheckinId: string | null;
   todaysCare: CareTask[];
   timeline: TimelineEvent[];
 }

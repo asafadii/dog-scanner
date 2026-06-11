@@ -4,22 +4,26 @@ import { DogCard } from "@/components/dogs/DogCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
+  checkInDog,
+  checkOutDog,
+  enrichDogAfterCheckout,
+  enrichDogWithCheckin,
+} from "@/lib/checkins";
+import {
   getDogs,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
-import type { Dog, DogStatus } from "@/lib/types";
+import type { Dog } from "@/lib/types";
 import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-function createId(): string {
-  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-}
 
 export function DogsListView() {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
   const loadDogs = useCallback(async () => {
@@ -41,52 +45,39 @@ export function DogsListView() {
     void loadDogs();
   }, [loadDogs]);
 
-  const toggleCheckStatus = useCallback((id: string) => {
-    setDogs((prev) =>
-      prev.map((dog) => {
-        if (dog.id !== id) return dog;
+  const toggleCheckStatus = useCallback(async (id: string) => {
+    const dog = dogs.find((item) => item.id === id);
+    if (!dog || togglingId) return;
 
-        const now = new Date().toISOString();
-        const checkingIn = dog.status === "checked_out";
+    setTogglingId(id);
+    setActionError(null);
 
-        return {
-          ...dog,
-          status: (checkingIn ? "checked_in" : "checked_out") as DogStatus,
-          lastCheckIn: checkingIn ? now : dog.lastCheckIn,
-          lastCheckOut: checkingIn ? dog.lastCheckOut : now,
-          todaysCare: checkingIn
-            ? dog.todaysCare.length > 0
-              ? dog.todaysCare
-              : [
-                  { id: createId(), task: "Morning feeding", completed: false },
-                  { id: createId(), task: "Afternoon walk", completed: false },
-                ]
-            : [],
-          timeline: checkingIn
-            ? [
-                {
-                  id: createId(),
-                  time: now,
-                  type: "check-in" as const,
-                  description: `Checked in — ${dog.owner.name}`,
-                  staff: "Staff",
-                },
-                ...dog.timeline,
-              ]
-            : [
-                {
-                  id: createId(),
-                  time: now,
-                  type: "check-out" as const,
-                  description: `Checked out — ${dog.owner.name}`,
-                  staff: "Staff",
-                },
-                ...dog.timeline,
-              ],
-        };
-      }),
-    );
-  }, []);
+    if (dog.status === "checked_out") {
+      const result = await checkInDog(id);
+      if (result.error) {
+        setActionError(result.error.message);
+      } else {
+        setDogs((prev) =>
+          prev.map((item) =>
+            item.id === id ? enrichDogWithCheckin(item, result.data) : item,
+          ),
+        );
+      }
+    } else if (dog.activeCheckinId) {
+      const result = await checkOutDog(dog.activeCheckinId);
+      if (result.error) {
+        setActionError(result.error.message);
+      } else {
+        setDogs((prev) =>
+          prev.map((item) =>
+            item.id === id ? enrichDogAfterCheckout(item, result.data) : item,
+          ),
+        );
+      }
+    }
+
+    setTogglingId(null);
+  }, [dogs, togglingId]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -149,6 +140,15 @@ export function DogsListView() {
         </Link>
       </div>
 
+      {actionError && (
+        <div
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          role="alert"
+        >
+          {actionError}
+        </div>
+      )}
+
       <div className="relative">
         <Search
           className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
@@ -193,7 +193,8 @@ export function DogsListView() {
             <DogCard
               key={dog.id}
               dog={dog}
-              onCheckToggle={toggleCheckStatus}
+              onCheckToggle={(dogId) => void toggleCheckStatus(dogId)}
+              isToggling={togglingId === dog.id}
             />
           ))}
         </div>

@@ -39,6 +39,7 @@ export const MOCK_DOGS: Dog[] = [
     overnight: false,
     lastCheckIn: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     lastCheckOut: null,
+    activeCheckinId: "checkin-max-001",
     todaysCare: [
       { id: "tc1", task: "Morning medication", completed: true, time: "8:00 AM" },
       { id: "tc2", task: "Morning feeding", completed: true, time: "7:15 AM" },
@@ -112,6 +113,7 @@ export const MOCK_DOGS: Dog[] = [
     overnight: true,
     lastCheckIn: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
     lastCheckOut: null,
+    activeCheckinId: "checkin-luna-002",
     todaysCare: [
       { id: "tc1", task: "Morning feeding", completed: true, time: "7:00 AM" },
       { id: "tc2", task: "Agility session", completed: true, time: "10:00 AM" },
@@ -170,6 +172,7 @@ export const MOCK_DOGS: Dog[] = [
     overnight: false,
     lastCheckIn: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     lastCheckOut: null,
+    activeCheckinId: "checkin-rocky-003",
     todaysCare: [
       { id: "tc1", task: "Morning medication", completed: true, time: "8:30 AM" },
       { id: "tc2", task: "Solo play session", completed: false },
@@ -219,6 +222,7 @@ export const MOCK_DOGS: Dog[] = [
     overnight: false,
     lastCheckIn: null,
     lastCheckOut: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    activeCheckinId: null,
     todaysCare: [],
     timeline: [
       {
@@ -264,6 +268,7 @@ export const MOCK_DOGS: Dog[] = [
     overnight: false,
     lastCheckIn: null,
     lastCheckOut: null,
+    activeCheckinId: null,
     todaysCare: [],
     timeline: [],
   },

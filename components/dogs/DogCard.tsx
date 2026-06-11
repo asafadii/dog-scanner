@@ -5,17 +5,23 @@ import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { Button } from "@/components/ui/Button";
 import type { Dog, DogStatus } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
-import { Clock, Eye, LogIn, LogOut, User } from "lucide-react";
+import { Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface DogCardProps {
   dog: Dog;
   onCheckToggle?: (id: string) => void;
+  isToggling?: boolean;
   className?: string;
 }
 
-export function DogCard({ dog, onCheckToggle, className }: DogCardProps) {
+export function DogCard({
+  dog,
+  onCheckToggle,
+  isToggling = false,
+  className,
+}: DogCardProps) {
   const router = useRouter();
   const isCheckedIn = dog.status === "checked_in";
   const critical = hasCriticalAlerts(dog.alerts);
@@ -126,12 +132,18 @@ export function DogCard({ dog, onCheckToggle, className }: DogCardProps) {
           variant={isCheckedIn ? "danger" : "primary"}
           size="md"
           className="col-span-3"
+          disabled={isToggling}
           onClick={() => onCheckToggle?.(dog.id)}
           aria-label={
             isCheckedIn ? `Check out ${dog.name}` : `Check in ${dog.name}`
           }
         >
-          {isCheckedIn ? (
+          {isToggling ? (
+            <>
+              <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+              {isCheckedIn ? "Checking out..." : "Checking in..."}
+            </>
+          ) : isCheckedIn ? (
             <>
               <LogOut className="h-4 w-4 shrink-0" aria-hidden />
               Check Out
