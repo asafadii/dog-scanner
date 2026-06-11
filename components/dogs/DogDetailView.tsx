@@ -31,6 +31,7 @@ import {
   LogIn,
   LogOut,
   Loader2,
+  Pencil,
   Phone,
   Pill,
   Plus,
@@ -39,6 +40,7 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -239,6 +241,13 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <Link
+          href={`/dogs/${dogId}/edit`}
+          className="absolute right-4 top-4 flex min-h-[44px] items-center gap-2 rounded-xl bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm hover:bg-black/55"
+        >
+          <Pencil className="h-4 w-4" aria-hidden />
+          Edit
+        </Link>
         <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>

@@ -5,7 +5,7 @@ import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { Button } from "@/components/ui/Button";
 import type { Dog, DogStatus } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
-import { Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
+import { Clock, Eye, Loader2, LogIn, LogOut, PawPrint, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -61,10 +61,10 @@ export function DogCard({
             />
           ) : (
             <div
-              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-100 to-amber-50 text-xl font-bold text-teal-700"
+              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-100 to-amber-50"
               aria-hidden
             >
-              {dog.name.charAt(0).toUpperCase()}
+              <PawPrint className="h-8 w-8 text-teal-600" />
             </div>
           )}
           <span

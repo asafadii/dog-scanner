@@ -25,6 +25,7 @@ export type UpdateDogInput = Partial<
   Omit<NewDogFormData, "alerts">
 > & {
   alerts?: Partial<NewDogFormData["alerts"]>;
+  photoUrl?: string | null;
 };
 
 type DogsResult<T> =
@@ -85,9 +86,31 @@ export function mapDogRowToDog(row: DogRow): Dog {
   };
 }
 
+export function dogToFormData(dog: Dog): NewDogFormData {
+  return {
+    name: dog.name,
+    breed: dog.breed,
+    age: dog.age,
+    size: dog.size,
+    ownerName: dog.owner.name,
+    ownerPhone: dog.owner.phone,
+    ownerEmail: dog.owner.email,
+    medication: dog.care.medication === "None" ? "" : dog.care.medication,
+    feeding:
+      dog.care.feeding === "Standard diet" ? "" : dog.care.feeding,
+    allergies:
+      dog.care.allergies === "None known" ? "" : dog.care.allergies,
+    behavior:
+      dog.care.behavior === "No notes" ? "" : dog.care.behavior,
+    alerts: { ...dog.alerts },
+    overnight: dog.overnight,
+  };
+}
+
 export function toDogInsert(
   facilityId: string,
   input: NewDogFormData,
+  photoUrl?: string | null,
 ): DogInsert {
   const emergencyContact =
     input.ownerPhone.trim() || input.ownerName.trim();
@@ -99,7 +122,7 @@ export function toDogInsert(
     age: input.age.trim(),
     size: input.size,
     sex: null,
-    photo_url: null,
+    photo_url: photoUrl ?? null,
     owner_name: input.ownerName.trim(),
     owner_phone: input.ownerPhone.trim(),
     emergency_contact: emergencyContact,
@@ -144,6 +167,9 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
   }
   if (input.alerts?.escapeRisk !== undefined) {
     update.escape_risk = input.alerts.escapeRisk;
+  }
+  if (input.photoUrl !== undefined) {
+    update.photo_url = input.photoUrl;
   }
 
   return update;
@@ -256,6 +282,7 @@ export async function getDogById(id: string): Promise<DogsResult<Dog>> {
 
 export async function createDog(
   input: NewDogFormData,
+  photoUrl?: string | null,
 ): Promise<DogsResult<Dog>> {
   const profileResult = await requireProfile();
   if (profileResult.error) {
@@ -263,7 +290,11 @@ export async function createDog(
   }
 
   const supabase = createSupabaseBrowserClient();
-  const insertRow = toDogInsert(profileResult.data.facility_id, input);
+  const insertRow = toDogInsert(
+    profileResult.data.facility_id,
+    input,
+    photoUrl,
+  );
   const { data, error } = await supabase
     .from("dogs")
     .insert(insertRow)

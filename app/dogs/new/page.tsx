@@ -1,19 +1,20 @@
 "use client";
 
-import { DogForm } from "@/components/dogs/DogForm";
+import { DogForm, type DogFormSubmitPhase } from "@/components/dogs/DogForm";
 import { Button } from "@/components/ui/Button";
 import {
   createDog,
+  getCurrentUserProfile,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
-import { Loader2 } from "lucide-react";
+import { uploadDogPhoto } from "@/lib/storage";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function NewDogPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitPhase, setSubmitPhase] = useState<DogFormSubmitPhase>("idle");
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -35,33 +36,53 @@ export default function NewDogPage() {
         </div>
       )}
 
-      {submitting ? (
-        <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3 rounded-2xl border border-stone-200 bg-white">
-          <Loader2
-            className="h-8 w-8 animate-spin text-teal-600"
-            aria-hidden
-          />
-          <p className="text-sm text-stone-500">Creating profile...</p>
-        </div>
-      ) : (
-        <DogForm
-          onSubmit={async (data) => {
-            setError(null);
-            setSubmitting(true);
+      <DogForm
+        submitPhase={submitPhase}
+        onSubmit={async (data, photo) => {
+          if (submitPhase !== "idle") return;
 
-            const result = await createDog(data);
+          setError(null);
+
+          try {
+            let photoUrl: string | null = null;
+
+            if (photo) {
+              setSubmitPhase("uploading");
+              const profileResult = await getCurrentUserProfile();
+              if (profileResult.error) {
+                setError(profileResult.error.message);
+                setSubmitPhase("idle");
+                return;
+              }
+
+              const uploadResult = await uploadDogPhoto(
+                profileResult.data.facility_id,
+                photo,
+              );
+              photoUrl = uploadResult.publicUrl;
+            }
+
+            setSubmitPhase("saving");
+            const result = await createDog(data, photoUrl);
             if (result.error) {
               setError(result.error.message);
-              setSubmitting(false);
+              setSubmitPhase("idle");
               return;
             }
 
             router.push(`/dogs/${result.data.id}`);
             router.refresh();
-          }}
-          submitLabel="Create Dog Profile"
-        />
-      )}
+          } catch (uploadError) {
+            setError(
+              uploadError instanceof Error
+                ? uploadError.message
+                : "Upload failed. Please try again.",
+            );
+            setSubmitPhase("idle");
+          }
+        }}
+        submitLabel="Create Dog Profile"
+      />
 
       {error === INCOMPLETE_SETUP_MESSAGE && (
         <div className="text-center">

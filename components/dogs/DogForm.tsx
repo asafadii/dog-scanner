@@ -1,11 +1,13 @@
 "use client";
 
+import { DogPhotoUpload } from "@/components/dogs/DogPhotoUpload";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import type { DogAlerts, DogSize, NewDogFormData } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 const SIZES: DogSize[] = ["small", "medium", "large"];
@@ -30,27 +32,44 @@ const defaultAlerts: DogAlerts = {
   escapeRisk: false,
 };
 
+export type DogFormSubmitPhase = "idle" | "uploading" | "saving";
+
 interface DogFormProps {
-  onSubmit: (data: NewDogFormData) => void;
+  onSubmit: (data: NewDogFormData, photo?: File | null) => void | Promise<void>;
   submitLabel?: string;
+  initialData?: NewDogFormData;
+  existingPhotoUrl?: string | null;
+  submitPhase?: DogFormSubmitPhase;
 }
 
-export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFormProps) {
-  const [form, setForm] = useState<NewDogFormData>({
-    name: "",
-    breed: "",
-    age: "",
-    size: "medium",
-    ownerName: "",
-    ownerPhone: "",
-    ownerEmail: "",
-    medication: "",
-    feeding: "",
-    allergies: "",
-    behavior: "",
-    alerts: { ...defaultAlerts },
-    overnight: false,
-  });
+export function DogForm({
+  onSubmit,
+  submitLabel = "Create Dog Profile",
+  initialData,
+  existingPhotoUrl,
+  submitPhase = "idle",
+}: DogFormProps) {
+  const [form, setForm] = useState<NewDogFormData>(
+    initialData ?? {
+      name: "",
+      breed: "",
+      age: "",
+      size: "medium",
+      ownerName: "",
+      ownerPhone: "",
+      ownerEmail: "",
+      medication: "",
+      feeding: "",
+      allergies: "",
+      behavior: "",
+      alerts: { ...defaultAlerts },
+      overnight: false,
+    },
+  );
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
+  const isSubmitting = submitPhase !== "idle";
 
   function updateField<K extends keyof NewDogFormData>(
     key: K,
@@ -68,11 +87,35 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    onSubmit(form);
+    if (isSubmitting) return;
+    void onSubmit(form, photoFile);
   }
+
+  const buttonLabel =
+    submitPhase === "uploading"
+      ? "Uploading..."
+      : submitPhase === "saving"
+        ? "Saving..."
+        : submitLabel;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Photo</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DogPhotoUpload
+            existingPhotoUrl={existingPhotoUrl}
+            dogName={form.name || "Dog"}
+            onFileChange={setPhotoFile}
+            onError={setPhotoError}
+            error={photoError}
+            disabled={isSubmitting}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Dog Information</CardTitle>
@@ -84,6 +127,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             value={form.name}
             onChange={(e) => updateField("name", e.target.value)}
             placeholder="e.g. Max"
+            disabled={isSubmitting}
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
@@ -92,6 +136,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
               value={form.breed}
               onChange={(e) => updateField("breed", e.target.value)}
               placeholder="e.g. Golden Retriever"
+              disabled={isSubmitting}
             />
             <Input
               label="Age"
@@ -99,6 +144,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
               value={form.age}
               onChange={(e) => updateField("age", e.target.value)}
               placeholder="e.g. 3 years"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -110,12 +156,14 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
                 <button
                   key={size}
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => updateField("size", size)}
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.size === size
                       ? "border-teal-500 bg-teal-50 text-teal-800"
                       : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
+                    isSubmitting && "cursor-not-allowed opacity-60",
                   )}
                 >
                   {size}
@@ -127,6 +175,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             <input
               type="checkbox"
               checked={form.overnight}
+              disabled={isSubmitting}
               onChange={(e) => updateField("overnight", e.target.checked)}
               className="h-5 w-5 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
             />
@@ -147,6 +196,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             required
             value={form.ownerName}
             onChange={(e) => updateField("ownerName", e.target.value)}
+            disabled={isSubmitting}
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
@@ -156,6 +206,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
               value={form.ownerPhone}
               onChange={(e) => updateField("ownerPhone", e.target.value)}
               placeholder="(555) 123-4567"
+              disabled={isSubmitting}
             />
             <Input
               label="Email"
@@ -163,6 +214,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
               value={form.ownerEmail}
               onChange={(e) => updateField("ownerEmail", e.target.value)}
               placeholder="owner@email.com"
+              disabled={isSubmitting}
             />
           </div>
         </CardContent>
@@ -181,11 +233,13 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
                 form.alerts[key]
                   ? "border-teal-200 bg-teal-50/50"
                   : "border-stone-200 hover:bg-stone-50",
+                isSubmitting && "cursor-not-allowed opacity-60",
               )}
             >
               <input
                 type="checkbox"
                 checked={form.alerts[key]}
+                disabled={isSubmitting}
                 onChange={() => toggleAlert(key)}
                 className="mt-0.5 h-5 w-5 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
               />
@@ -211,6 +265,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             onChange={(e) => updateField("medication", e.target.value)}
             placeholder="Medication schedule and dosage..."
             rows={3}
+            disabled={isSubmitting}
           />
           <Textarea
             label="Feeding"
@@ -218,6 +273,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             onChange={(e) => updateField("feeding", e.target.value)}
             placeholder="Feeding schedule and dietary notes..."
             rows={3}
+            disabled={isSubmitting}
           />
           <Textarea
             label="Allergies"
@@ -225,6 +281,7 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             onChange={(e) => updateField("allergies", e.target.value)}
             placeholder="Known allergies..."
             rows={2}
+            disabled={isSubmitting}
           />
           <Textarea
             label="Behavior Notes"
@@ -232,12 +289,21 @@ export function DogForm({ onSubmit, submitLabel = "Create Dog Profile" }: DogFor
             onChange={(e) => updateField("behavior", e.target.value)}
             placeholder="Temperament, triggers, play preferences..."
             rows={3}
+            disabled={isSubmitting}
           />
         </CardContent>
       </Card>
 
-      <Button type="submit" size="lg" className="w-full">
-        {submitLabel}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={isSubmitting}
+      >
+        {isSubmitting && (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+        )}
+        {buttonLabel}
       </Button>
     </form>
   );
