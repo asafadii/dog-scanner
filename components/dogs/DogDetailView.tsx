@@ -15,6 +15,7 @@ import {
   enrichDogAfterCheckout,
   enrichDogWithCheckin,
 } from "@/lib/checkins";
+import { getDogPhotoSrc } from "@/lib/dogAssets";
 import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
@@ -226,20 +227,14 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
     <div className="-mx-4 -mt-6 md:mx-0 md:mt-0">
       {/* Hero */}
       <div className="relative h-56 bg-gradient-to-br from-teal-400 to-teal-600 sm:h-64">
-        {dog.photoUrl ? (
-          <Image
-            src={dog.photoUrl}
-            alt={dog.name}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, 1024px"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-teal-100 to-amber-50 text-6xl font-bold text-teal-700">
-            {dog.name.charAt(0)}
-          </div>
-        )}
+        <Image
+          src={getDogPhotoSrc(dog.photoUrl)}
+          alt={dog.name}
+          fill
+          className="object-cover"
+          priority
+          sizes="(max-width: 768px) 100vw, 1024px"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         <Link
           href={`/dogs/${dogId}/edit`}

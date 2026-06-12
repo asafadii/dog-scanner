@@ -3,9 +3,10 @@
 import { DogAlertBadges, hasCriticalAlerts } from "@/components/dogs/DogAlertBadges";
 import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { Button } from "@/components/ui/Button";
+import { getDogPhotoSrc } from "@/lib/dogAssets";
 import type { Dog, DogStatus } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
-import { Clock, Eye, Loader2, LogIn, LogOut, PawPrint, User } from "lucide-react";
+import { Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -51,22 +52,13 @@ export function DogCard({
 
       <div className="flex gap-3 pl-2">
         <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-stone-100 sm:h-20 sm:w-20">
-          {dog.photoUrl ? (
-            <Image
-              src={dog.photoUrl}
-              alt={`Photo of ${dog.name}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 72px, 80px"
-            />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-teal-100 to-amber-50"
-              aria-hidden
-            >
-              <PawPrint className="h-8 w-8 text-teal-600" />
-            </div>
-          )}
+          <Image
+            src={getDogPhotoSrc(dog.photoUrl)}
+            alt={`Photo of ${dog.name}`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 72px, 80px"
+          />
           <span
             className={cn(
               "absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white",
