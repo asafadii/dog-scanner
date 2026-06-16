@@ -344,57 +344,109 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-teal-600" aria-hidden />
-              Owner Information
+              {dog.client ? "Linked Client" : "Owner Information"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="font-semibold text-stone-900">{dog.owner.name}</p>
-                <a
-                  href={`tel:${dog.owner.phone}`}
-                  className="text-sm text-teal-600 hover:underline"
-                >
-                  {dog.owner.phone}
-                </a>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => window.open(`tel:${dog.owner.phone}`)}
-                aria-label={`Call ${dog.owner.name}`}
-              >
-                <Phone className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="grid gap-2 border-t border-stone-100 pt-3 text-sm">
-              <div className="flex justify-between gap-4">
-                <span className="text-stone-500">Emergency</span>
-                <a
-                  href={`tel:${dog.owner.emergencyPhone}`}
-                  className="text-right font-medium text-teal-600 hover:underline"
-                >
-                  {dog.owner.emergencyContact} — {dog.owner.emergencyPhone}
-                </a>
-              </div>
-              {dog.owner.veterinarian && (
-                <div className="flex items-start justify-between gap-4">
-                  <span className="flex items-center gap-1 text-stone-500">
-                    <Stethoscope className="h-3.5 w-3.5" aria-hidden />
-                    Vet
-                  </span>
-                  <div className="text-right">
-                    <p className="font-medium">{dog.owner.veterinarian}</p>
-                    <a
-                      href={`tel:${dog.owner.vetPhone}`}
-                      className="text-teal-600 hover:underline"
+            {dog.client ? (
+              <>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-stone-900">{dog.client.name}</p>
+                    {dog.client.phone && (
+                      <a
+                        href={`tel:${dog.client.phone}`}
+                        className="text-sm text-teal-600 hover:underline"
+                      >
+                        {dog.client.phone}
+                      </a>
+                    )}
+                    {dog.client.email && (
+                      <a
+                        href={`mailto:${dog.client.email}`}
+                        className="mt-1 block text-sm text-teal-600 hover:underline"
+                      >
+                        {dog.client.email}
+                      </a>
+                    )}
+                  </div>
+                  {dog.client.phone && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => window.open(`tel:${dog.client?.phone ?? ""}`)}
+                      aria-label={`Call ${dog.client.name}`}
                     >
-                      {dog.owner.vetPhone}
+                      <Phone className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {dog.client.emergencyContact && (
+                  <div className="border-t border-stone-100 pt-3 text-sm">
+                    <span className="text-stone-500">Emergency: </span>
+                    <span className="font-medium text-stone-900">
+                      {dog.client.emergencyContact}
+                    </span>
+                  </div>
+                )}
+                <Link
+                  href={`/clients/${dog.client.id}`}
+                  className="inline-flex text-sm font-medium text-teal-600 hover:underline"
+                >
+                  View client profile
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-stone-900">{dog.owner.name}</p>
+                    <a
+                      href={`tel:${dog.owner.phone}`}
+                      className="text-sm text-teal-600 hover:underline"
+                    >
+                      {dog.owner.phone}
                     </a>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => window.open(`tel:${dog.owner.phone}`)}
+                    aria-label={`Call ${dog.owner.name}`}
+                  >
+                    <Phone className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
-            </div>
+                <div className="grid gap-2 border-t border-stone-100 pt-3 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-stone-500">Emergency</span>
+                    <a
+                      href={`tel:${dog.owner.emergencyPhone}`}
+                      className="text-right font-medium text-teal-600 hover:underline"
+                    >
+                      {dog.owner.emergencyContact} — {dog.owner.emergencyPhone}
+                    </a>
+                  </div>
+                  {dog.owner.veterinarian && (
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="flex items-center gap-1 text-stone-500">
+                        <Stethoscope className="h-3.5 w-3.5" aria-hidden />
+                        Vet
+                      </span>
+                      <div className="text-right">
+                        <p className="font-medium">{dog.owner.veterinarian}</p>
+                        <a
+                          href={`tel:${dog.owner.vetPhone}`}
+                          className="text-teal-600 hover:underline"
+                        >
+                          {dog.owner.vetPhone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

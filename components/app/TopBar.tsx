@@ -11,6 +11,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/dogs": "Dogs",
   "/dogs/new": "New Dog",
+  "/clients": "Clients",
+  "/clients/new": "New Client",
   "/checkins": "Check-ins",
   "/settings": "Settings",
 };
@@ -18,6 +20,9 @@ const PAGE_TITLES: Record<string, string> = {
 function getTitle(pathname: string): string {
   if (pathname.startsWith("/dogs/") && pathname !== "/dogs/new") {
     return "Dog Profile";
+  }
+  if (pathname.startsWith("/clients/") && pathname !== "/clients/new") {
+    return pathname.endsWith("/edit") ? "Edit Client" : "Client Profile";
   }
   return PAGE_TITLES[pathname] ?? "Dog Scanner";
 }

@@ -6,6 +6,7 @@ import {
   Home,
   PawPrint,
   Settings,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,6 +14,7 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dogs", label: "Dogs", icon: PawPrint },
+  { href: "/clients", label: "Clients", icon: Users },
   { href: "/checkins", label: "Check-ins", icon: ClipboardCheck },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
@@ -29,7 +31,8 @@ export function MobileBottomNav() {
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive =
             pathname === href ||
-            (href === "/dogs" && pathname.startsWith("/dogs"));
+            (href === "/dogs" && pathname.startsWith("/dogs")) ||
+            (href === "/clients" && pathname.startsWith("/clients"));
 
           return (
             <Link

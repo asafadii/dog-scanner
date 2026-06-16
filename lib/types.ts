@@ -42,6 +42,38 @@ export interface TimelineEvent {
   staff?: string;
 }
 
+export interface Client {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  emergencyContact: string | null;
+  notes: string | null;
+  dogCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClientFormData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  emergencyContact: string;
+  notes: string;
+}
+
+export interface DogClientLink {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  emergencyContact: string | null;
+  address: string | null;
+  notes: string | null;
+}
+
 export interface Dog {
   id: string;
   name: string;
@@ -53,6 +85,8 @@ export interface Dog {
   alerts: DogAlerts;
   owner: DogOwner;
   care: DogCare;
+  clientId: string | null;
+  client: DogClientLink | null;
   overnight: boolean;
   lastCheckIn: string | null;
   lastCheckOut: string | null;
@@ -66,6 +100,7 @@ export interface NewDogFormData {
   breed: string;
   age: string;
   size: DogSize;
+  clientId: string | null;
   ownerName: string;
   ownerPhone: string;
   ownerEmail: string;

@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import type { DogAlerts, DogSize, NewDogFormData } from "@/lib/types";
+import { getClients } from "@/lib/clients";
+import type { Client, DogAlerts, DogSize, NewDogFormData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 const SIZES: DogSize[] = ["small", "medium", "large"];
 
@@ -38,14 +39,29 @@ interface DogFormProps {
   onSubmit: (data: NewDogFormData, photo?: File | null) => void | Promise<void>;
   submitLabel?: string;
   initialData?: NewDogFormData;
+  initialClientId?: string | null;
   existingPhotoUrl?: string | null;
   submitPhase?: DogFormSubmitPhase;
+}
+
+function applyClientToOwnerFields(
+  client: Client,
+  current: NewDogFormData,
+): NewDogFormData {
+  return {
+    ...current,
+    clientId: client.id,
+    ownerName: client.name,
+    ownerPhone: client.phone ?? "",
+    ownerEmail: client.email ?? "",
+  };
 }
 
 export function DogForm({
   onSubmit,
   submitLabel = "Create Dog Profile",
   initialData,
+  initialClientId = null,
   existingPhotoUrl,
   submitPhase = "idle",
 }: DogFormProps) {
@@ -55,6 +71,7 @@ export function DogForm({
       breed: "",
       age: "",
       size: "medium",
+      clientId: initialClientId,
       ownerName: "",
       ownerPhone: "",
       ownerEmail: "",
@@ -66,10 +83,53 @@ export function DogForm({
       overnight: false,
     },
   );
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientsLoading, setClientsLoading] = useState(true);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
 
   const isSubmitting = submitPhase !== "idle";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadClients() {
+      setClientsLoading(true);
+      const result = await getClients();
+      if (cancelled) return;
+
+      if (!result.error) {
+        setClients(result.data);
+
+        if (initialClientId && !initialData) {
+          const client = result.data.find((item) => item.id === initialClientId);
+          if (client) {
+            setForm((prev) => applyClientToOwnerFields(client, prev));
+          }
+        }
+      }
+
+      setClientsLoading(false);
+    }
+
+    void loadClients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialClientId, initialData]);
+
+  function handleClientChange(clientId: string) {
+    if (!clientId) {
+      setForm((prev) => ({ ...prev, clientId: null }));
+      return;
+    }
+
+    const client = clients.find((item) => item.id === clientId);
+    if (!client) return;
+
+    setForm((prev) => applyClientToOwnerFields(client, prev));
+  }
 
   function updateField<K extends keyof NewDogFormData>(
     key: K,
@@ -191,6 +251,36 @@ export function DogForm({
           <CardTitle>Owner Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <label
+              htmlFor="client-select"
+              className="mb-2 block text-sm font-medium text-stone-700"
+            >
+              Link to Client
+            </label>
+            <select
+              id="client-select"
+              value={form.clientId ?? ""}
+              onChange={(e) => handleClientChange(e.target.value)}
+              disabled={isSubmitting || clientsLoading}
+              className={cn(
+                "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
+                "focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20",
+                (isSubmitting || clientsLoading) && "cursor-not-allowed opacity-60",
+              )}
+            >
+              <option value="">No client — enter owner manually</option>
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name}
+                  {client.phone ? ` (${client.phone})` : ""}
+                </option>
+              ))}
+            </select>
+            {clientsLoading && (
+              <p className="mt-1 text-xs text-stone-500">Loading clients...</p>
+            )}
+          </div>
           <Input
             label="Owner Name"
             required

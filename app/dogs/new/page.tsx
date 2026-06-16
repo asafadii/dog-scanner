@@ -8,11 +8,13 @@ import {
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
 import { uploadDogPhoto } from "@/lib/storage";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function NewDogPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialClientId = searchParams.get("clientId");
   const [error, setError] = useState<string | null>(null);
   const [submitPhase, setSubmitPhase] = useState<DogFormSubmitPhase>("idle");
 
@@ -37,6 +39,7 @@ export default function NewDogPage() {
       )}
 
       <DogForm
+        initialClientId={initialClientId}
         submitPhase={submitPhase}
         onSubmit={async (data, photo) => {
           if (submitPhase !== "idle") return;

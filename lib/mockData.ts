@@ -9,6 +9,8 @@ export const MOCK_DOGS: Dog[] = [
     size: "large",
     photoUrl:
       "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=400&h=400&fit=crop",
+    clientId: null,
+    client: null,
     status: "checked_in",
     alerts: {
       medication: true,
@@ -86,6 +88,8 @@ export const MOCK_DOGS: Dog[] = [
     size: "medium",
     photoUrl:
       "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=400&fit=crop",
+    clientId: null,
+    client: null,
     status: "checked_in",
     alerts: {
       medication: false,
@@ -145,6 +149,8 @@ export const MOCK_DOGS: Dog[] = [
     size: "large",
     photoUrl:
       "https://images.unsplash.com/photo-1568393691622-c7ba131d63b4?w=400&h=400&fit=crop",
+    clientId: null,
+    client: null,
     status: "checked_in",
     alerts: {
       medication: true,
@@ -196,6 +202,8 @@ export const MOCK_DOGS: Dog[] = [
     size: "small",
     photoUrl:
       "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=400&fit=crop",
+    clientId: null,
+    client: null,
     status: "checked_out",
     alerts: {
       medication: false,
@@ -242,6 +250,8 @@ export const MOCK_DOGS: Dog[] = [
     size: "medium",
     photoUrl:
       "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=400&fit=crop",
+    clientId: null,
+    client: null,
     status: "checked_out",
     alerts: {
       medication: false,

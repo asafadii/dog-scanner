@@ -104,6 +104,8 @@ export function MockStoreProvider({ children }: { children: ReactNode }) {
       age: data.age,
       size: data.size,
       photoUrl: null,
+      clientId: data.clientId,
+      client: null,
       status: "checked_out",
       alerts: data.alerts,
       owner: {

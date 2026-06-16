@@ -6,6 +6,7 @@ export type DbDogSize = "small" | "medium" | "large";
 export interface DogRow {
   id: string;
   facility_id: string;
+  client_id: string | null;
   name: string;
   breed: string;
   age: string;
@@ -31,6 +32,7 @@ export interface DogRow {
 export type DogInsert = {
   id?: string;
   facility_id: string;
+  client_id?: string | null;
   name: string;
   breed: string;
   age: string;
@@ -56,6 +58,7 @@ export type DogInsert = {
 export type DogUpdate = {
   id?: string;
   facility_id?: string;
+  client_id?: string | null;
   name?: string;
   breed?: string;
   age?: string;
@@ -77,6 +80,45 @@ export type DogUpdate = {
   created_at?: string;
   updated_at?: string;
 };
+export interface ClientRow {
+  id: string;
+  facility_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  emergency_contact: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ClientInsert = {
+  id?: string;
+  facility_id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  emergency_contact?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ClientUpdate = {
+  id?: string;
+  facility_id?: string;
+  name?: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  emergency_contact?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export interface FacilityRow {
   id: string;
   name: string;
@@ -171,6 +213,12 @@ export type Database = {
         Row: DogRow;
         Insert: DogInsert;
         Update: DogUpdate;
+        Relationships: [];
+      };
+      clients: {
+        Row: ClientRow;
+        Insert: ClientInsert;
+        Update: ClientUpdate;
         Relationships: [];
       };
       dog_checkins: {
