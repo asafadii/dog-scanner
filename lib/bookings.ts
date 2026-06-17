@@ -1,4 +1,5 @@
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
+import { canApproveBooking } from "@/lib/capacity";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   BookingInsert,
@@ -14,6 +15,7 @@ export type BookingsErrorCode =
   | "incomplete_setup"
   | "unauthorized"
   | "not_found"
+  | "capacity_exceeded"
   | "unknown";
 
 export interface BookingsError {
@@ -318,6 +320,23 @@ export async function updateBooking(
   const update = toBookingUpdate(input);
   if (Object.keys(update).length === 0) {
     return getBookingById(id);
+  }
+
+  if (input.status === "approved") {
+    const approvalCheck = await canApproveBooking(id);
+    if (approvalCheck.error) {
+      return { data: null, error: toError(approvalCheck.error.message) };
+    }
+    if (!approvalCheck.data.canApprove) {
+      return {
+        data: null,
+        error: toError(
+          approvalCheck.data.message ??
+            "This booking cannot be approved because capacity is full.",
+          "capacity_exceeded",
+        ),
+      };
+    }
   }
 
   const supabase = createSupabaseBrowserClient();

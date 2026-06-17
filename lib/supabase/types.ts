@@ -216,6 +216,30 @@ export type BookingUpdate = {
   updated_at?: string;
 };
 
+export interface FacilityCapacityRow {
+  facility_id: string;
+  daycare_capacity: number;
+  boarding_capacity: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type FacilityCapacityInsert = {
+  facility_id: string;
+  daycare_capacity?: number;
+  boarding_capacity?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type FacilityCapacityUpdate = {
+  facility_id?: string;
+  daycare_capacity?: number;
+  boarding_capacity?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -277,6 +301,12 @@ export type Database = {
         Row: BookingRow;
         Insert: BookingInsert;
         Update: BookingUpdate;
+        Relationships: [];
+      };
+      facility_capacity: {
+        Row: FacilityCapacityRow;
+        Insert: FacilityCapacityInsert;
+        Update: FacilityCapacityUpdate;
         Relationships: [];
       };
       dog_checkins: {

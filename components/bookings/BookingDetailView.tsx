@@ -8,6 +8,7 @@ import {
   INCOMPLETE_SETUP_MESSAGE,
   updateBooking,
 } from "@/lib/bookings";
+import { canApproveBooking } from "@/lib/capacity";
 import type { Booking } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
 import {
@@ -35,10 +36,14 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [capacityBlocked, setCapacityBlocked] = useState(false);
+  const [capacityMessage, setCapacityMessage] = useState<string | null>(null);
 
   const loadBooking = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setCapacityBlocked(false);
+    setCapacityMessage(null);
 
     const result = await getBookingById(bookingId);
     if (result.error) {
@@ -46,6 +51,14 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
       setBooking(null);
     } else {
       setBooking(result.data);
+
+      if (result.data.status === "pending") {
+        const approvalCheck = await canApproveBooking(bookingId);
+        if (!approvalCheck.error && approvalCheck.data) {
+          setCapacityBlocked(!approvalCheck.data.canApprove);
+          setCapacityMessage(approvalCheck.data.message);
+        }
+      }
     }
 
     setLoading(false);
@@ -212,11 +225,24 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
           <CardHeader className="pb-2">
             <CardTitle>Admin Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2 pt-0 sm:flex-row">
+          <CardContent className="space-y-3 pt-0">
+            {canApprove && capacityMessage && (
+              <div
+                className={`rounded-xl border px-4 py-3 text-sm ${
+                  capacityBlocked
+                    ? "border-amber-200 bg-amber-50 text-amber-900"
+                    : "border-stone-200 bg-stone-50 text-stone-700"
+                }`}
+                role="status"
+              >
+                {capacityMessage}
+              </div>
+            )}
+            <div className="flex flex-col gap-2 sm:flex-row">
             {canApprove && (
               <Button
                 className="flex-1"
-                disabled={updating}
+                disabled={updating || capacityBlocked}
                 onClick={() => void handleStatusChange("approved")}
               >
                 Approve
@@ -242,6 +268,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
                 Mark Completed
               </Button>
             )}
+            </div>
           </CardContent>
         </Card>
       )}

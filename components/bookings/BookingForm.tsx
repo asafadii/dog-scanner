@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { getClientDogs, getClients } from "@/lib/clients";
+import { getBookingCapacityWarning } from "@/lib/capacity";
 import type { BookingFormData, BookingServiceType, Client, Dog } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -44,8 +45,10 @@ export function BookingForm({
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [clientsLoading, setClientsLoading] = useState(true);
   const [dogsLoading, setDogsLoading] = useState(false);
+  const [capacityWarning, setCapacityWarning] = useState<string | null>(null);
 
   const isSubmitting = submitPhase !== "idle";
+  const isCreateMode = !initialData;
 
   useEffect(() => {
     let cancelled = false;
@@ -101,6 +104,36 @@ export function BookingForm({
       cancelled = true;
     };
   }, [form.clientId, form.dogId]);
+
+  useEffect(() => {
+    if (!isCreateMode) {
+      setCapacityWarning(null);
+      return;
+    }
+
+    if (
+      !form.startDate ||
+      !form.endDate ||
+      form.endDate < form.startDate
+    ) {
+      setCapacityWarning(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function checkCapacity() {
+      const result = await getBookingCapacityWarning(form);
+      if (cancelled) return;
+      setCapacityWarning(result.error ? null : result.data);
+    }
+
+    void checkCapacity();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCreateMode, form.serviceType, form.startDate, form.endDate]);
 
   function updateField<K extends keyof BookingFormData>(
     key: K,
@@ -267,6 +300,15 @@ export function BookingForm({
           />
         </CardContent>
       </Card>
+
+      {isCreateMode && capacityWarning && (
+        <div
+          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          role="status"
+        >
+          {capacityWarning}
+        </div>
+      )}
 
       <Button
         type="submit"

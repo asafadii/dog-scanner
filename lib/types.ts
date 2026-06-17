@@ -147,3 +147,21 @@ export interface BookingFormData {
   transportRequired: boolean;
   notes: string;
 }
+
+export interface FacilityCapacity {
+  facilityId: string;
+  daycareCapacity: number;
+  boardingCapacity: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface CapacityFormData {
+  daycareCapacity: number;
+  boardingCapacity: number;
+}
+
+export interface CapacityUsage {
+  used: number;
+  capacity: number;
+}

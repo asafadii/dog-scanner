@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Building2, Bell, LogOut, User } from "lucide-react";
@@ -41,7 +42,7 @@ export default function SettingsPage() {
           Settings
         </h2>
         <p className="mt-1 text-sm text-stone-500">
-          Facility and account preferences — coming in a future sprint.
+          Facility preferences and account settings.
         </p>
       </div>
 
@@ -59,6 +60,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      <CapacitySettingsSection />
 
       <div className="space-y-4">
         {PLACEHOLDER_SECTIONS.map(({ icon: Icon, title, description }) => (

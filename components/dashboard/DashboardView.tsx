@@ -2,6 +2,7 @@
 
 import { DogCard } from "@/components/dogs/DogCard";
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
+import { CapacityUsageBar } from "@/components/capacity/CapacityUsageBar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
@@ -12,13 +13,15 @@ import {
   getActiveCheckins,
 } from "@/lib/checkins";
 import { getUpcomingBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { getTodaysCapacityUsage } from "@/lib/capacity";
 import { getDogs } from "@/lib/dogs";
 import { getDashboardStats } from "@/lib/mockData";
-import type { Booking, Dog } from "@/lib/types";
+import type { Booking, CapacityUsage, Dog } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
 import {
   CalendarDays,
   ClipboardCheck,
+  Gauge,
   Loader2,
   Moon,
   PawPrint,
@@ -61,6 +64,10 @@ const STAT_CONFIG = [
 export function DashboardView() {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
+  const [capacityUsage, setCapacityUsage] = useState<{
+    daycare: CapacityUsage;
+    boarding: CapacityUsage;
+  } | null>(null);
   const [checkedInCount, setCheckedInCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,10 +78,12 @@ export function DashboardView() {
     setLoading(true);
     setError(null);
 
-    const [dogsResult, checkinsResult, bookingsResult] = await Promise.all([
+    const [dogsResult, checkinsResult, bookingsResult, capacityResult] =
+      await Promise.all([
       getDogs(),
       getActiveCheckins(),
       getUpcomingBookings(5),
+      getTodaysCapacityUsage(),
     ]);
 
     if (dogsResult.error) {
@@ -82,6 +91,7 @@ export function DashboardView() {
       setDogs([]);
       setCheckedInCount(0);
       setUpcomingBookings([]);
+      setCapacityUsage(null);
       setLoading(false);
       return;
     }
@@ -91,6 +101,7 @@ export function DashboardView() {
       setDogs([]);
       setCheckedInCount(0);
       setUpcomingBookings([]);
+      setCapacityUsage(null);
       setLoading(false);
       return;
     }
@@ -98,6 +109,7 @@ export function DashboardView() {
     setDogs(dogsResult.data);
     setCheckedInCount(checkinsResult.data.length);
     setUpcomingBookings(bookingsResult.error ? [] : bookingsResult.data);
+    setCapacityUsage(capacityResult.error ? null : capacityResult.data);
     setLoading(false);
   }, []);
 
@@ -226,6 +238,38 @@ export function DashboardView() {
           </Link>
         ))}
       </div>
+
+      <Card>
+        <CardContent className="space-y-5 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                <Gauge className="h-5 w-5" aria-hidden />
+              </span>
+              <div>
+                <h3 className="font-semibold text-stone-900">Capacity Usage</h3>
+                <p className="text-xs text-stone-500">Today&apos;s approved bookings</p>
+              </div>
+            </div>
+            <Link
+              href="/settings"
+              className="text-sm font-medium text-teal-600 hover:underline"
+            >
+              Manage
+            </Link>
+          </div>
+          {capacityUsage ? (
+            <div className="space-y-4">
+              <CapacityUsageBar label="Daycare" usage={capacityUsage.daycare} />
+              <CapacityUsageBar label="Boarding" usage={capacityUsage.boarding} />
+            </div>
+          ) : (
+            <p className="text-sm text-stone-500">
+              Capacity data unavailable.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <div>
         <div className="mb-4 flex items-center justify-between">
