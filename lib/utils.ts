@@ -39,3 +39,23 @@ export function formatTime(value: string): string {
     minute: "2-digit",
   }).format(new Date(value));
 }
+
+export function formatBookingDate(value: string): string {
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+export function formatBookingDateRange(
+  startDate: string,
+  endDate: string,
+): string {
+  if (startDate === endDate) {
+    return formatBookingDate(startDate);
+  }
+  return `${formatBookingDate(startDate)} – ${formatBookingDate(endDate)}`;
+}

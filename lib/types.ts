@@ -111,3 +111,39 @@ export interface NewDogFormData {
   alerts: DogAlerts;
   overnight: boolean;
 }
+
+export type BookingServiceType = "daycare" | "boarding";
+
+export type BookingStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "completed";
+
+export interface Booking {
+  id: string;
+  facilityId: string;
+  clientId: string;
+  dogId: string;
+  serviceType: BookingServiceType;
+  startDate: string;
+  endDate: string;
+  transportRequired: boolean;
+  status: BookingStatus;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  clientName: string;
+  dogName: string;
+  dogBreed: string;
+}
+
+export interface BookingFormData {
+  clientId: string;
+  dogId: string;
+  serviceType: BookingServiceType;
+  startDate: string;
+  endDate: string;
+  transportRequired: boolean;
+  notes: string;
+}

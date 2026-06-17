@@ -1,0 +1,156 @@
+"use client";
+
+import { BookingCard } from "@/components/bookings/BookingCard";
+import { Button } from "@/components/ui/Button";
+import { getBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import type { Booking, BookingStatus } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { Loader2, Plus } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+type StatusFilter = "all" | BookingStatus;
+
+const FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "completed", label: "Completed" },
+];
+
+export function BookingsListView() {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  const loadBookings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const result = await getBookings();
+    if (result.error) {
+      setError(result.error.message);
+      setBookings([]);
+    } else {
+      setBookings(result.data);
+    }
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void loadBookings();
+  }, [loadBookings]);
+
+  const filtered = useMemo(() => {
+    if (statusFilter === "all") return bookings;
+    return bookings.filter((booking) => booking.status === statusFilter);
+  }, [bookings, statusFilter]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
+        <Loader2
+          className="h-8 w-8 animate-spin text-teal-600"
+          aria-hidden
+        />
+        <p className="text-sm text-stone-500">Loading bookings...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
+        <p className="text-sm font-medium text-red-800" role="alert">
+          {error}
+        </p>
+        {error !== INCOMPLETE_SETUP_MESSAGE && (
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => void loadBookings()}
+          >
+            Try again
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+            Bookings
+          </h2>
+          <p className="mt-1 text-sm text-stone-500">
+            {filtered.length} of {bookings.length} bookings
+          </p>
+        </div>
+        <Link href="/bookings/new">
+          <Button className="w-full sm:w-auto">
+            <Plus className="h-4 w-4" aria-hidden />
+            New Booking
+          </Button>
+        </Link>
+      </div>
+
+      <div
+        className="flex gap-2 overflow-x-auto pb-1"
+        role="tablist"
+        aria-label="Filter bookings by status"
+      >
+        {FILTER_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={statusFilter === value}
+            onClick={() => setStatusFilter(value)}
+            className={cn(
+              "min-h-[44px] shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+              statusFilter === value
+                ? "border-teal-500 bg-teal-50 text-teal-800"
+                : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {bookings.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-stone-300 bg-white py-16 text-center">
+          <p className="text-stone-600">No bookings yet.</p>
+          <Link
+            href="/bookings/new"
+            className="mt-3 inline-block text-sm font-medium text-teal-600 hover:underline"
+          >
+            Create your first booking
+          </Link>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-stone-300 bg-white py-16 text-center">
+          <p className="text-stone-600">No bookings match this filter.</p>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("all")}
+            className="mt-2 text-sm font-medium text-teal-600 hover:underline"
+          >
+            Show all bookings
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {filtered.map((booking) => (
+            <BookingCard key={booking.id} booking={booking} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

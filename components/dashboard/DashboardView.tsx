@@ -1,6 +1,7 @@
 "use client";
 
 import { DogCard } from "@/components/dogs/DogCard";
+import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
@@ -10,10 +11,13 @@ import {
   enrichDogWithCheckin,
   getActiveCheckins,
 } from "@/lib/checkins";
-import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
+import { getUpcomingBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { getDogs } from "@/lib/dogs";
 import { getDashboardStats } from "@/lib/mockData";
-import type { Dog } from "@/lib/types";
+import type { Booking, Dog } from "@/lib/types";
+import { formatBookingDateRange } from "@/lib/utils";
 import {
+  CalendarDays,
   ClipboardCheck,
   Loader2,
   Moon,
@@ -56,6 +60,7 @@ const STAT_CONFIG = [
 
 export function DashboardView() {
   const [dogs, setDogs] = useState<Dog[]>([]);
+  const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [checkedInCount, setCheckedInCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,15 +71,17 @@ export function DashboardView() {
     setLoading(true);
     setError(null);
 
-    const [dogsResult, checkinsResult] = await Promise.all([
+    const [dogsResult, checkinsResult, bookingsResult] = await Promise.all([
       getDogs(),
       getActiveCheckins(),
+      getUpcomingBookings(5),
     ]);
 
     if (dogsResult.error) {
       setError(dogsResult.error.message);
       setDogs([]);
       setCheckedInCount(0);
+      setUpcomingBookings([]);
       setLoading(false);
       return;
     }
@@ -83,12 +90,14 @@ export function DashboardView() {
       setError(checkinsResult.error.message);
       setDogs([]);
       setCheckedInCount(0);
+      setUpcomingBookings([]);
       setLoading(false);
       return;
     }
 
     setDogs(dogsResult.data);
     setCheckedInCount(checkinsResult.data.length);
+    setUpcomingBookings(bookingsResult.error ? [] : bookingsResult.data);
     setLoading(false);
   }, []);
 
@@ -216,6 +225,56 @@ export function DashboardView() {
             </Card>
           </Link>
         ))}
+      </div>
+
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-stone-900">
+            Upcoming Bookings
+          </h3>
+          <Link
+            href="/bookings"
+            className="text-sm font-medium text-teal-600 hover:underline"
+          >
+            View all
+          </Link>
+        </div>
+        {upcomingBookings.length === 0 ? (
+          <Card>
+            <CardContent className="py-10 text-center text-stone-500">
+              No upcoming bookings scheduled.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {upcomingBookings.map((booking) => (
+              <Link key={booking.id} href={`/bookings/${booking.id}`}>
+                <Card className="transition-shadow hover:shadow-md">
+                  <CardContent className="flex items-center gap-4 p-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                      <CalendarDays className="h-5 w-5" aria-hidden />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-stone-900">
+                          {booking.dogName}
+                        </p>
+                        <BookingStatusBadge status={booking.status} />
+                      </div>
+                      <p className="mt-0.5 truncate text-sm text-stone-500">
+                        {booking.clientName} ·{" "}
+                        {formatBookingDateRange(
+                          booking.startDate,
+                          booking.endDate,
+                        )}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>

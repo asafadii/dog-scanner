@@ -164,6 +164,58 @@ export type DogCheckinUpdate = {
   created_by?: string;
 };
 
+export type DbBookingServiceType = "daycare" | "boarding";
+export type DbBookingStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "completed";
+
+export interface BookingRow {
+  id: string;
+  facility_id: string;
+  client_id: string;
+  dog_id: string;
+  service_type: DbBookingServiceType;
+  start_date: string;
+  end_date: string;
+  transport_required: boolean;
+  status: DbBookingStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type BookingInsert = {
+  id?: string;
+  facility_id: string;
+  client_id: string;
+  dog_id: string;
+  service_type: DbBookingServiceType;
+  start_date: string;
+  end_date: string;
+  transport_required?: boolean;
+  status?: DbBookingStatus;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type BookingUpdate = {
+  id?: string;
+  facility_id?: string;
+  client_id?: string;
+  dog_id?: string;
+  service_type?: DbBookingServiceType;
+  start_date?: string;
+  end_date?: string;
+  transport_required?: boolean;
+  status?: DbBookingStatus;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -219,6 +271,12 @@ export type Database = {
         Row: ClientRow;
         Insert: ClientInsert;
         Update: ClientUpdate;
+        Relationships: [];
+      };
+      bookings: {
+        Row: BookingRow;
+        Insert: BookingInsert;
+        Update: BookingUpdate;
         Relationships: [];
       };
       dog_checkins: {
