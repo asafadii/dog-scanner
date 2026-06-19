@@ -6,6 +6,7 @@ import {
   hasCriticalAlerts,
 } from "@/components/dogs/DogAlertBadges";
 import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
+import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -109,7 +110,15 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
     setActionError(null);
 
     if (dog.status === "checked_out") {
-      const result = await checkInDog(dog.id);
+      let result = await checkInDog(dog.id);
+      if (
+        result.error?.code === "no_approved_booking" &&
+        window.confirm(
+          `${dog.name} doesn't have an approved booking for today. Check in anyway?`,
+        )
+      ) {
+        result = await checkInDog(dog.id, undefined, { force: true });
+      }
       if (result.error) {
         setActionError(result.error.message);
       } else {
@@ -252,7 +261,10 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 <span className="capitalize">{dog.size}</span>
               </p>
             </div>
-            <DogStatusBadge status={dog.status} />
+            <div className="flex flex-wrap items-center gap-2">
+              <DogStatusBadge status={dog.status} />
+              {!dog.isReturning && <DogVisitBadge isReturning={false} />}
+            </div>
           </div>
         </div>
       </div>

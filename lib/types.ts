@@ -87,6 +87,7 @@ export interface Dog {
   care: DogCare;
   clientId: string | null;
   client: DogClientLink | null;
+  isReturning: boolean;
   overnight: boolean;
   lastCheckIn: string | null;
   lastCheckOut: string | null;

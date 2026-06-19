@@ -53,7 +53,15 @@ export function DogsListView() {
     setActionError(null);
 
     if (dog.status === "checked_out") {
-      const result = await checkInDog(id);
+      let result = await checkInDog(id);
+      if (
+        result.error?.code === "no_approved_booking" &&
+        window.confirm(
+          `${dog.name} doesn't have an approved booking for today. Check in anyway?`,
+        )
+      ) {
+        result = await checkInDog(id, undefined, { force: true });
+      }
       if (result.error) {
         setActionError(result.error.message);
       } else {

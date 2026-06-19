@@ -2,6 +2,7 @@
 
 import { DogAlertBadges, hasCriticalAlerts } from "@/components/dogs/DogAlertBadges";
 import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
+import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { Button } from "@/components/ui/Button";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
 import type { Dog, DogStatus } from "@/lib/types";
@@ -90,6 +91,9 @@ export function DogCard({
             compact
             className="mt-2.5"
           />
+          {!dog.isReturning && (
+            <DogVisitBadge isReturning={false} compact className="mt-2" />
+          )}
         </div>
       </div>
 

@@ -138,6 +138,7 @@ export interface DogCheckinRow {
   id: string;
   dog_id: string;
   facility_id: string;
+  booking_id: string | null;
   checked_in_at: string;
   checked_out_at: string | null;
   notes: string | null;
@@ -148,6 +149,7 @@ export type DogCheckinInsert = {
   id?: string;
   dog_id: string;
   facility_id: string;
+  booking_id?: string | null;
   checked_in_at?: string;
   checked_out_at?: string | null;
   notes?: string | null;
@@ -158,6 +160,7 @@ export type DogCheckinUpdate = {
   id?: string;
   dog_id?: string;
   facility_id?: string;
+  booking_id?: string | null;
   checked_in_at?: string;
   checked_out_at?: string | null;
   notes?: string | null;

@@ -70,6 +70,7 @@ export function mapDogRowToDog(row: DogRow): Dog {
     status: "checked_out",
     clientId: row.client_id,
     client: null,
+    isReturning: false,
     alerts: {
       medication: row.medication_required,
       allergy: allergyText.length > 0,
@@ -260,6 +261,35 @@ async function requireProfile(): Promise<DogsResult<ProfileRow>> {
   return { data: profile as ProfileRow, error: null };
 }
 
+async function enrichDogsWithVisitStatus(
+  dogs: Dog[],
+  facilityId: string,
+): Promise<Dog[]> {
+  if (dogs.length === 0) return dogs;
+
+  const dogIds = dogs.map((dog) => dog.id);
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("dog_id")
+    .eq("facility_id", facilityId)
+    .eq("status", "completed")
+    .in("dog_id", dogIds);
+
+  if (error || !data) {
+    return dogs;
+  }
+
+  const returningDogIds = new Set(
+    (data as { dog_id: string }[]).map((row) => row.dog_id),
+  );
+
+  return dogs.map((dog) => ({
+    ...dog,
+    isReturning: returningDogIds.has(dog.id),
+  }));
+}
+
 async function attachClientToDog(
   dog: Dog,
   facilityId: string,
@@ -327,8 +357,14 @@ export async function getDogs(): Promise<DogsResult<Dog[]>> {
     return { data: null, error: toError(checkinsResult.error.message) };
   }
 
+  const withCheckins = enrichDogsWithCheckins(dogs, checkinsResult.data);
+  const withVisitStatus = await enrichDogsWithVisitStatus(
+    withCheckins,
+    profileResult.data.facility_id,
+  );
+
   return {
-    data: enrichDogsWithCheckins(dogs, checkinsResult.data),
+    data: withVisitStatus,
     error: null,
   };
 }
@@ -363,8 +399,12 @@ export async function getDogById(id: string): Promise<DogsResult<Dog>> {
   }
 
   const enriched = enrichDogWithCheckin(dog, checkinResult.data);
+  const [withVisitStatus] = await enrichDogsWithVisitStatus(
+    [enriched],
+    profileResult.data.facility_id,
+  );
   const withClient = await attachClientToDog(
-    enriched,
+    withVisitStatus,
     profileResult.data.facility_id,
   );
 

@@ -9,6 +9,7 @@ export type CheckinsErrorCode =
   | "not_found"
   | "already_checked_in"
   | "not_checked_in"
+  | "no_approved_booking"
   | "unknown";
 
 export interface CheckinsError {
@@ -142,6 +143,39 @@ export async function getDogActiveCheckin(
   return { data: (data as DogCheckinRow | null) ?? null, error: null };
 }
 
+function todayDateString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export async function findTodaysApprovedBooking(
+  facilityId: string,
+  dogId: string,
+): Promise<string | null> {
+  const today = todayDateString();
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("facility_id", facilityId)
+    .eq("dog_id", dogId)
+    .eq("status", "approved")
+    .lte("start_date", today)
+    .gte("end_date", today)
+    .order("start_date", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return (data as { id: string }).id;
+}
+
 export async function isDogCheckedIn(dogId: string): Promise<boolean> {
   const result = await getDogActiveCheckin(dogId);
   return result.data !== null;
@@ -149,6 +183,8 @@ export async function isDogCheckedIn(dogId: string): Promise<boolean> {
 
 export async function checkInDog(
   dogId: string,
+  bookingId?: string | null,
+  options?: { force?: boolean },
 ): Promise<CheckinsResult<DogCheckinRow>> {
   const contextResult = await requireFacilityContext();
   if (contextResult.error) {
@@ -185,11 +221,30 @@ export async function checkInDog(
     };
   }
 
+  let linkedBookingId = bookingId ?? null;
+  if (!linkedBookingId) {
+    linkedBookingId = await findTodaysApprovedBooking(
+      contextResult.data.facilityId,
+      dogId,
+    );
+  }
+
+  if (!linkedBookingId && !options?.force) {
+    return {
+      data: null,
+      error: toError(
+        "This dog doesn't have an approved booking for today. Confirm to check in anyway.",
+        "no_approved_booking",
+      ),
+    };
+  }
+
   const { data, error } = await supabase
     .from("dog_checkins")
     .insert({
       dog_id: dogId,
       facility_id: contextResult.data.facilityId,
+      booking_id: linkedBookingId,
       checked_in_at: new Date().toISOString(),
       created_by: contextResult.data.userId,
     })

@@ -9,12 +9,15 @@ import {
   updateBooking,
 } from "@/lib/bookings";
 import { canApproveBooking } from "@/lib/capacity";
+import { checkInDog, getDogActiveCheckin } from "@/lib/checkins";
 import type { Booking } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
 import {
   Calendar,
   Car,
+  Check,
   Loader2,
+  LogIn,
   PawPrint,
   Pencil,
   User,
@@ -38,12 +41,15 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   const [updating, setUpdating] = useState(false);
   const [capacityBlocked, setCapacityBlocked] = useState(false);
   const [capacityMessage, setCapacityMessage] = useState<string | null>(null);
+  const [dogCheckedIn, setDogCheckedIn] = useState(false);
+  const [checkingIn, setCheckingIn] = useState(false);
 
   const loadBooking = useCallback(async () => {
     setLoading(true);
     setError(null);
     setCapacityBlocked(false);
     setCapacityMessage(null);
+    setDogCheckedIn(false);
 
     const result = await getBookingById(bookingId);
     if (result.error) {
@@ -57,6 +63,13 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         if (!approvalCheck.error && approvalCheck.data) {
           setCapacityBlocked(!approvalCheck.data.canApprove);
           setCapacityMessage(approvalCheck.data.message);
+        }
+      }
+
+      if (result.data.status === "approved") {
+        const checkinResult = await getDogActiveCheckin(result.data.dogId);
+        if (!checkinResult.error && checkinResult.data) {
+          setDogCheckedIn(true);
         }
       }
     }
@@ -84,6 +97,22 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
     }
 
     setUpdating(false);
+  }
+
+  async function handleCheckIn() {
+    if (!booking || checkingIn || dogCheckedIn) return;
+
+    setCheckingIn(true);
+    setActionError(null);
+
+    const result = await checkInDog(booking.dogId, booking.id);
+    if (result.error) {
+      setActionError(result.error.message);
+    } else {
+      setDogCheckedIn(true);
+    }
+
+    setCheckingIn(false);
   }
 
   if (loading) {
@@ -124,6 +153,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   const canApprove = booking.status === "pending";
   const canReject = booking.status === "pending";
   const canComplete = booking.status === "approved";
+  const canCheckIn = booking.status === "approved" && !dogCheckedIn;
 
   return (
     <div className="space-y-6">
@@ -219,6 +249,42 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
           )}
         </CardContent>
       </Card>
+
+      {canCheckIn && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Check In</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            <p className="text-sm text-stone-600">
+              This booking is approved. Check {booking.dogName} in for today&apos;s
+              stay.
+            </p>
+            <Button
+              className="w-full sm:w-auto"
+              disabled={checkingIn}
+              onClick={() => void handleCheckIn()}
+            >
+              {checkingIn ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <LogIn className="h-4 w-4" aria-hidden />
+              )}
+              {checkingIn ? "Checking in..." : "Check In"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {dogCheckedIn && booking.status === "approved" && (
+        <div
+          className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+          role="status"
+        >
+          <Check className="h-4 w-4 shrink-0" aria-hidden />
+          {booking.dogName} is checked in for this booking.
+        </div>
+      )}
 
       {(canApprove || canReject || canComplete) && (
         <Card>
