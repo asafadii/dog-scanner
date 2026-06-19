@@ -128,6 +128,7 @@ export function MockStoreProvider({ children }: { children: ReactNode }) {
       lastCheckIn: null,
       lastCheckOut: null,
       activeCheckinId: null,
+      currentAssignment: null,
       todaysCare: [],
       timeline: [],
     };

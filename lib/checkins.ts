@@ -37,6 +37,7 @@ export function enrichDogWithCheckin(
       ...dog,
       status: "checked_out",
       activeCheckinId: null,
+      currentAssignment: null,
     };
   }
 
@@ -45,6 +46,7 @@ export function enrichDogWithCheckin(
     status: "checked_in",
     lastCheckIn: activeCheckin.checked_in_at,
     activeCheckinId: activeCheckin.id,
+    currentAssignment: dog.currentAssignment ?? null,
   };
 }
 
@@ -56,6 +58,7 @@ export function enrichDogAfterCheckout(
     ...dog,
     status: "checked_out",
     activeCheckinId: null,
+    currentAssignment: null,
     lastCheckOut: checkin.checked_out_at,
   };
 }

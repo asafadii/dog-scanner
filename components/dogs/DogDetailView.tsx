@@ -7,6 +7,8 @@ import {
 } from "@/components/dogs/DogAlertBadges";
 import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
+import { LocationChip } from "@/components/kennels/LocationChip";
+import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -21,9 +23,10 @@ import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
-import type { CareTask, Dog, TimelineEvent } from "@/lib/types";
+import type { CareTask, Dog, KennelAssignment, TimelineEvent } from "@/lib/types";
 import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
 import {
+  ArrowRightLeft,
   Activity,
   AlertTriangle,
   Apple,
@@ -83,6 +86,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   const [noteText, setNoteText] = useState("");
   const [checkActionLoading, setCheckActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
 
   const loadDog = useCallback(async () => {
     setLoading(true);
@@ -123,8 +127,14 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         setActionError(result.error.message);
       } else {
         setDog((current) =>
-          current ? enrichDogWithCheckin(current, result.data) : current,
+          current
+            ? {
+                ...enrichDogWithCheckin(current, result.data),
+                currentAssignment: null,
+              }
+            : current,
         );
+        setMoveOpen(false);
       }
     } else if (dog.activeCheckinId) {
       const result = await checkOutDog(dog.activeCheckinId);
@@ -263,6 +273,22 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <DogStatusBadge status={dog.status} />
+              {isCheckedIn && (
+                <>
+                  <LocationChip assignment={dog.currentAssignment} />
+                  {dog.activeCheckinId && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMoveOpen((open) => !open)}
+                      aria-expanded={moveOpen}
+                    >
+                      <ArrowRightLeft className="h-4 w-4" aria-hidden />
+                      Move Kennel
+                    </Button>
+                  )}
+                </>
+              )}
               {!dog.isReturning && <DogVisitBadge isReturning={false} />}
             </div>
           </div>
@@ -270,6 +296,21 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
       </div>
 
       <div className="space-y-4 p-4 pb-32">
+        {isCheckedIn && moveOpen && dog.activeCheckinId && (
+          <MoveKennelPicker
+            checkinId={dog.activeCheckinId}
+            onAssigned={(assignment: KennelAssignment) => {
+              setDog((current) =>
+                current
+                  ? { ...current, currentAssignment: assignment }
+                  : current,
+              );
+              setMoveOpen(false);
+            }}
+            onClose={() => setMoveOpen(false)}
+          />
+        )}
+
         {actionError && (
           <div
             className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"

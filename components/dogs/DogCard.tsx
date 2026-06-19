@@ -3,18 +3,22 @@
 import { DogAlertBadges, hasCriticalAlerts } from "@/components/dogs/DogAlertBadges";
 import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
+import { LocationChip } from "@/components/kennels/LocationChip";
+import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { Button } from "@/components/ui/Button";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
-import type { Dog, DogStatus } from "@/lib/types";
+import type { Dog, DogStatus, KennelAssignment } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
-import { Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
+import { ArrowRightLeft, Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface DogCardProps {
   dog: Dog;
   onCheckToggle?: (id: string) => void;
   isToggling?: boolean;
+  onAssignmentChange?: (dogId: string, assignment: KennelAssignment) => void;
   className?: string;
 }
 
@@ -22,9 +26,11 @@ export function DogCard({
   dog,
   onCheckToggle,
   isToggling = false,
+  onAssignmentChange,
   className,
 }: DogCardProps) {
   const router = useRouter();
+  const [moveOpen, setMoveOpen] = useState(false);
   const isCheckedIn = dog.status === "checked_in";
   const critical = hasCriticalAlerts(dog.alerts);
 
@@ -83,7 +89,10 @@ export function DogCard({
                 <span className="capitalize">{dog.size}</span>
               </p>
             </div>
-            <DogStatusBadge status={dog.status} compact />
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+              <LocationChip assignment={dog.currentAssignment} />
+              <DogStatusBadge status={dog.status} compact />
+            </div>
           </div>
 
           <DogAlertBadges
@@ -104,14 +113,40 @@ export function DogCard({
             {dog.owner.name}
           </span>
         </span>
-        <time
-          className="flex shrink-0 items-center gap-1 tabular-nums"
-          dateTime={dog.lastCheckIn ?? undefined}
-        >
-          <Clock className="h-4 w-4 text-stone-400" aria-hidden />
-          {formatCheckInTime(dog.lastCheckIn)}
-        </time>
+        <div className="flex shrink-0 items-center gap-2">
+          {isCheckedIn && dog.activeCheckinId && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMoveOpen((open) => !open)}
+              aria-label={`Move kennel for ${dog.name}`}
+              aria-expanded={moveOpen}
+            >
+              <ArrowRightLeft className="h-4 w-4" aria-hidden />
+            </Button>
+          )}
+          <time
+            className="flex items-center gap-1 tabular-nums"
+            dateTime={dog.lastCheckIn ?? undefined}
+          >
+            <Clock className="h-4 w-4 text-stone-400" aria-hidden />
+            {formatCheckInTime(dog.lastCheckIn)}
+          </time>
+        </div>
       </div>
+
+      {moveOpen && isCheckedIn && dog.activeCheckinId && (
+        <div className="mt-3 pl-2">
+          <MoveKennelPicker
+            checkinId={dog.activeCheckinId}
+            onAssigned={(assignment) => {
+              onAssignmentChange?.(dog.id, assignment);
+              setMoveOpen(false);
+            }}
+            onClose={() => setMoveOpen(false)}
+          />
+        </div>
+      )}
 
       <div className="mt-3 grid grid-cols-5 gap-2 pl-2">
         <Button

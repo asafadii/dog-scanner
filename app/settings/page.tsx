@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
+import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Building2, Bell, LogOut, User } from "lucide-react";
@@ -62,6 +63,8 @@ export default function SettingsPage() {
       )}
 
       <CapacitySettingsSection />
+
+      <KennelsSettingsSection />
 
       <div className="space-y-4">
         {PLACEHOLDER_SECTIONS.map(({ icon: Icon, title, description }) => (

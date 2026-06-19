@@ -3,9 +3,14 @@
 import { DogCard } from "@/components/dogs/DogCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-import { checkOutDog, getActiveCheckins } from "@/lib/checkins";
+import {
+  checkOutDog,
+  enrichDogsWithCheckins,
+  getActiveCheckins,
+} from "@/lib/checkins";
 import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
-import type { Dog } from "@/lib/types";
+import { getActiveAssignmentsMap } from "@/lib/kennels";
+import type { Dog, KennelAssignment } from "@/lib/types";
 import { ClipboardCheck, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -42,8 +47,27 @@ export function CheckinsView() {
     const activeDogIds = new Set(
       checkinsResult.data.map((checkin) => checkin.dog_id),
     );
-    setCheckedIn(
+    const checkedInDogs = enrichDogsWithCheckins(
       dogsResult.data.filter((dog) => activeDogIds.has(dog.id)),
+      checkinsResult.data,
+    );
+
+    const checkinIds = checkinsResult.data.map((checkin) => checkin.id);
+    const assignmentsResult = await getActiveAssignmentsMap(checkinIds);
+    if (assignmentsResult.error) {
+      setError(assignmentsResult.error.message);
+      setCheckedIn([]);
+      setLoading(false);
+      return;
+    }
+
+    setCheckedIn(
+      checkedInDogs.map((dog) => ({
+        ...dog,
+        currentAssignment: dog.activeCheckinId
+          ? assignmentsResult.data.get(dog.activeCheckinId) ?? null
+          : null,
+      })),
     );
     setLoading(false);
   }, []);
@@ -72,6 +96,19 @@ export function CheckinsView() {
       setTogglingId(null);
     },
     [checkedIn, togglingId],
+  );
+
+  const handleAssignmentChange = useCallback(
+    (dogId: string, assignment: KennelAssignment) => {
+      setCheckedIn((prev) =>
+        prev.map((dog) =>
+          dog.id === dogId
+            ? { ...dog, currentAssignment: assignment }
+            : dog,
+        ),
+      );
+    },
+    [],
   );
 
   if (loading) {
@@ -147,6 +184,7 @@ export function CheckinsView() {
               key={dog.id}
               dog={dog}
               onCheckToggle={(dogId) => void toggleCheckStatus(dogId)}
+              onAssignmentChange={handleAssignmentChange}
               isToggling={togglingId === dog.id}
             />
           ))}

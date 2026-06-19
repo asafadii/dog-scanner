@@ -92,6 +92,7 @@ export interface Dog {
   lastCheckIn: string | null;
   lastCheckOut: string | null;
   activeCheckinId: string | null;
+  currentAssignment: KennelAssignment | null;
   todaysCare: CareTask[];
   timeline: TimelineEvent[];
 }
@@ -165,4 +166,23 @@ export interface CapacityFormData {
 export interface CapacityUsage {
   used: number;
   capacity: number;
+}
+
+export type LocationType = "kennel" | "daycare" | "grooming" | "isolation";
+
+export interface Kennel {
+  id: string;
+  name: string;
+  capacity: number;
+  isActive: boolean;
+}
+
+export interface KennelAssignment {
+  id: string;
+  checkinId: string;
+  locationType: LocationType;
+  kennelId: string | null;
+  kennelName: string | null;
+  notes: string | null;
+  assignedAt: string;
 }

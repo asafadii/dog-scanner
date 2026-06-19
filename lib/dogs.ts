@@ -4,6 +4,7 @@ import {
   getActiveCheckins,
   getDogActiveCheckin,
 } from "@/lib/checkins";
+import { getCurrentAssignment } from "@/lib/kennels";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ClientRow, DogInsert, DogRow, DogUpdate, ProfileRow } from "@/lib/supabase/types";
 import type { Dog, DogClientLink, NewDogFormData } from "@/lib/types";
@@ -97,6 +98,7 @@ export function mapDogRowToDog(row: DogRow): Dog {
     lastCheckIn: null,
     lastCheckOut: null,
     activeCheckinId: null,
+    currentAssignment: null,
     todaysCare: [],
     timeline: [],
   };
@@ -399,8 +401,19 @@ export async function getDogById(id: string): Promise<DogsResult<Dog>> {
   }
 
   const enriched = enrichDogWithCheckin(dog, checkinResult.data);
+  let withAssignment = enriched;
+  if (enriched.activeCheckinId) {
+    const assignmentResult = await getCurrentAssignment(enriched.activeCheckinId);
+    if (assignmentResult.error) {
+      return { data: null, error: toError(assignmentResult.error.message) };
+    }
+    withAssignment = {
+      ...enriched,
+      currentAssignment: assignmentResult.data,
+    };
+  }
   const [withVisitStatus] = await enrichDogsWithVisitStatus(
-    [enriched],
+    [withAssignment],
     profileResult.data.facility_id,
   );
   const withClient = await attachClientToDog(

@@ -243,6 +243,64 @@ export type FacilityCapacityUpdate = {
   updated_at?: string;
 };
 
+export type DbLocationType = "kennel" | "daycare" | "grooming" | "isolation";
+
+export interface KennelRow {
+  id: string;
+  facility_id: string;
+  name: string;
+  capacity: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type KennelInsert = {
+  id?: string;
+  facility_id: string;
+  name: string;
+  capacity?: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type KennelUpdate = {
+  id?: string;
+  facility_id?: string;
+  name?: string;
+  capacity?: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface KennelAssignmentRow {
+  id: string;
+  checkin_id: string;
+  facility_id: string;
+  location_type: DbLocationType;
+  kennel_id: string | null;
+  assigned_at: string;
+  assigned_by: string;
+  notes: string | null;
+}
+
+export type KennelAssignmentInsert = {
+  id?: string;
+  checkin_id: string;
+  facility_id: string;
+  location_type: DbLocationType;
+  kennel_id?: string | null;
+  assigned_at?: string;
+  assigned_by: string;
+  notes?: string | null;
+};
+
+export type KennelAssignmentWithKennelRow = KennelAssignmentRow & {
+  kennels: { name: string } | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -316,6 +374,18 @@ export type Database = {
         Row: DogCheckinRow;
         Insert: DogCheckinInsert;
         Update: DogCheckinUpdate;
+        Relationships: [];
+      };
+      kennels: {
+        Row: KennelRow;
+        Insert: KennelInsert;
+        Update: KennelUpdate;
+        Relationships: [];
+      };
+      kennel_assignments: {
+        Row: KennelAssignmentRow;
+        Insert: KennelAssignmentInsert;
+        Update: Partial<KennelAssignmentInsert>;
         Relationships: [];
       };
     };
