@@ -6,6 +6,10 @@ import {
 } from "@/lib/portal/auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DogRow } from "@/lib/supabase/types";
+import {
+  getDogPhotoValidationMessage,
+  validateDogPhotoFile,
+} from "@/lib/storage";
 import type { Dog, DogAlerts, DogSize, NewDogFormData } from "@/lib/types";
 
 export type PortalDogsErrorCode =
@@ -61,6 +65,20 @@ export interface CreatePortalDogErrorResponse {
 export type CreatePortalDogResponse =
   | CreatePortalDogSuccessResponse
   | CreatePortalDogErrorResponse;
+
+export interface UploadPortalDogPhotoSuccessResponse {
+  ok: true;
+  photoUrl: string;
+}
+
+export interface UploadPortalDogPhotoErrorResponse {
+  ok: false;
+  error: string;
+}
+
+export type UploadPortalDogPhotoResponse =
+  | UploadPortalDogPhotoSuccessResponse
+  | UploadPortalDogPhotoErrorResponse;
 
 export async function getPortalDogs(
   clientId: string,
@@ -154,6 +172,42 @@ export async function createPortalDog(
   }
 
   return { data: data.dog, error: null };
+}
+
+export async function uploadPortalDogPhoto(
+  dogId: string,
+  file: File,
+): Promise<PortalDogsResult<string>> {
+  const validation = validateDogPhotoFile(file);
+  if (!validation.ok) {
+    return {
+      data: null,
+      error: toError(getDogPhotoValidationMessage(validation.code)),
+    };
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await portalFetch(`/api/portal/dogs/${dogId}/photo`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = (await response.json()) as UploadPortalDogPhotoResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to upload photo";
+    return {
+      data: null,
+      error: toError(message, response.status === 403 ? "unauthorized" : "unknown"),
+    };
+  }
+
+  return { data: data.photoUrl, error: null };
 }
 
 export function portalCreateDogInputFromForm(

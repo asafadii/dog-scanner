@@ -104,9 +104,7 @@ export function DogCard({
             compact
             className="mt-2.5"
           />
-          {!dog.isReturning && (
-            <DogVisitBadge isReturning={false} compact className="mt-2" />
-          )}
+          <DogVisitBadge isReturning={dog.isReturning} compact className="mt-2" />
         </div>
       </div>
 

@@ -281,7 +281,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   )}
                 </>
               )}
-              {!dog.isReturning && <DogVisitBadge isReturning={false} />}
+              <DogVisitBadge isReturning={dog.isReturning} />
             </div>
           </div>
         </div>

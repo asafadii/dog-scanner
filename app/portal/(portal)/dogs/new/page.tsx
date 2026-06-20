@@ -4,20 +4,26 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { getLinkedClients } from "@/lib/portal/auth";
 import {
   createPortalDog,
   portalCreateDogInputFromForm,
+  uploadPortalDogPhoto,
 } from "@/lib/portal/dogs";
 import {
   getDocumentValidationMessage,
   uploadPortalDocument,
   validateDocumentFile,
 } from "@/lib/portal/documents";
+import {
+  getDogPhotoValidationMessage,
+  validateDogPhotoFile,
+} from "@/lib/storage";
 import type { DogAlerts, DogDocumentType, DogSize, NewDogFormData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 const SIZES: DogSize[] = ["small", "medium", "large"];
 const DOCUMENT_TYPES: { value: DogDocumentType; label: string }[] = [
@@ -56,11 +62,37 @@ export default function PortalNewDogPage() {
     alerts: { ...defaultAlerts },
     overnight: false,
   });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [vaccinationFile, setVaccinationFile] = useState<File | null>(null);
   const [optionalFile, setOptionalFile] = useState<File | null>(null);
   const [optionalDocType, setOptionalDocType] = useState<DogDocumentType>("pedigree");
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<"idle" | "creating" | "uploading">("idle");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      const result = await getLinkedClients();
+      if (cancelled || result.error || !result.data) return;
+
+      const match = result.data.find(
+        (client) => client.id === clientId && client.facilityId === facilityId,
+      );
+      if (!match) return;
+
+      setForm((prev) => ({
+        ...prev,
+        ownerName: match.name,
+        ownerPhone: match.phone ?? "",
+        ownerEmail: match.email ?? "",
+      }));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, facilityId]);
 
   if (!clientId || !facilityId) {
     return (
@@ -90,6 +122,14 @@ export default function PortalNewDogPage() {
       }
     }
 
+    if (photoFile) {
+      const validation = validateDogPhotoFile(photoFile);
+      if (!validation.ok) {
+        setError(getDogPhotoValidationMessage(validation.code));
+        return;
+      }
+    }
+
     setPhase("creating");
     const createResult = await createPortalDog(
       portalCreateDogInputFromForm(clientId, facilityId, form),
@@ -103,6 +143,15 @@ export default function PortalNewDogPage() {
 
     const dogId = createResult.data.id;
     setPhase("uploading");
+
+    if (photoFile) {
+      const uploadResult = await uploadPortalDogPhoto(dogId, photoFile);
+      if (uploadResult.error) {
+        setError(uploadResult.error.message);
+        setPhase("idle");
+        return;
+      }
+    }
 
     if (vaccinationFile) {
       const uploadResult = await uploadPortalDocument(
@@ -254,9 +303,23 @@ export default function PortalNewDogPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Documents</CardTitle>
+            <CardTitle className="text-base">Photo &amp; documents</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-0">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-stone-700">
+                Profile photo <span className="font-normal text-stone-500">(optional)</span>
+              </label>
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+                className="block w-full text-sm text-stone-600 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-violet-700"
+              />
+              <p className="mt-1 text-xs text-stone-500">
+                JPG, PNG, or WEBP up to 10 MB.
+              </p>
+            </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-stone-700">
                 Vaccination record
@@ -314,7 +377,7 @@ export default function PortalNewDogPage() {
             {phase === "creating"
               ? "Creating profile..."
               : phase === "uploading"
-                ? "Uploading documents..."
+                ? "Uploading files..."
                 : "Add Dog"}
           </Button>
           <Link href="/portal">
