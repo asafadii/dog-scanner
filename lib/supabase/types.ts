@@ -178,6 +178,28 @@ export type ClaimAttemptInsert = {
   attempted_at?: string;
 };
 
+export type DbDogDocumentType = "vaccination" | "pedigree" | "other";
+
+export interface DogDocumentRow {
+  id: string;
+  dog_id: string;
+  facility_id: string;
+  document_type: DbDogDocumentType;
+  file_path: string;
+  uploaded_by_client_account_id: string | null;
+  created_at: string;
+}
+
+export type DogDocumentInsert = {
+  id?: string;
+  dog_id: string;
+  facility_id: string;
+  document_type: DbDogDocumentType;
+  file_path: string;
+  uploaded_by_client_account_id?: string | null;
+  created_at?: string;
+};
+
 export interface FacilityRow {
   id: string;
   name: string;
@@ -530,6 +552,12 @@ export type Database = {
         Update: Partial<ClaimAttemptInsert>;
         Relationships: [];
       };
+      dog_documents: {
+        Row: DogDocumentRow;
+        Insert: DogDocumentInsert;
+        Update: Partial<DogDocumentInsert>;
+        Relationships: [];
+      };
       bookings: {
         Row: BookingRow;
         Insert: BookingInsert;
@@ -621,3 +649,4 @@ export interface AuthSetupErrorResponse {
 export type AuthSetupResponse = AuthSetupSuccessResponse | AuthSetupErrorResponse;
 
 export const DOG_PHOTOS_BUCKET = "dog-photos" as const;
+export const VACCINATION_DOCUMENTS_BUCKET = "vaccination-documents" as const;

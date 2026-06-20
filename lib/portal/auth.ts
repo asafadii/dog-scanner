@@ -131,6 +131,29 @@ export async function getLinkedClients(): Promise<PortalResult<LinkedClient[]>> 
   return { data: linked, error: null };
 }
 
+export async function verifyLinkedClient(
+  clientId: string,
+  facilityId: string,
+): Promise<PortalResult<LinkedClient>> {
+  const linkedResult = await getLinkedClients();
+  if (linkedResult.error) {
+    return { data: null, error: linkedResult.error };
+  }
+
+  const match = linkedResult.data.find(
+    (client) => client.id === clientId && client.facilityId === facilityId,
+  );
+
+  if (!match) {
+    return {
+      data: null,
+      error: toError("Not authorized to access this client record", "unauthorized"),
+    };
+  }
+
+  return { data: match, error: null };
+}
+
 export async function hasClientAccount(): Promise<boolean> {
   const supabase = createSupabaseBrowserClient();
   const {

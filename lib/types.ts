@@ -250,3 +250,15 @@ export interface RevenueReport {
   };
   payments: PaymentReportRow[];
 }
+
+export type DogDocumentType = "vaccination" | "pedigree" | "other";
+
+export interface DogDocument {
+  id: string;
+  dogId: string;
+  facilityId: string;
+  documentType: DogDocumentType;
+  filePath: string;
+  uploadedByClientAccountId: string | null;
+  createdAt: string;
+}

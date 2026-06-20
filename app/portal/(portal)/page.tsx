@@ -1,27 +1,49 @@
 "use client";
 
+import { PortalBookingCard } from "@/components/portal/PortalBookingCard";
+import { PortalDogCard } from "@/components/portal/PortalDogCard";
+import {
+  buildFacilityOptions,
+  PortalFacilityPicker,
+  type FacilityOption,
+} from "@/components/portal/PortalFacilityPicker";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { getPortalBookings } from "@/lib/portal/bookings";
 import { claimClientAccount } from "@/lib/portal/claim";
+import { getPortalDogs } from "@/lib/portal/dogs";
 import {
   getLinkedClients,
   requireClientAccount,
   type LinkedClient,
 } from "@/lib/portal/auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Building2, KeyRound, Loader2, User } from "lucide-react";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import type { Booking, Dog } from "@/lib/types";
+import { CalendarPlus, KeyRound, Loader2, PawPrint, Plus } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 
 export default function PortalPage() {
   const [linkedClients, setLinkedClients] = useState<LinkedClient[] | null>(
     null,
   );
   const [accountName, setAccountName] = useState<string>("");
+  const [selectedFacility, setSelectedFacility] = useState<FacilityOption | null>(
+    null,
+  );
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(false);
   const [claimCode, setClaimCode] = useState("");
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claimLoading, setClaimLoading] = useState(false);
+
+  const facilityOptions = useMemo(
+    () => buildFacilityOptions(linkedClients ?? []),
+    [linkedClients],
+  );
 
   const loadPortalData = useCallback(async () => {
     setLoading(true);
@@ -52,14 +74,34 @@ export default function PortalPage() {
       setLinkedClients([]);
     } else {
       setLinkedClients(linkedResult.data);
+      const options = buildFacilityOptions(linkedResult.data);
+      setSelectedFacility((current) => current ?? options[0] ?? null);
     }
 
     setLoading(false);
   }, []);
 
+  const loadFacilityContent = useCallback(async (facility: FacilityOption) => {
+    setContentLoading(true);
+
+    const [dogsResult, bookingsResult] = await Promise.all([
+      getPortalDogs(facility.clientId, facility.facilityId),
+      getPortalBookings(facility.clientId, facility.facilityId),
+    ]);
+
+    setDogs(dogsResult.error ? [] : dogsResult.data);
+    setBookings(bookingsResult.error ? [] : bookingsResult.data);
+    setContentLoading(false);
+  }, []);
+
   useEffect(() => {
     void loadPortalData();
   }, [loadPortalData]);
+
+  useEffect(() => {
+    if (!selectedFacility) return;
+    void loadFacilityContent(selectedFacility);
+  }, [loadFacilityContent, selectedFacility]);
 
   async function handleClaim(e: FormEvent) {
     e.preventDefault();
@@ -104,45 +146,18 @@ export default function PortalPage() {
 
   const hasLinks = linkedClients && linkedClients.length > 0;
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">
-          Welcome{accountName ? `, ${accountName.split(" ")[0]}` : ""}
-        </h1>
-        <p className="mt-1 text-sm text-stone-500">
-          {hasLinks
-            ? "Your linked daycare accounts"
-            : "Link your account to get started"}
-        </p>
-      </div>
+  if (!hasLinks) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+            Welcome{accountName ? `, ${accountName.split(" ")[0]}` : ""}
+          </h1>
+          <p className="mt-1 text-sm text-stone-500">
+            Link your account to get started
+          </p>
+        </div>
 
-      {hasLinks ? (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">You&apos;re linked to</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-0">
-            {linkedClients.map((client) => (
-              <div
-                key={client.id}
-                className="flex items-start gap-3 rounded-xl border border-violet-100 bg-violet-50/50 px-4 py-3"
-              >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
-                  <User className="h-4 w-4" aria-hidden />
-                </span>
-                <div>
-                  <p className="font-medium text-stone-900">{client.name}</p>
-                  <p className="mt-0.5 flex items-center gap-1.5 text-sm text-stone-500">
-                    <Building2 className="h-3.5 w-3.5" aria-hidden />
-                    {client.facilityName}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -180,44 +195,141 @@ export default function PortalPage() {
             </form>
           </CardContent>
         </Card>
-      )}
+      </div>
+    );
+  }
 
-      {hasLinks && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Link another facility</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <form onSubmit={handleClaim} className="space-y-4">
-              <Input
-                label="Invite code"
-                type="text"
-                required
-                value={claimCode}
-                onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
-                placeholder="Enter another invite code"
-                autoComplete="off"
-              />
+  const newDogHref = selectedFacility
+    ? `/portal/dogs/new?clientId=${encodeURIComponent(selectedFacility.clientId)}&facilityId=${encodeURIComponent(selectedFacility.facilityId)}`
+    : "/portal/dogs/new";
+  const newBookingHref = selectedFacility
+    ? `/portal/bookings/new?clientId=${encodeURIComponent(selectedFacility.clientId)}&facilityId=${encodeURIComponent(selectedFacility.facilityId)}`
+    : "/portal/bookings/new";
 
-              {claimError && (
-                <p
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-                  role="alert"
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+          Welcome{accountName ? `, ${accountName.split(" ")[0]}` : ""}
+        </h1>
+        <p className="mt-1 text-sm text-stone-500">
+          Manage your dogs and bookings
+        </p>
+      </div>
+
+      <PortalFacilityPicker
+        options={facilityOptions}
+        selectedFacilityId={selectedFacility?.facilityId ?? ""}
+        onChange={setSelectedFacility}
+      />
+
+      {contentLoading ? (
+        <div className="flex min-h-[20vh] items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-violet-600" aria-hidden />
+        </div>
+      ) : (
+        <>
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+                <PawPrint className="h-5 w-5 text-violet-600" aria-hidden />
+                Your Dogs
+              </h2>
+              <Link href={newDogHref}>
+                <Button size="sm">
+                  <Plus className="h-4 w-4" aria-hidden />
+                  Add a Dog
+                </Button>
+              </Link>
+            </div>
+
+            {dogs.length === 0 ? (
+              <Card>
+                <CardContent className="py-10 text-center text-sm text-stone-500">
+                  No dogs on file yet. Add your first dog to get started.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {dogs.map((dog) =>
+                  selectedFacility ? (
+                    <PortalDogCard
+                      key={dog.id}
+                      dog={dog}
+                      clientId={selectedFacility.clientId}
+                      facilityId={selectedFacility.facilityId}
+                    />
+                  ) : null,
+                )}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+                <CalendarPlus className="h-5 w-5 text-violet-600" aria-hidden />
+                Your Bookings
+              </h2>
+              <Link href={newBookingHref}>
+                <Button size="sm" variant="outline">
+                  <Plus className="h-4 w-4" aria-hidden />
+                  New Booking
+                </Button>
+              </Link>
+            </div>
+
+            {bookings.length === 0 ? (
+              <Card>
+                <CardContent className="py-10 text-center text-sm text-stone-500">
+                  No bookings yet. Request a stay when you&apos;re ready.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {bookings.map((booking) => (
+                  <PortalBookingCard key={booking.id} booking={booking} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Link another facility</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <form onSubmit={handleClaim} className="space-y-4">
+                <Input
+                  label="Invite code"
+                  type="text"
+                  required
+                  value={claimCode}
+                  onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
+                  placeholder="Enter another invite code"
+                  autoComplete="off"
+                />
+
+                {claimError && (
+                  <p
+                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                    role="alert"
+                  >
+                    {claimError}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={claimLoading}
                 >
-                  {claimError}
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                variant="outline"
-                disabled={claimLoading}
-              >
-                {claimLoading ? "Linking..." : "Add Link"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                  {claimLoading ? "Linking..." : "Add Link"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
