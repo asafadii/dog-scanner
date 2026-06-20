@@ -186,3 +186,66 @@ export interface KennelAssignment {
   notes: string | null;
   assignedAt: string;
 }
+
+export type PaymentMethod = "cash" | "card" | "transfer";
+
+export interface PricingRules {
+  facilityId: string;
+  daycareRate: number;
+  boardingRate: number;
+  transportFee: number;
+  foodFee: number;
+  seasonalSurchargeEnabled: boolean;
+  seasonalSurchargePercent: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface StayPriceBreakdown {
+  serviceType: BookingServiceType;
+  units: number;
+  rate: number;
+  transportFee: number;
+  foodFee: number;
+  surchargePercent: number;
+  subtotal: number;
+  total: number;
+}
+
+export interface Payment {
+  id: string;
+  checkinId: string;
+  bookingId: string | null;
+  serviceType: BookingServiceType;
+  units: number;
+  rate: number;
+  transportFee: number;
+  foodFee: number;
+  surchargePercent: number;
+  subtotal: number;
+  total: number;
+  paymentMethod: PaymentMethod;
+  paidAt: string;
+}
+
+export interface PaymentReportRow {
+  id: string;
+  dogName: string;
+  serviceType: BookingServiceType;
+  paidAt: string;
+  total: number;
+  paymentMethod: PaymentMethod;
+}
+
+export interface RevenueReport {
+  totalRevenue: number;
+  totalStays: number;
+  daycareVisits: number;
+  boardingStays: number;
+  paymentBreakdown: {
+    cash: number;
+    card: number;
+    transfer: number;
+  };
+  payments: PaymentReportRow[];
+}

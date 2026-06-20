@@ -5,9 +5,10 @@ import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
+import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
 import { Button } from "@/components/ui/Button";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
-import type { Dog, DogStatus, KennelAssignment } from "@/lib/types";
+import type { Dog, DogStatus, KennelAssignment, Payment } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
 import { ArrowRightLeft, Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
 import Image from "next/image";
@@ -19,6 +20,7 @@ interface DogCardProps {
   onCheckToggle?: (id: string) => void;
   isToggling?: boolean;
   onAssignmentChange?: (dogId: string, assignment: KennelAssignment) => void;
+  onCheckoutComplete?: (dogId: string, payment: Payment) => void;
   className?: string;
 }
 
@@ -27,10 +29,12 @@ export function DogCard({
   onCheckToggle,
   isToggling = false,
   onAssignmentChange,
+  onCheckoutComplete,
   className,
 }: DogCardProps) {
   const router = useRouter();
   const [moveOpen, setMoveOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const isCheckedIn = dog.status === "checked_in";
   const critical = hasCriticalAlerts(dog.alerts);
 
@@ -148,6 +152,19 @@ export function DogCard({
         </div>
       )}
 
+      {checkoutOpen && isCheckedIn && dog.activeCheckinId && (
+        <div className="mt-3 pl-2">
+          <CheckoutPicker
+            checkinId={dog.activeCheckinId}
+            onComplete={(payment) => {
+              onCheckoutComplete?.(dog.id, payment);
+              setCheckoutOpen(false);
+            }}
+            onClose={() => setCheckoutOpen(false)}
+          />
+        </div>
+      )}
+
       <div className="mt-3 grid grid-cols-5 gap-2 pl-2">
         <Button
           variant="outline"
@@ -164,7 +181,15 @@ export function DogCard({
           size="md"
           className="col-span-3"
           disabled={isToggling}
-          onClick={() => onCheckToggle?.(dog.id)}
+          onClick={() => {
+            if (isCheckedIn) {
+              setCheckoutOpen((open) => !open);
+              setMoveOpen(false);
+            } else {
+              onCheckToggle?.(dog.id);
+            }
+          }}
+          aria-expanded={isCheckedIn ? checkoutOpen : undefined}
           aria-label={
             isCheckedIn ? `Check out ${dog.name}` : `Check in ${dog.name}`
           }

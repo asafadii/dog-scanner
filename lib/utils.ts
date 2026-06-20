@@ -59,3 +59,28 @@ export function formatBookingDateRange(
   }
   return `${formatBookingDate(startDate)} – ${formatBookingDate(endDate)}`;
 }
+
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("en-IE", {
+    style: "currency",
+    currency: "EUR",
+  }).format(value);
+}
+
+export function formatReportDate(value: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+export function currentMonthDateRange(): { startDate: string; endDate: string } {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const startDate = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const endDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+  return { startDate, endDate };
+}

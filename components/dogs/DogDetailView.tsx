@@ -9,13 +9,12 @@ import { DogStatusBadge } from "@/components/dogs/DogStatusBadge";
 import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
+import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
 import {
   checkInDog,
-  checkOutDog,
-  enrichDogAfterCheckout,
   enrichDogWithCheckin,
 } from "@/lib/checkins";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
@@ -23,7 +22,7 @@ import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
-import type { CareTask, Dog, KennelAssignment, TimelineEvent } from "@/lib/types";
+import type { CareTask, Dog, KennelAssignment, Payment, TimelineEvent } from "@/lib/types";
 import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
 import {
   ArrowRightLeft,
@@ -87,6 +86,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   const [checkActionLoading, setCheckActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [moveOpen, setMoveOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const loadDog = useCallback(async () => {
     setLoading(true);
@@ -135,15 +135,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             : current,
         );
         setMoveOpen(false);
-      }
-    } else if (dog.activeCheckinId) {
-      const result = await checkOutDog(dog.activeCheckinId);
-      if (result.error) {
-        setActionError(result.error.message);
-      } else {
-        setDog((current) =>
-          current ? enrichDogAfterCheckout(current, result.data) : current,
-        );
+        setCheckoutOpen(false);
       }
     }
 
@@ -637,7 +629,27 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
       {/* Sticky bottom actions */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur-sm md:bottom-0">
         <div className="mx-auto max-w-5xl space-y-2 p-4 pb-[calc(1rem+env(safe-area-inset-bottom)+4rem)] md:pb-4">
-          {noteOpen ? (
+          {checkoutOpen && isCheckedIn && dog.activeCheckinId ? (
+            <CheckoutPicker
+              checkinId={dog.activeCheckinId}
+              onComplete={(payment: Payment) => {
+                setDog((current) =>
+                  current
+                    ? {
+                        ...current,
+                        status: "checked_out",
+                        activeCheckinId: null,
+                        currentAssignment: null,
+                        lastCheckOut: payment.paidAt,
+                      }
+                    : current,
+                );
+                setCheckoutOpen(false);
+                setMoveOpen(false);
+              }}
+              onClose={() => setCheckoutOpen(false)}
+            />
+          ) : noteOpen ? (
             <div className="space-y-2 rounded-2xl border border-stone-200 bg-white p-4 shadow-lg">
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-stone-900">Add Note</p>
@@ -681,12 +693,20 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 className="col-span-2"
                 size="lg"
                 disabled={checkActionLoading}
-                onClick={() => void toggleCheckStatus()}
+                onClick={() => {
+                  if (isCheckedIn) {
+                    setCheckoutOpen(true);
+                    setNoteOpen(false);
+                    setMoveOpen(false);
+                  } else {
+                    void toggleCheckStatus();
+                  }
+                }}
               >
                 {checkActionLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    {isCheckedIn ? "Checking out..." : "Checking in..."}
+                    Checking in...
                   </>
                 ) : isCheckedIn ? (
                   <>

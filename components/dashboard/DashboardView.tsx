@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
   checkInDog,
-  checkOutDog,
-  enrichDogAfterCheckout,
   enrichDogWithCheckin,
   getActiveCheckins,
 } from "@/lib/checkins";
@@ -16,7 +14,7 @@ import { getUpcomingBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
 import { getTodaysCapacityUsage } from "@/lib/capacity";
 import { getDogs } from "@/lib/dogs";
 import { getDashboardStats } from "@/lib/mockData";
-import type { Booking, CapacityUsage, Dog } from "@/lib/types";
+import type { Booking, CapacityUsage, Dog, Payment } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
 import {
   CalendarDays,
@@ -157,23 +155,31 @@ export function DashboardView() {
           );
           setCheckedInCount((count) => count + 1);
         }
-      } else if (dog.activeCheckinId) {
-        const result = await checkOutDog(dog.activeCheckinId);
-        if (result.error) {
-          setActionError(result.error.message);
-        } else {
-          setDogs((prev) =>
-            prev.map((item) =>
-              item.id === id ? enrichDogAfterCheckout(item, result.data) : item,
-            ),
-          );
-          setCheckedInCount((count) => Math.max(0, count - 1));
-        }
       }
 
       setTogglingId(null);
     },
     [dogs, togglingId],
+  );
+
+  const handleCheckoutComplete = useCallback(
+    (dogId: string, payment: Payment) => {
+      setDogs((prev) =>
+        prev.map((item) =>
+          item.id === dogId
+            ? {
+                ...item,
+                status: "checked_out",
+                activeCheckinId: null,
+                currentAssignment: null,
+                lastCheckOut: payment.paidAt,
+              }
+            : item,
+        ),
+      );
+      setCheckedInCount((count) => Math.max(0, count - 1));
+    },
+    [],
   );
 
   if (loading) {
@@ -354,6 +360,7 @@ export function DashboardView() {
                 key={dog.id}
                 dog={dog}
                 onCheckToggle={(dogId) => void toggleCheckStatus(dogId)}
+                onCheckoutComplete={handleCheckoutComplete}
                 isToggling={togglingId === dog.id}
               />
             ))}

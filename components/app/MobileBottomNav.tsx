@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import {
+  BarChart3,
   CalendarDays,
   ClipboardCheck,
   Home,
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/checkins", label: "Check-ins", icon: ClipboardCheck },
+  { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -35,7 +37,8 @@ export function MobileBottomNav() {
             pathname === href ||
             (href === "/dogs" && pathname.startsWith("/dogs")) ||
             (href === "/clients" && pathname.startsWith("/clients")) ||
-            (href === "/bookings" && pathname.startsWith("/bookings"));
+            (href === "/bookings" && pathname.startsWith("/bookings")) ||
+            (href === "/reports" && pathname.startsWith("/reports"));
 
           return (
             <Link

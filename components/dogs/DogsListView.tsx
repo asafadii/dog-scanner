@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
   checkInDog,
-  checkOutDog,
-  enrichDogAfterCheckout,
   enrichDogWithCheckin,
 } from "@/lib/checkins";
 import {
   getDogs,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
-import type { Dog } from "@/lib/types";
+import type { Dog, Payment } from "@/lib/types";
 import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -71,21 +69,26 @@ export function DogsListView() {
           ),
         );
       }
-    } else if (dog.activeCheckinId) {
-      const result = await checkOutDog(dog.activeCheckinId);
-      if (result.error) {
-        setActionError(result.error.message);
-      } else {
-        setDogs((prev) =>
-          prev.map((item) =>
-            item.id === id ? enrichDogAfterCheckout(item, result.data) : item,
-          ),
-        );
-      }
     }
 
     setTogglingId(null);
   }, [dogs, togglingId]);
+
+  const handleCheckoutComplete = useCallback((dogId: string, payment: Payment) => {
+    setDogs((prev) =>
+      prev.map((item) =>
+        item.id === dogId
+          ? {
+              ...item,
+              status: "checked_out",
+              activeCheckinId: null,
+              currentAssignment: null,
+              lastCheckOut: payment.paidAt,
+            }
+          : item,
+      ),
+    );
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -202,6 +205,7 @@ export function DogsListView() {
               key={dog.id}
               dog={dog}
               onCheckToggle={(dogId) => void toggleCheckStatus(dogId)}
+              onCheckoutComplete={handleCheckoutComplete}
               isToggling={togglingId === dog.id}
             />
           ))}

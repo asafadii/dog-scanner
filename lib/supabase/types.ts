@@ -301,6 +301,101 @@ export type KennelAssignmentWithKennelRow = KennelAssignmentRow & {
   kennels: { name: string } | null;
 };
 
+export interface PricingRulesRow {
+  facility_id: string;
+  daycare_rate: number;
+  boarding_rate: number;
+  transport_fee: number;
+  food_fee: number;
+  seasonal_surcharge_enabled: boolean;
+  seasonal_surcharge_percent: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PricingRulesInsert = {
+  facility_id: string;
+  daycare_rate?: number;
+  boarding_rate?: number;
+  transport_fee?: number;
+  food_fee?: number;
+  seasonal_surcharge_enabled?: boolean;
+  seasonal_surcharge_percent?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PricingRulesUpdate = {
+  facility_id?: string;
+  daycare_rate?: number;
+  boarding_rate?: number;
+  transport_fee?: number;
+  food_fee?: number;
+  seasonal_surcharge_enabled?: boolean;
+  seasonal_surcharge_percent?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DbPaymentMethod = "cash" | "card" | "transfer";
+
+export interface PaymentRow {
+  id: string;
+  checkin_id: string;
+  booking_id: string | null;
+  facility_id: string;
+  service_type: DbBookingServiceType;
+  units: number;
+  rate: number;
+  transport_fee: number;
+  food_fee: number;
+  surcharge_percent: number;
+  subtotal: number;
+  total: number;
+  payment_method: DbPaymentMethod;
+  paid_at: string;
+  recorded_by: string;
+}
+
+export type PaymentInsert = {
+  id?: string;
+  checkin_id: string;
+  booking_id?: string | null;
+  facility_id: string;
+  service_type: DbBookingServiceType;
+  units: number;
+  rate: number;
+  transport_fee?: number;
+  food_fee?: number;
+  surcharge_percent?: number;
+  subtotal: number;
+  total: number;
+  payment_method: DbPaymentMethod;
+  paid_at?: string;
+  recorded_by: string;
+};
+
+export interface BookingItemRow {
+  id: string;
+  booking_id: string;
+  food_addon: boolean;
+  created_at: string;
+}
+
+export type BookingItemInsert = {
+  id?: string;
+  booking_id: string;
+  food_addon?: boolean;
+  created_at?: string;
+};
+
+export type PaymentReportRowDb = PaymentRow & {
+  dog_checkins: {
+    dog_id: string;
+    dogs: { name: string } | null;
+  } | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -386,6 +481,24 @@ export type Database = {
         Row: KennelAssignmentRow;
         Insert: KennelAssignmentInsert;
         Update: Partial<KennelAssignmentInsert>;
+        Relationships: [];
+      };
+      pricing_rules: {
+        Row: PricingRulesRow;
+        Insert: PricingRulesInsert;
+        Update: PricingRulesUpdate;
+        Relationships: [];
+      };
+      payments: {
+        Row: PaymentRow;
+        Insert: PaymentInsert;
+        Update: Partial<PaymentInsert>;
+        Relationships: [];
+      };
+      booking_items: {
+        Row: BookingItemRow;
+        Insert: BookingItemInsert;
+        Update: Partial<BookingItemInsert>;
         Relationships: [];
       };
     };
