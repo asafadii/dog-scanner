@@ -11,7 +11,8 @@ import {
 import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { getActiveAssignmentsMap } from "@/lib/kennels";
 import type { Dog, KennelAssignment, Payment } from "@/lib/types";
-import { ClipboardCheck, Loader2 } from "lucide-react";
+import { ClipboardCheck, Loader2, ScanLine } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 export function CheckinsView() {
@@ -154,19 +155,27 @@ export function CheckinsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-          <ClipboardCheck className="h-6 w-6" aria-hidden />
-        </span>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-stone-900">
-            Check-ins
-          </h2>
-          <p className="mt-1 text-stone-500">
-            {checkedIn.length} dog{checkedIn.length !== 1 ? "s" : ""} currently
-            on site
-          </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <ClipboardCheck className="h-6 w-6" aria-hidden />
+          </span>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+              Check-ins
+            </h2>
+            <p className="mt-1 text-stone-500">
+              {checkedIn.length} dog{checkedIn.length !== 1 ? "s" : ""} currently
+              on site
+            </p>
+          </div>
         </div>
+        <Link href="/checkins/scan">
+          <Button variant="outline" size="sm">
+            <ScanLine className="h-4 w-4" aria-hidden />
+            Scan to Check In
+          </Button>
+        </Link>
       </div>
 
       {actionError && (

@@ -200,6 +200,32 @@ export type DogDocumentInsert = {
   created_at?: string;
 };
 
+export interface CheckinTokenRow {
+  id: string;
+  token: string;
+  booking_id: string;
+  dog_id: string;
+  facility_id: string;
+  created_by_client_account_id: string | null;
+  expires_at: string;
+  used_at: string | null;
+  used_by: string | null;
+  created_at: string;
+}
+
+export type CheckinTokenInsert = {
+  id?: string;
+  token: string;
+  booking_id: string;
+  dog_id: string;
+  facility_id: string;
+  created_by_client_account_id?: string | null;
+  expires_at: string;
+  used_at?: string | null;
+  used_by?: string | null;
+  created_at?: string;
+};
+
 export interface FacilityRow {
   id: string;
   name: string;
@@ -556,6 +582,12 @@ export type Database = {
         Row: DogDocumentRow;
         Insert: DogDocumentInsert;
         Update: Partial<DogDocumentInsert>;
+        Relationships: [];
+      };
+      checkin_tokens: {
+        Row: CheckinTokenRow;
+        Insert: CheckinTokenInsert;
+        Update: Partial<CheckinTokenInsert>;
         Relationships: [];
       };
       bookings: {

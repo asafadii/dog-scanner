@@ -287,9 +287,16 @@ export default function PortalPage() {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {bookings.map((booking) => (
-                  <PortalBookingCard key={booking.id} booking={booking} />
-                ))}
+                {bookings.map((booking) =>
+                  selectedFacility ? (
+                    <PortalBookingCard
+                      key={booking.id}
+                      booking={booking}
+                      clientId={selectedFacility.clientId}
+                      facilityId={selectedFacility.facilityId}
+                    />
+                  ) : null,
+                )}
               </div>
             )}
           </section>

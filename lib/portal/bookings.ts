@@ -124,6 +124,42 @@ export async function getPortalBookings(
   };
 }
 
+export async function getPortalBookingById(
+  bookingId: string,
+  clientId: string,
+  facilityId: string,
+): Promise<PortalBookingsResult<Booking>> {
+  const accountResult = await requireClientAccount();
+  if (accountResult.error) {
+    return { data: null, error: accountResult.error };
+  }
+
+  const linkResult = await verifyLinkedClient(clientId, facilityId);
+  if (linkResult.error) {
+    return { data: null, error: linkResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("id", bookingId)
+    .eq("facility_id", facilityId)
+    .eq("client_id", clientId)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  if (!data) {
+    return { data: null, error: toError("Booking not found", "not_found") };
+  }
+
+  const [booking] = await enrichPortalBookings([data as BookingRow], facilityId);
+  return { data: booking, error: null };
+}
+
 export async function createPortalBooking(
   input: PortalCreateBookingInput,
 ): Promise<PortalBookingsResult<Booking>> {
