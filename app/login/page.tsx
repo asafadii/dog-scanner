@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { resolvePostLoginDestination, shouldRunStaffAuthSetup } from "@/lib/authRedirect";
 import { runAuthSetup } from "@/lib/authSetup";
 import { getCurrentUserProfile } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -46,11 +47,15 @@ export default function LoginPage() {
       }
 
       const profileResult = await getCurrentUserProfile();
-      if (profileResult.error?.code === "incomplete_setup") {
+      if (
+        profileResult.error?.code === "incomplete_setup" &&
+        (await shouldRunStaffAuthSetup())
+      ) {
         await runAuthSetup(accessToken, { email: trimmedEmail });
       }
 
-      router.push("/dashboard");
+      const destination = await resolvePostLoginDestination();
+      router.push(destination);
       router.refresh();
     } catch (err) {
       setError(
@@ -86,7 +91,7 @@ export default function LoginPage() {
               Sign in
             </h1>
             <p className="mt-1 text-sm text-stone-500">
-              Access your facility dashboard
+              Sign in as staff or client
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -129,12 +134,21 @@ export default function LoginPage() {
             </form>
 
             <p className="mt-6 text-center text-sm text-stone-500">
-              Don&apos;t have an account?{" "}
+              Facility staff?{" "}
               <Link
                 href="/signup"
                 className="font-medium text-teal-600 hover:underline"
               >
-                Create one
+                Create facility account
+              </Link>
+            </p>
+            <p className="mt-2 text-center text-sm text-stone-500">
+              Dog owner?{" "}
+              <Link
+                href="/portal/signup"
+                className="font-medium text-violet-600 hover:underline"
+              >
+                Client portal signup
               </Link>
             </p>
           </CardContent>

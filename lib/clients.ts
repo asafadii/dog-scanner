@@ -43,6 +43,7 @@ export function mapClientRowToClient(
     address: row.address,
     emergencyContact: row.emergency_contact,
     notes: row.notes,
+    inviteCode: row.invite_code,
     dogCount,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -88,6 +89,58 @@ function toClientUpdate(input: Partial<ClientFormData>): ClientUpdate {
   if (input.notes !== undefined) update.notes = input.notes.trim() || null;
 
   return update;
+}
+
+const INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const INVITE_CODE_LENGTH = 8;
+
+function generateInviteCodeValue(): string {
+  let code = "";
+  for (let i = 0; i < INVITE_CODE_LENGTH; i += 1) {
+    code += INVITE_CODE_CHARS[
+      Math.floor(Math.random() * INVITE_CODE_CHARS.length)
+    ];
+  }
+  return code;
+}
+
+export async function generateClientInviteCode(
+  id: string,
+): Promise<ClientsResult<string>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const facilityId = profileResult.data.facility_id;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const inviteCode = generateInviteCodeValue();
+    const { data, error } = await supabase
+      .from("clients")
+      .update({ invite_code: inviteCode, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .eq("facility_id", facilityId)
+      .select("invite_code")
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === "23505") continue;
+      return { data: null, error: toError(error.message) };
+    }
+
+    if (!data?.invite_code) {
+      return { data: null, error: toError("Client not found", "not_found") };
+    }
+
+    return { data: data.invite_code, error: null };
+  }
+
+  return {
+    data: null,
+    error: toError("Could not generate a unique invite code"),
+  };
 }
 
 async function requireProfile(): Promise<ClientsResult<ProfileRow>> {

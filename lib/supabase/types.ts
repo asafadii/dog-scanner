@@ -89,6 +89,7 @@ export interface ClientRow {
   address: string | null;
   emergency_contact: string | null;
   notes: string | null;
+  invite_code: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -102,6 +103,7 @@ export type ClientInsert = {
   address?: string | null;
   emergency_contact?: string | null;
   notes?: string | null;
+  invite_code?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -115,8 +117,65 @@ export type ClientUpdate = {
   address?: string | null;
   emergency_contact?: string | null;
   notes?: string | null;
+  invite_code?: string | null;
   created_at?: string;
   updated_at?: string;
+};
+
+export interface ClientAccountRow {
+  id: string;
+  email: string;
+  full_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ClientAccountInsert = {
+  id: string;
+  email: string;
+  full_name: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ClientAccountUpdate = {
+  id?: string;
+  email?: string;
+  full_name?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface ClientAccountLinkRow {
+  id: string;
+  client_account_id: string;
+  client_id: string;
+  facility_id: string;
+  created_at: string;
+}
+
+export type ClientAccountLinkInsert = {
+  id?: string;
+  client_account_id: string;
+  client_id: string;
+  facility_id: string;
+  created_at?: string;
+};
+
+export interface ClaimAttemptRow {
+  id: string;
+  ip_address: string;
+  user_id: string | null;
+  succeeded: boolean;
+  attempted_at: string;
+}
+
+export type ClaimAttemptInsert = {
+  id?: string;
+  ip_address: string;
+  user_id?: string | null;
+  succeeded: boolean;
+  attempted_at?: string;
 };
 
 export interface FacilityRow {
@@ -451,6 +510,24 @@ export type Database = {
         Row: ClientRow;
         Insert: ClientInsert;
         Update: ClientUpdate;
+        Relationships: [];
+      };
+      client_accounts: {
+        Row: ClientAccountRow;
+        Insert: ClientAccountInsert;
+        Update: ClientAccountUpdate;
+        Relationships: [];
+      };
+      client_account_links: {
+        Row: ClientAccountLinkRow;
+        Insert: ClientAccountLinkInsert;
+        Update: Partial<ClientAccountLinkInsert>;
+        Relationships: [];
+      };
+      claim_attempts: {
+        Row: ClaimAttemptRow;
+        Insert: ClaimAttemptInsert;
+        Update: Partial<ClaimAttemptInsert>;
         Relationships: [];
       };
       bookings: {

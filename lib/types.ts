@@ -50,6 +50,7 @@ export interface Client {
   address: string | null;
   emergencyContact: string | null;
   notes: string | null;
+  inviteCode: string | null;
   dogCount?: number;
   createdAt: string;
   updatedAt: string;
