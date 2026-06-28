@@ -38,7 +38,8 @@ export function MobileBottomNav() {
             (href === "/dogs" && pathname.startsWith("/dogs")) ||
             (href === "/clients" && pathname.startsWith("/clients")) ||
             (href === "/bookings" && pathname.startsWith("/bookings")) ||
-            (href === "/reports" && pathname.startsWith("/reports"));
+            (href === "/reports" && pathname.startsWith("/reports")) ||
+            (href === "/checkins" && pathname.startsWith("/checkins"));
 
           return (
             <Link

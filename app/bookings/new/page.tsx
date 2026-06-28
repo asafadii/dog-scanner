@@ -65,7 +65,7 @@ export default function NewBookingPage() {
 
       {error === INCOMPLETE_SETUP_MESSAGE && (
         <div className="text-center">
-          <Button variant="outline" onClick={() => router.push("/settings")}>
+          <Button variant="outline" onClick={() => router.push("/bookings")}>
             Go to Settings
           </Button>
         </div>

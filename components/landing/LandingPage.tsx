@@ -147,7 +147,10 @@ export function LandingPage() {
               Sign In
             </Link>
             <LandingButton href="/signup" size="sm">
-              Start Free Trial
+              Staff signup
+            </LandingButton>
+            <LandingButton href="/portal/signup" variant="outline" size="sm">
+              Owner signup
             </LandingButton>
           </div>
         </div>
@@ -170,9 +173,12 @@ export function LandingPage() {
                 payments, and daily operations from one modern platform built
                 specifically for dog daycare businesses.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <LandingButton href="/signup" size="lg">
-                  Start Free Trial
+                  Staff signup
+                </LandingButton>
+                <LandingButton href="/portal/signup" variant="outline" size="lg">
+                  Owner signup
                 </LandingButton>
                 <LandingButton href="mailto:hello@hellodora.com" variant="outline" size="lg">
                   Book a Demo
@@ -358,9 +364,17 @@ export function LandingPage() {
               Everything you need to manage dogs, bookings, boarding, and
               payments in one place.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <LandingButton href="/signup" variant="inverted" size="lg">
-                Start Free Trial
+                Staff signup
+              </LandingButton>
+              <LandingButton
+                href="/portal/signup"
+                variant="outline"
+                size="lg"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10"
+              >
+                Owner signup
               </LandingButton>
               <LandingButton
                 href="mailto:hello@hellodora.com"
