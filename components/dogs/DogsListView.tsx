@@ -105,7 +105,7 @@ export function DogsListView() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading dogs...</p>
@@ -180,7 +180,7 @@ export function DogsListView() {
           <p className="text-stone-600">No dog profiles yet.</p>
           <Link
             href="/dogs/new"
-            className="mt-3 inline-block text-sm font-medium text-teal-600 hover:underline"
+            className="mt-3 inline-block text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             Add your first dog
           </Link>
@@ -192,7 +192,7 @@ export function DogsListView() {
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="mt-2 text-sm font-medium text-teal-600 hover:underline"
+              className="mt-2 text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
             >
               Clear search
             </button>

@@ -145,7 +145,7 @@ export function KennelsSettingsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Home className="h-5 w-5 text-teal-600" aria-hidden />
+          <Home className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
           Kennels
         </CardTitle>
       </CardHeader>

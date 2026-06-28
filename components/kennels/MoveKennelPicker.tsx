@@ -117,7 +117,7 @@ export function MoveKennelPicker({
             value={locationType}
             onChange={(e) => setLocationType(e.target.value as LocationType)}
             disabled={submitting}
-            className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-900 focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20"
           >
             {LOCATION_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -150,7 +150,7 @@ export function MoveKennelPicker({
                 value={kennelId}
                 onChange={(e) => setKennelId(e.target.value)}
                 disabled={submitting}
-                className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-900 focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20"
               >
                 {kennels.map((kennel) => (
                   <option key={kennel.id} value={kennel.id}>

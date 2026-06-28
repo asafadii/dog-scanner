@@ -186,7 +186,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading profile...</p>
@@ -237,7 +237,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   return (
     <div className="-mx-4 -mt-6 md:mx-0 md:mt-0">
       {/* Hero */}
-      <div className="relative h-56 bg-gradient-to-br from-teal-400 to-teal-600 sm:h-64">
+      <div className="relative h-56 bg-gradient-to-br from-[oklch(0.828_0.050_180.2)] to-[oklch(0.531_0.092_185.0)] sm:h-64">
         <Image
           src={getDogPhotoSrc(dog.photoUrl)}
           alt={dog.name}
@@ -388,7 +388,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-teal-600" aria-hidden />
+              <User className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
               {dog.client ? "Linked Client" : "Owner Information"}
             </CardTitle>
           </CardHeader>
@@ -401,7 +401,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     {dog.client.phone && (
                       <a
                         href={`tel:${dog.client.phone}`}
-                        className="text-sm text-teal-600 hover:underline"
+                        className="text-sm text-[oklch(0.531_0.092_185.0)] hover:underline"
                       >
                         {dog.client.phone}
                       </a>
@@ -409,7 +409,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     {dog.client.email && (
                       <a
                         href={`mailto:${dog.client.email}`}
-                        className="mt-1 block text-sm text-teal-600 hover:underline"
+                        className="mt-1 block text-sm text-[oklch(0.531_0.092_185.0)] hover:underline"
                       >
                         {dog.client.email}
                       </a>
@@ -436,7 +436,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 )}
                 <Link
                   href={`/clients/${dog.client.id}`}
-                  className="inline-flex text-sm font-medium text-teal-600 hover:underline"
+                  className="inline-flex text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
                 >
                   View client profile
                 </Link>
@@ -448,7 +448,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     <p className="font-semibold text-stone-900">{dog.owner.name}</p>
                     <a
                       href={`tel:${dog.owner.phone}`}
-                      className="text-sm text-teal-600 hover:underline"
+                      className="text-sm text-[oklch(0.531_0.092_185.0)] hover:underline"
                     >
                       {dog.owner.phone}
                     </a>
@@ -467,7 +467,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     <span className="text-stone-500">Emergency</span>
                     <a
                       href={`tel:${dog.owner.emergencyPhone}`}
-                      className="text-right font-medium text-teal-600 hover:underline"
+                      className="text-right font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
                     >
                       {dog.owner.emergencyContact} — {dog.owner.emergencyPhone}
                     </a>
@@ -482,7 +482,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                         <p className="font-medium">{dog.owner.veterinarian}</p>
                         <a
                           href={`tel:${dog.owner.vetPhone}`}
-                          className="text-teal-600 hover:underline"
+                          className="text-[oklch(0.531_0.092_185.0)] hover:underline"
                         >
                           {dog.owner.vetPhone}
                         </a>
@@ -499,7 +499,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-teal-600" aria-hidden />
+              <FileText className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
               Care Instructions
             </CardTitle>
           </CardHeader>
@@ -516,7 +516,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             ].map(({ icon: Icon, label, text }) => (
               <div key={label}>
                 <div className="mb-1 flex items-center gap-2 font-semibold text-stone-800">
-                  <Icon className="h-4 w-4 text-teal-600" aria-hidden />
+                  <Icon className="h-4 w-4 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
                   {label}
                 </div>
                 <p className="pl-6 text-stone-600">{text}</p>
@@ -530,7 +530,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-teal-600" aria-hidden />
+                <Check className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
                 Today&apos;s Care
               </CardTitle>
             </CardHeader>
@@ -544,7 +544,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     "flex w-full min-h-[44px] items-center gap-3 rounded-xl border p-3 text-left transition-colors",
                     task.completed
                       ? "border-emerald-200 bg-emerald-50"
-                      : "border-stone-200 bg-white hover:border-teal-200",
+                      : "border-stone-200 bg-white hover:border-[oklch(0.900_0.035_185.0)]",
                   )}
                 >
                   <span
@@ -582,7 +582,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-teal-600" aria-hidden />
+              <Clock className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
               Activity Timeline
             </CardTitle>
           </CardHeader>
@@ -594,7 +594,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                 {dog.timeline.map((event, index) => (
                   <div key={event.id} className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-100 text-teal-700">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[oklch(0.950_0.020_185.0)] text-[oklch(0.480_0.085_185.0)]">
                         <TimelineIcon type={event.type} />
                       </div>
                       {index < dog.timeline.length - 1 && (

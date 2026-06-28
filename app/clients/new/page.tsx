@@ -57,7 +57,7 @@ export default function NewClientPage() {
 
       {error === INCOMPLETE_SETUP_MESSAGE && (
         <div className="text-center">
-          <Button variant="outline" onClick={() => router.push("/clients")}>
+          <Button variant="outline" onClick={() => router.push("/settings")}>
             Go to Settings
           </Button>
         </div>

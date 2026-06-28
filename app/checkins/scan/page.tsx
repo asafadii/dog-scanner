@@ -7,7 +7,7 @@ export default function ScanCheckinPage() {
       <div>
         <Link
           href="/checkins"
-          className="text-sm font-medium text-teal-600 hover:underline"
+          className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
         >
           Back to Check-ins
         </Link>

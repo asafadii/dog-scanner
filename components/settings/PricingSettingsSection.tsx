@@ -83,7 +83,7 @@ export function PricingSettingsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Euro className="h-5 w-5 text-teal-600" aria-hidden />
+          <Euro className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
           Pricing
         </CardTitle>
       </CardHeader>
@@ -193,7 +193,7 @@ export function PricingSettingsSection() {
                     }))
                   }
                   disabled={saving}
-                  className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+                  className="h-4 w-4 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
                 />
                 Enable seasonal surcharge
               </label>

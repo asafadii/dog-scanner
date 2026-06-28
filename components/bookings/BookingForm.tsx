@@ -178,7 +178,7 @@ export function BookingForm({
               disabled={isSubmitting || clientsLoading}
               className={cn(
                 "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
-                "focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20",
+                "focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20",
                 (isSubmitting || clientsLoading) && "cursor-not-allowed opacity-60",
               )}
             >
@@ -208,7 +208,7 @@ export function BookingForm({
               }
               className={cn(
                 "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
-                "focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20",
+                "focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20",
                 (isSubmitting || !form.clientId || dogsLoading) &&
                   "cursor-not-allowed opacity-60",
               )}
@@ -244,7 +244,7 @@ export function BookingForm({
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.serviceType === type
-                      ? "border-teal-500 bg-teal-50 text-teal-800"
+                      ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
                       : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
                     isSubmitting && "cursor-not-allowed opacity-60",
                   )}
@@ -283,7 +283,7 @@ export function BookingForm({
               onChange={(e) =>
                 updateField("transportRequired", e.target.checked)
               }
-              className="h-5 w-5 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
             />
             <span className="text-sm font-medium text-stone-700">
               Transport required

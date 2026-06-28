@@ -77,7 +77,9 @@ export default function PortalNewBookingPage() {
       return;
     }
 
-    router.push("/portal");
+    router.push(
+      `/portal/bookings/${result.data.id}?clientId=${encodeURIComponent(clientId)}&facilityId=${encodeURIComponent(facilityId)}`,
+    );
     router.refresh();
   }
 

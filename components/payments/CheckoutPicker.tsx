@@ -181,7 +181,7 @@ export function CheckoutPicker({
                 checked={foodAddon}
                 onChange={(e) => setFoodAddon(e.target.checked)}
                 disabled={submitting}
-                className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+                className="h-4 w-4 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
               />
               <span className="text-stone-800">
                 Add daycare food (+{formatCurrency(breakdown.configuredFoodFee)})
@@ -203,8 +203,8 @@ export function CheckoutPicker({
                   className={cn(
                     "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
                     paymentMethod === value
-                      ? "border-teal-600 bg-teal-50 text-teal-800"
-                      : "border-stone-200 bg-white text-stone-700 hover:border-teal-200",
+                      ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
+                      : "border-stone-200 bg-white text-stone-700 hover:border-[oklch(0.900_0.035_185.0)]",
                   )}
                   aria-pressed={paymentMethod === value}
                 >

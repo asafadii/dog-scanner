@@ -54,7 +54,7 @@ const STAT_CONFIG = [
     key: "total" as const,
     label: "Total Dogs",
     icon: PawPrint,
-    color: "text-teal-600 bg-teal-50",
+    color: "text-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9]",
     href: "/dogs",
   },
 ];
@@ -186,7 +186,7 @@ export function DashboardView() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading dashboard...</p>
@@ -257,7 +257,7 @@ export function DashboardView() {
         <CardContent className="space-y-5 p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
                 <Gauge className="h-5 w-5" aria-hidden />
               </span>
               <div>
@@ -267,7 +267,7 @@ export function DashboardView() {
             </div>
             <Link
               href="/settings"
-              className="text-sm font-medium text-teal-600 hover:underline"
+              className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
             >
               Manage
             </Link>
@@ -292,7 +292,7 @@ export function DashboardView() {
           </h3>
           <Link
             href="/bookings"
-            className="text-sm font-medium text-teal-600 hover:underline"
+            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             View all
           </Link>
@@ -309,7 +309,7 @@ export function DashboardView() {
               <Link key={booking.id} href={`/bookings/${booking.id}`}>
                 <Card className="transition-shadow hover:shadow-md">
                   <CardContent className="flex items-center gap-4 p-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
                       <CalendarDays className="h-5 w-5" aria-hidden />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -342,7 +342,7 @@ export function DashboardView() {
           </h3>
           <Link
             href="/checkins"
-            className="text-sm font-medium text-teal-600 hover:underline"
+            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             View all
           </Link>

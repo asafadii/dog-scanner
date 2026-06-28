@@ -43,7 +43,7 @@ export function CapacityUsageBar({ label, usage }: CapacityUsageBarProps) {
               ? "bg-red-500"
               : isHigh
                 ? "bg-amber-500"
-                : "bg-teal-500",
+                : "bg-[oklch(0.531_0.092_185.0)]",
           )}
           style={{ width: `${percent}%` }}
           role="progressbar"

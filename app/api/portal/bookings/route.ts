@@ -1,14 +1,74 @@
 import { mapBookingRowToBooking } from "@/lib/bookings";
+import {
+  DEFAULT_BOARDING_CAPACITY,
+  DEFAULT_DAYCARE_CAPACITY,
+  enumerateDates,
+} from "@/lib/capacity";
 import type { CreatePortalBookingSuccessResponse } from "@/lib/portal/bookings";
 import {
   verifyClientAccountLink,
   verifyPortalAccessToken,
 } from "@/lib/portal/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { BookingFormData, BookingServiceType } from "@/lib/types";
 import { NextResponse } from "next/server";
 
 interface CreatePortalBookingBody extends BookingFormData {
   facilityId?: string;
+}
+
+type AdminDb = NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
+
+async function countApprovedBookingsOnDate(
+  db: AdminDb,
+  facilityId: string,
+  date: string,
+  serviceType: BookingServiceType,
+): Promise<number> {
+  const { data, error } = await db
+    .from("bookings")
+    .select("id")
+    .eq("facility_id", facilityId)
+    .eq("status", "approved")
+    .eq("service_type", serviceType)
+    .lte("start_date", date)
+    .gte("end_date", date);
+
+  if (error || !data) return 0;
+  return data.length;
+}
+
+async function canAutoApprovePortalBooking(
+  db: Parameters<typeof countApprovedBookingsOnDate>[0],
+  facilityId: string,
+  serviceType: BookingServiceType,
+  startDate: string,
+  endDate: string,
+): Promise<boolean> {
+  const { data: capacityRow } = await db
+    .from("facility_capacity")
+    .select("daycare_capacity, boarding_capacity")
+    .eq("facility_id", facilityId)
+    .maybeSingle();
+
+  const capacityLimit =
+    serviceType === "daycare"
+      ? (capacityRow?.daycare_capacity ?? DEFAULT_DAYCARE_CAPACITY)
+      : (capacityRow?.boarding_capacity ?? DEFAULT_BOARDING_CAPACITY);
+
+  for (const date of enumerateDates(startDate, endDate)) {
+    const used = await countApprovedBookingsOnDate(
+      db,
+      facilityId,
+      date,
+      serviceType,
+    );
+    if (used + 1 > capacityLimit) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export async function POST(request: Request) {
@@ -84,6 +144,27 @@ export async function POST(request: Request) {
     );
   }
 
+  const { data: priorStay } = await db
+    .from("bookings")
+    .select("id")
+    .eq("facility_id", facilityId)
+    .eq("dog_id", dogId)
+    .eq("status", "completed")
+    .limit(1)
+    .maybeSingle();
+
+  const isReturningDog = priorStay !== null;
+
+  const autoApprove =
+    isReturningDog &&
+    (await canAutoApprovePortalBooking(
+      db,
+      facilityId,
+      serviceType,
+      startDate,
+      endDate,
+    ));
+
   const { data, error } = await db
     .from("bookings")
     .insert({
@@ -94,7 +175,7 @@ export async function POST(request: Request) {
       start_date: startDate,
       end_date: endDate,
       transport_required: Boolean(body.transportRequired),
-      status: "pending",
+      status: autoApprove ? "approved" : "pending",
       notes: body.notes?.trim() || null,
     })
     .select("*")

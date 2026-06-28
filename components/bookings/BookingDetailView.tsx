@@ -119,7 +119,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading booking...</p>
@@ -141,7 +141,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         <div>
           <Link
             href="/bookings"
-            className="text-sm font-medium text-teal-600 hover:underline"
+            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             Back to Bookings
           </Link>
@@ -198,7 +198,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
             </span>
             <Link
               href={`/dogs/${booking.dogId}`}
-              className="font-medium text-teal-600 hover:underline"
+              className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
             >
               {booking.dogName}
             </Link>
@@ -210,7 +210,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
             </span>
             <Link
               href={`/clients/${booking.clientId}`}
-              className="font-medium text-teal-600 hover:underline"
+              className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
             >
               {booking.clientName}
             </Link>

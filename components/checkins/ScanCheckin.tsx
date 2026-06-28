@@ -136,7 +136,7 @@ export function ScanCheckin() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <ScanLine className="h-5 w-5 text-teal-600" aria-hidden />
+            <ScanLine className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
             Scan QR code
           </CardTitle>
         </CardHeader>

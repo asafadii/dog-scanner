@@ -78,7 +78,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading client...</p>
@@ -100,7 +100,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
         <div>
           <Link
             href="/clients"
-            className="text-sm font-medium text-teal-600 hover:underline"
+            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             Back to Clients
           </Link>
@@ -113,8 +113,8 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-100 to-amber-50">
-            <User className="h-8 w-8 text-teal-600" aria-hidden />
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[oklch(0.950_0.020_185.0)] to-amber-50">
+            <User className="h-8 w-8 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
           </div>
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-stone-900">
@@ -144,7 +144,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-teal-600" aria-hidden />
+            <User className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
             Contact Information
           </CardTitle>
         </CardHeader>
@@ -157,7 +157,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
               </span>
               <a
                 href={`tel:${client.phone}`}
-                className="font-medium text-teal-600 hover:underline"
+                className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
               >
                 {client.phone}
               </a>
@@ -171,7 +171,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
               </span>
               <a
                 href={`mailto:${client.email}`}
-                className="font-medium text-teal-600 hover:underline"
+                className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
               >
                 {client.email}
               </a>
@@ -208,7 +208,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
             Share an invite code so this client can link their portal account.
           </p>
           {client.inviteCode ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-teal-100 bg-teal-50/50 px-4 py-3">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-[oklch(0.950_0.020_185.0)] bg-[#F0FAF9]/50 px-4 py-3">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
                   Invite code

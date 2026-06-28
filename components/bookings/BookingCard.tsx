@@ -28,7 +28,7 @@ export function BookingCard({ booking, className }: BookingCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <PawPrint className="h-4 w-4 shrink-0 text-teal-600" aria-hidden />
+            <PawPrint className="h-4 w-4 shrink-0 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
             <h3 className="truncate text-lg font-semibold text-stone-900">
               {booking.dogName}
             </h3>

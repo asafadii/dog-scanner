@@ -11,11 +11,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-teal-600 text-white shadow-sm hover:bg-teal-700 focus-visible:ring-teal-500",
+    "bg-[oklch(0.531_0.092_185.0)] text-white shadow-sm hover:bg-[oklch(0.480_0.085_185.0)] focus-visible:ring-[oklch(0.531_0.092_185.0)]",
   secondary:
     "bg-stone-100 text-stone-800 hover:bg-stone-200 focus-visible:ring-stone-400",
   outline:
-    "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 focus-visible:ring-teal-500",
+    "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 focus-visible:ring-[oklch(0.531_0.092_185.0)]",
   ghost: "text-stone-600 hover:bg-stone-100 focus-visible:ring-stone-400",
   danger:
     "bg-stone-700 text-white hover:bg-stone-800 focus-visible:ring-stone-500",

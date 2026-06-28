@@ -1,6 +1,7 @@
 "use client";
 
 import { DogCard } from "@/components/dogs/DogCard";
+import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
@@ -8,32 +9,40 @@ import {
   enrichDogsWithCheckins,
   getActiveCheckins,
 } from "@/lib/checkins";
+import { getTodaysBookings } from "@/lib/bookings";
 import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { getActiveAssignmentsMap } from "@/lib/kennels";
-import type { Dog, KennelAssignment, Payment } from "@/lib/types";
+import type { Booking, Dog, KennelAssignment, Payment } from "@/lib/types";
+import { formatBookingDateRange } from "@/lib/utils";
 import { ClipboardCheck, Loader2, ScanLine } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 export function CheckinsView() {
   const [checkedIn, setCheckedIn] = useState<Dog[]>([]);
+  const [todaysBookings, setTodaysBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [checkingInBookingId, setCheckingInBookingId] = useState<string | null>(
+    null,
+  );
 
   const loadCheckedIn = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const [dogsResult, checkinsResult] = await Promise.all([
+    const [dogsResult, checkinsResult, bookingsResult] = await Promise.all([
       getDogs(),
       getActiveCheckins(),
+      getTodaysBookings(),
     ]);
 
     if (dogsResult.error) {
       setError(dogsResult.error.message);
       setCheckedIn([]);
+      setTodaysBookings([]);
       setLoading(false);
       return;
     }
@@ -41,12 +50,24 @@ export function CheckinsView() {
     if (checkinsResult.error) {
       setError(checkinsResult.error.message);
       setCheckedIn([]);
+      setTodaysBookings([]);
+      setLoading(false);
+      return;
+    }
+
+    if (bookingsResult.error) {
+      setError(bookingsResult.error.message);
+      setCheckedIn([]);
+      setTodaysBookings([]);
       setLoading(false);
       return;
     }
 
     const activeDogIds = new Set(
       checkinsResult.data.map((checkin) => checkin.dog_id),
+    );
+    setTodaysBookings(
+      bookingsResult.data.filter((booking) => !activeDogIds.has(booking.dogId)),
     );
     const checkedInDogs = enrichDogsWithCheckins(
       dogsResult.data.filter((dog) => activeDogIds.has(dog.id)),
@@ -122,11 +143,30 @@ export function CheckinsView() {
     [],
   );
 
+  const handleBookingCheckIn = useCallback(
+    async (booking: Booking) => {
+      if (checkingInBookingId) return;
+
+      setCheckingInBookingId(booking.id);
+      setActionError(null);
+
+      const result = await checkInDog(booking.dogId, booking.id);
+      if (result.error) {
+        setActionError(result.error.message);
+      } else {
+        void loadCheckedIn();
+      }
+
+      setCheckingInBookingId(null);
+    },
+    [checkingInBookingId, loadCheckedIn],
+  );
+
   if (loading) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading check-ins...</p>
@@ -187,12 +227,68 @@ export function CheckinsView() {
         </div>
       )}
 
+      {todaysBookings.length > 0 && (
+        <section className="space-y-3">
+          <div>
+            <h3 className="text-lg font-semibold text-stone-900">
+              Today&apos;s bookings
+            </h3>
+            <p className="text-sm text-stone-500">
+              Approved bookings ready for check-in, plus any awaiting approval.
+            </p>
+          </div>
+          <div className="space-y-3">
+            {todaysBookings.map((booking) => (
+              <Card key={booking.id}>
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-stone-900">
+                        {booking.dogName}
+                      </p>
+                      <BookingStatusBadge status={booking.status} />
+                    </div>
+                    <p className="mt-0.5 text-sm text-stone-500">
+                      {booking.clientName} ·{" "}
+                      {formatBookingDateRange(
+                        booking.startDate,
+                        booking.endDate,
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <Link href={`/bookings/${booking.id}`}>
+                      <Button variant="outline" size="sm">
+                        View booking
+                      </Button>
+                    </Link>
+                    {booking.status === "approved" && (
+                      <Button
+                        size="sm"
+                        disabled={checkingInBookingId === booking.id}
+                        onClick={() => void handleBookingCheckIn(booking)}
+                      >
+                        {checkingInBookingId === booking.id
+                          ? "Checking in..."
+                          : "Check in"}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="space-y-3">
+        <h3 className="text-lg font-semibold text-stone-900">On site now</h3>
       {checkedIn.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
             <p className="text-stone-600">No dogs checked in right now.</p>
             <p className="mt-1 text-sm text-stone-400">
-              Use the Dogs page to check someone in.
+              Scan a QR code or check in from today&apos;s bookings above.
             </p>
           </CardContent>
         </Card>
@@ -210,6 +306,7 @@ export function CheckinsView() {
           ))}
         </div>
       )}
+      </section>
     </div>
   );
 }

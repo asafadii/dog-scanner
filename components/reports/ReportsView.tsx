@@ -81,7 +81,7 @@ export function ReportsView() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
           <BarChart3 className="h-6 w-6" aria-hidden />
         </span>
         <div>
@@ -132,7 +132,7 @@ export function ReportsView() {
       {loading ? (
         <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3">
           <Loader2
-            className="h-8 w-8 animate-spin text-teal-600"
+            className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
             aria-hidden
           />
           <p className="text-sm text-stone-500">Loading report...</p>
@@ -206,7 +206,7 @@ export function ReportsView() {
                       className={cn(
                         "h-full rounded-full",
                         method === "cash" && "bg-emerald-500",
-                        method === "card" && "bg-teal-500",
+                        method === "card" && "bg-[oklch(0.531_0.092_185.0)]",
                         method === "transfer" && "bg-violet-500",
                       )}
                       style={{ width: `${(total / maxBreakdown) * 100}%` }}

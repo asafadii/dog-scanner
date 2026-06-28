@@ -53,7 +53,7 @@ export function BookingsListView() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-teal-600"
+          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
           aria-hidden
         />
         <p className="text-sm text-stone-500">Loading bookings...</p>
@@ -114,7 +114,7 @@ export function BookingsListView() {
             className={cn(
               "min-h-[44px] shrink-0 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
               statusFilter === value
-                ? "border-teal-500 bg-teal-50 text-teal-800"
+                ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
                 : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
             )}
           >
@@ -128,7 +128,7 @@ export function BookingsListView() {
           <p className="text-stone-600">No bookings yet.</p>
           <Link
             href="/bookings/new"
-            className="mt-3 inline-block text-sm font-medium text-teal-600 hover:underline"
+            className="mt-3 inline-block text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             Create your first booking
           </Link>
@@ -139,7 +139,7 @@ export function BookingsListView() {
           <button
             type="button"
             onClick={() => setStatusFilter("all")}
-            className="mt-2 text-sm font-medium text-teal-600 hover:underline"
+            className="mt-2 text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
             Show all bookings
           </button>

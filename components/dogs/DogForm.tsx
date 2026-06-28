@@ -221,7 +221,7 @@ export function DogForm({
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.size === size
-                      ? "border-teal-500 bg-teal-50 text-teal-800"
+                      ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
                       : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
                     isSubmitting && "cursor-not-allowed opacity-60",
                   )}
@@ -237,7 +237,7 @@ export function DogForm({
               checked={form.overnight}
               disabled={isSubmitting}
               onChange={(e) => updateField("overnight", e.target.checked)}
-              className="h-5 w-5 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
             />
             <span className="text-sm font-medium text-stone-700">
               Overnight boarding stay
@@ -265,7 +265,7 @@ export function DogForm({
               disabled={isSubmitting || clientsLoading}
               className={cn(
                 "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
-                "focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20",
+                "focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20",
                 (isSubmitting || clientsLoading) && "cursor-not-allowed opacity-60",
               )}
             >
@@ -321,7 +321,7 @@ export function DogForm({
               className={cn(
                 "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
                 form.alerts[key]
-                  ? "border-teal-200 bg-teal-50/50"
+                  ? "border-[oklch(0.900_0.035_185.0)] bg-[#F0FAF9]/50"
                   : "border-stone-200 hover:bg-stone-50",
                 isSubmitting && "cursor-not-allowed opacity-60",
               )}
@@ -331,7 +331,7 @@ export function DogForm({
                 checked={form.alerts[key]}
                 disabled={isSubmitting}
                 onChange={() => toggleAlert(key)}
-                className="mt-0.5 h-5 w-5 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+                className="mt-0.5 h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
               />
               <div>
                 <span className="text-sm font-medium text-stone-800">

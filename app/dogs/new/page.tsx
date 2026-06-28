@@ -89,7 +89,7 @@ export default function NewDogPage() {
 
       {error === INCOMPLETE_SETUP_MESSAGE && (
         <div className="text-center">
-          <Button variant="outline" onClick={() => router.push("/dogs")}>
+          <Button variant="outline" onClick={() => router.push("/settings")}>
             Go to Settings
           </Button>
         </div>

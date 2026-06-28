@@ -21,8 +21,8 @@ export function ClientCard({ client, className }: ClientCardProps) {
       aria-label={`${client.name}, client`}
     >
       <div className="flex gap-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-amber-50">
-          <User className="h-7 w-7 text-teal-600" aria-hidden />
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[oklch(0.950_0.020_185.0)] to-amber-50">
+          <User className="h-7 w-7 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -44,7 +44,7 @@ export function ClientCard({ client, className }: ClientCardProps) {
             )}
           </div>
           {(client.dogCount ?? 0) > 0 && (
-            <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-teal-700">
+            <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[oklch(0.480_0.085_185.0)]">
               <PawPrint className="h-3.5 w-3.5" aria-hidden />
               {client.dogCount} {client.dogCount === 1 ? "dog" : "dogs"}
             </p>

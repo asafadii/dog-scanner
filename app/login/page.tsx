@@ -7,7 +7,7 @@ import { resolvePostLoginDestination, shouldRunStaffAuthSetup } from "@/lib/auth
 import { runAuthSetup } from "@/lib/authSetup";
 import { getCurrentUserProfile } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Dog } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -70,16 +70,14 @@ export default function LoginPage() {
     <div className="flex min-h-full flex-col bg-[#FAFAF8]">
       <header className="border-b border-stone-200/80 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-lg items-center px-4">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-teal-700 transition-colors hover:text-teal-800"
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm">
-              <Dog className="h-5 w-5" aria-hidden />
-            </span>
-            <span className="text-lg font-semibold tracking-tight">
-              Dog Scanner
-            </span>
+          <Link href="/" className="inline-flex transition-opacity hover:opacity-90">
+            <Image
+              src="/dora-logo.svg"
+              alt="DORA"
+              width={160}
+              height={53}
+              className="h-12 w-auto"
+            />
           </Link>
         </div>
       </header>
@@ -137,7 +135,7 @@ export default function LoginPage() {
               Facility staff?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-teal-600 hover:underline"
+                className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
               >
                 Create facility account
               </Link>

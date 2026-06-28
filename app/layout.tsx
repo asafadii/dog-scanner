@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dog Scanner",
+  title: "DORA",
   description:
     "Mobile-first dog daycare and boarding management for trainers and staff.",
 };
@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>
