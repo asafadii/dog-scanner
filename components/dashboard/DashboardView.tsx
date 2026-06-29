@@ -2,7 +2,7 @@
 
 import { DogCard } from "@/components/dogs/DogCard";
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
-import { CapacityUsageBar } from "@/components/capacity/CapacityUsageBar";
+import { CapacityCalendar } from "@/components/capacity/CapacityCalendar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
@@ -11,19 +11,17 @@ import {
   getActiveCheckins,
 } from "@/lib/checkins";
 import { getUpcomingBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
-import { getTodaysCapacityUsage } from "@/lib/capacity";
+import { getDashboardKpiStats } from "@/lib/dashboard";
 import { getDogs } from "@/lib/dogs";
-import { getDashboardStats } from "@/lib/mockData";
-import type { Booking, CapacityUsage, Dog, Payment } from "@/lib/types";
-import { formatBookingDateRange } from "@/lib/utils";
+import type { Booking, Dog, Payment } from "@/lib/types";
+import { formatBookingDateRange, getTimeBasedGreeting } from "@/lib/utils";
 import {
   CalendarDays,
   ClipboardCheck,
-  Gauge,
   Loader2,
+  LogIn,
   Moon,
-  PawPrint,
-  Pill,
+  Sun,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -37,36 +35,37 @@ const STAT_CONFIG = [
     href: "/checkins",
   },
   {
-    key: "needMedication" as const,
-    label: "Need Medication",
-    icon: Pill,
-    color: "text-violet-600 bg-violet-50",
-    href: "/dogs",
-  },
-  {
-    key: "overnight" as const,
-    label: "Overnight Stays",
-    icon: Moon,
-    color: "text-amber-600 bg-amber-50",
+    key: "arrivalsToday" as const,
+    label: "Arrivals Today",
+    icon: LogIn,
+    color: "text-blue-600 bg-blue-50",
     href: "/checkins",
   },
   {
-    key: "total" as const,
-    label: "Total Dogs",
-    icon: PawPrint,
+    key: "daycareToday" as const,
+    label: "Daycare Today",
+    icon: Sun,
     color: "text-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9]",
-    href: "/dogs",
+    href: "/checkins",
+  },
+  {
+    key: "overnight" as const,
+    label: "Overnight",
+    icon: Moon,
+    color: "text-amber-600 bg-amber-50",
+    href: "/checkins",
   },
 ];
 
 export function DashboardView() {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
-  const [capacityUsage, setCapacityUsage] = useState<{
-    daycare: CapacityUsage;
-    boarding: CapacityUsage;
-  } | null>(null);
-  const [checkedInCount, setCheckedInCount] = useState(0);
+  const [stats, setStats] = useState({
+    checkedIn: 0,
+    arrivalsToday: 0,
+    daycareToday: 0,
+    overnight: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -76,20 +75,18 @@ export function DashboardView() {
     setLoading(true);
     setError(null);
 
-    const [dogsResult, checkinsResult, bookingsResult, capacityResult] =
+    const [dogsResult, checkinsResult, bookingsResult, kpiResult] =
       await Promise.all([
-      getDogs(),
-      getActiveCheckins(),
-      getUpcomingBookings(5),
-      getTodaysCapacityUsage(),
-    ]);
+        getDogs(),
+        getActiveCheckins(),
+        getUpcomingBookings(5),
+        getDashboardKpiStats(),
+      ]);
 
     if (dogsResult.error) {
       setError(dogsResult.error.message);
       setDogs([]);
-      setCheckedInCount(0);
       setUpcomingBookings([]);
-      setCapacityUsage(null);
       setLoading(false);
       return;
     }
@@ -97,31 +94,28 @@ export function DashboardView() {
     if (checkinsResult.error) {
       setError(checkinsResult.error.message);
       setDogs([]);
-      setCheckedInCount(0);
       setUpcomingBookings([]);
-      setCapacityUsage(null);
+      setLoading(false);
+      return;
+    }
+
+    if (kpiResult.error) {
+      setError(kpiResult.error.message);
+      setDogs([]);
+      setUpcomingBookings([]);
       setLoading(false);
       return;
     }
 
     setDogs(dogsResult.data);
-    setCheckedInCount(checkinsResult.data.length);
+    setStats(kpiResult.data);
     setUpcomingBookings(bookingsResult.error ? [] : bookingsResult.data);
-    setCapacityUsage(capacityResult.error ? null : capacityResult.data);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
-
-  const stats = useMemo(() => {
-    const base = getDashboardStats(dogs);
-    return {
-      ...base,
-      checkedIn: checkedInCount,
-    };
-  }, [dogs, checkedInCount]);
 
   const checkedInDogs = useMemo(
     () => dogs.filter((dog) => dog.status === "checked_in").slice(0, 3),
@@ -153,13 +147,13 @@ export function DashboardView() {
           setDogs((prev) =>
             prev.map((item) => (item.id === id ? updated : item)),
           );
-          setCheckedInCount((count) => count + 1);
+          void loadDashboard();
         }
       }
 
       setTogglingId(null);
     },
-    [dogs, togglingId],
+    [dogs, togglingId, loadDashboard],
   );
 
   const handleCheckoutComplete = useCallback(
@@ -177,9 +171,9 @@ export function DashboardView() {
             : item,
         ),
       );
-      setCheckedInCount((count) => Math.max(0, count - 1));
+      void loadDashboard();
     },
-    [],
+    [loadDashboard],
   );
 
   if (loading) {
@@ -217,7 +211,7 @@ export function DashboardView() {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-stone-900">
-          Good morning!
+          {getTimeBasedGreeting()}!
         </h2>
         <p className="mt-1 text-stone-500">
           Here&apos;s what&apos;s happening at the facility today.
@@ -253,37 +247,7 @@ export function DashboardView() {
         ))}
       </div>
 
-      <Card>
-        <CardContent className="space-y-5 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
-                <Gauge className="h-5 w-5" aria-hidden />
-              </span>
-              <div>
-                <h3 className="font-semibold text-stone-900">Capacity Usage</h3>
-                <p className="text-xs text-stone-500">Today&apos;s approved bookings</p>
-              </div>
-            </div>
-            <Link
-              href="/settings"
-              className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
-            >
-              Manage
-            </Link>
-          </div>
-          {capacityUsage ? (
-            <div className="space-y-4">
-              <CapacityUsageBar label="Daycare" usage={capacityUsage.daycare} />
-              <CapacityUsageBar label="Boarding" usage={capacityUsage.boarding} />
-            </div>
-          ) : (
-            <p className="text-sm text-stone-500">
-              Capacity data unavailable.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      <CapacityCalendar />
 
       <div>
         <div className="mb-4 flex items-center justify-between">

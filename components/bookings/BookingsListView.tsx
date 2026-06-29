@@ -2,10 +2,11 @@
 
 import { BookingCard } from "@/components/bookings/BookingCard";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { getBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -19,11 +20,29 @@ const FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "completed", label: "Completed" },
 ];
 
+function formatServiceType(serviceType: Booking["serviceType"]): string {
+  return serviceType === "daycare" ? "Daycare" : "Boarding";
+}
+
+function matchesSearch(booking: Booking, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+
+  return (
+    booking.dogName.toLowerCase().includes(normalized) ||
+    booking.clientName.toLowerCase().includes(normalized) ||
+    booking.status.toLowerCase().includes(normalized) ||
+    formatServiceType(booking.serviceType).toLowerCase().includes(normalized)
+  );
+}
+
 export function BookingsListView() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
   const loadBookings = useCallback(async () => {
     setLoading(true);
@@ -45,9 +64,16 @@ export function BookingsListView() {
   }, [loadBookings]);
 
   const filtered = useMemo(() => {
-    if (statusFilter === "all") return bookings;
-    return bookings.filter((booking) => booking.status === statusFilter);
-  }, [bookings, statusFilter]);
+    return bookings.filter((booking) => {
+      if (statusFilter !== "all" && booking.status !== statusFilter) {
+        return false;
+      }
+      if (dateFilter && booking.startDate !== dateFilter) {
+        return false;
+      }
+      return matchesSearch(booking, searchQuery);
+    });
+  }, [bookings, statusFilter, searchQuery, dateFilter]);
 
   if (loading) {
     return (
@@ -90,6 +116,12 @@ export function BookingsListView() {
           <p className="mt-1 text-sm text-stone-500">
             {filtered.length} of {bookings.length} bookings
           </p>
+          <Link
+            href="/dogs"
+            className="mt-2 inline-block text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+          >
+            View all dog profiles
+          </Link>
         </div>
         <Link href="/bookings/new">
           <Button className="w-full sm:w-auto">
@@ -97,6 +129,29 @@ export function BookingsListView() {
             New Booking
           </Button>
         </Link>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+            aria-hidden
+          />
+          <Input
+            type="search"
+            placeholder="Search dog, owner, status, service..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="pl-10"
+            aria-label="Search bookings"
+          />
+        </div>
+        <Input
+          type="date"
+          label="Filter by start date"
+          value={dateFilter}
+          onChange={(event) => setDateFilter(event.target.value)}
+        />
       </div>
 
       <div
@@ -138,10 +193,14 @@ export function BookingsListView() {
           <p className="text-stone-600">No bookings match this filter.</p>
           <button
             type="button"
-            onClick={() => setStatusFilter("all")}
+            onClick={() => {
+              setStatusFilter("all");
+              setSearchQuery("");
+              setDateFilter("");
+            }}
             className="mt-2 text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
           >
-            Show all bookings
+            Clear filters
           </button>
         </div>
       ) : (

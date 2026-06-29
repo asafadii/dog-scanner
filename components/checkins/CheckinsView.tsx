@@ -14,9 +14,10 @@ import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { getActiveAssignmentsMap } from "@/lib/kennels";
 import type { Booking, Dog, KennelAssignment, Payment } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
-import { ClipboardCheck, Loader2, ScanLine } from "lucide-react";
+import { ClipboardCheck, Loader2, ScanLine, Search } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Input } from "@/components/ui/Input";
 
 export function CheckinsView() {
   const [checkedIn, setCheckedIn] = useState<Dog[]>([]);
@@ -28,6 +29,7 @@ export function CheckinsView() {
   const [checkingInBookingId, setCheckingInBookingId] = useState<string | null>(
     null,
   );
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadCheckedIn = useCallback(async () => {
     setLoading(true);
@@ -162,6 +164,18 @@ export function CheckinsView() {
     [checkingInBookingId, loadCheckedIn],
   );
 
+  const filteredCheckedIn = useMemo(() => {
+    const normalized = searchQuery.trim().toLowerCase();
+    if (!normalized) return checkedIn;
+
+    return checkedIn.filter(
+      (dog) =>
+        dog.name.toLowerCase().includes(normalized) ||
+        dog.owner.name.toLowerCase().includes(normalized) ||
+        (dog.client?.name.toLowerCase().includes(normalized) ?? false),
+    );
+  }, [checkedIn, searchQuery]);
+
   if (loading) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
@@ -283,6 +297,24 @@ export function CheckinsView() {
 
       <section className="space-y-3">
         <h3 className="text-lg font-semibold text-stone-900">On site now</h3>
+
+        {checkedIn.length > 0 && (
+          <div className="relative max-w-md">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+              aria-hidden
+            />
+            <Input
+              type="search"
+              placeholder="Search by dog or owner name..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="pl-10"
+              aria-label="Search checked-in dogs"
+            />
+          </div>
+        )}
+
       {checkedIn.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
@@ -292,9 +324,15 @@ export function CheckinsView() {
             </p>
           </CardContent>
         </Card>
+      ) : filteredCheckedIn.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center text-stone-500">
+            No dogs match your search.
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {checkedIn.map((dog) => (
+          {filteredCheckedIn.map((dog) => (
             <DogCard
               key={dog.id}
               dog={dog}

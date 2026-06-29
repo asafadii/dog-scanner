@@ -99,13 +99,38 @@ const SPOTLIGHT_TAGS = [
   "Daycare",
 ];
 
-const PRICING_FEATURES = [
-  "Online bookings",
-  "Dog profiles",
-  "Check-ins",
-  "Payments",
-  "Reporting",
-];
+const PRICING_PLANS = [
+  {
+    name: "DORA",
+    price: "€49",
+    period: "/month",
+    description: "Everything you need to run your dog daycare.",
+    features: [
+      "Unlimited dogs",
+      "Unlimited bookings",
+      "Boarding & daycare management",
+      "QR check-ins",
+      "Kennel management",
+      "Payments & reports",
+      "Up to 3 staff members",
+    ],
+    highlighted: true,
+  },
+  {
+    name: "DORA Unlimited",
+    price: "€99",
+    period: "/month",
+    description: "Built for growing operations.",
+    features: [
+      "Everything in DORA",
+      "Unlimited staff",
+      "Advanced reporting",
+      "Priority support",
+      "Future premium features included",
+    ],
+    highlighted: false,
+  },
+] as const;
 
 export function LandingPage() {
   const year = new Date().getFullYear();
@@ -180,7 +205,7 @@ export function LandingPage() {
                 <LandingButton href="/portal/signup" variant="outline" size="lg">
                   Owner signup
                 </LandingButton>
-                <LandingButton href="mailto:hello@hellodora.com" variant="outline" size="lg">
+                <LandingButton href="/demo" variant="outline" size="lg">
                   Book a Demo
                 </LandingButton>
               </div>
@@ -317,38 +342,56 @@ export function LandingPage() {
                 Simple, transparent plans
               </h2>
             </div>
-            <div className="mx-auto mt-12 max-w-md">
-              <div className="relative rounded-2xl border-2 border-[oklch(0.531_0.092_185.0)] bg-white p-8 shadow-lg">
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[oklch(0.531_0.092_185.0)] px-3 py-1 text-xs font-semibold text-white">
-                  Most popular
-                </span>
-                <h3 className="text-center text-xl font-bold">Starter</h3>
-                <p className="mt-2 text-center text-3xl font-bold text-[oklch(0.531_0.092_185.0)]">
-                  Custom pricing
-                </p>
-                <ul className="mt-8 space-y-3">
-                  {PRICING_FEATURES.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center gap-3 text-sm text-[oklch(0.556_0.000_89.9)]"
-                    >
-                      <Check
-                        className="h-4 w-4 shrink-0 text-[oklch(0.531_0.092_185.0)]"
-                        aria-hidden
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <LandingButton
-                  href="mailto:hello@hellodora.com"
-                  className="mt-8 w-full"
-                  size="lg"
+            <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
+              {PRICING_PLANS.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`relative rounded-2xl border-2 bg-white p-8 shadow-lg ${
+                    plan.highlighted
+                      ? "border-[oklch(0.531_0.092_185.0)]"
+                      : "border-[oklch(0.885_0.000_89.9)]"
+                  }`}
                 >
-                  Contact sales
-                </LandingButton>
-              </div>
+                  {plan.highlighted && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[oklch(0.531_0.092_185.0)] px-3 py-1 text-xs font-semibold text-white">
+                      Most popular
+                    </span>
+                  )}
+                  <h3 className="text-center text-xl font-bold">{plan.name}</h3>
+                  <p className="mt-2 text-center">
+                    <span className="text-3xl font-bold text-[oklch(0.531_0.092_185.0)]">
+                      {plan.price}
+                    </span>
+                    <span className="text-sm text-[oklch(0.556_0.000_89.9)]">
+                      {plan.period}
+                    </span>
+                  </p>
+                  <p className="mt-3 text-center text-sm text-[oklch(0.556_0.000_89.9)]">
+                    {plan.description}
+                  </p>
+                  <ul className="mt-8 space-y-3">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-center gap-3 text-sm text-[oklch(0.556_0.000_89.9)]"
+                      >
+                        <Check
+                          className="h-4 w-4 shrink-0 text-[oklch(0.531_0.092_185.0)]"
+                          aria-hidden
+                        />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <LandingButton href="/signup" className="mt-8 w-full" size="lg">
+                    Start free trial
+                  </LandingButton>
+                </div>
+              ))}
             </div>
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm text-[oklch(0.556_0.000_89.9)]">
+              14-day free trial. No credit card required. Cancel anytime.
+            </p>
           </div>
         </section>
 
@@ -377,7 +420,7 @@ export function LandingPage() {
                 Owner signup
               </LandingButton>
               <LandingButton
-                href="mailto:hello@hellodora.com"
+                href="/demo"
                 variant="outline"
                 size="lg"
                 className="border-white/30 bg-transparent text-white hover:bg-white/10"

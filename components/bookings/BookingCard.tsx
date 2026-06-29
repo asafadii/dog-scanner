@@ -2,9 +2,11 @@
 
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { Button } from "@/components/ui/Button";
+import { getDogPhotoSrc } from "@/lib/dogAssets";
 import type { Booking } from "@/lib/types";
 import { cn, formatBookingDateRange } from "@/lib/utils";
-import { Calendar, Eye, PawPrint, User } from "lucide-react";
+import { Calendar, Eye, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface BookingCardProps {
@@ -17,6 +19,8 @@ function formatServiceType(serviceType: Booking["serviceType"]): string {
 }
 
 export function BookingCard({ booking, className }: BookingCardProps) {
+  const photoSrc = getDogPhotoSrc(booking.dogPhotoUrl);
+
   return (
     <article
       className={cn(
@@ -25,19 +29,27 @@ export function BookingCard({ booking, className }: BookingCardProps) {
       )}
       aria-label={`Booking for ${booking.dogName}`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
+        <Image
+          src={photoSrc}
+          alt=""
+          width={56}
+          height={56}
+          className="h-14 w-14 shrink-0 rounded-xl object-cover"
+        />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <PawPrint className="h-4 w-4 shrink-0 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
-            <h3 className="truncate text-lg font-semibold text-stone-900">
-              {booking.dogName}
-            </h3>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-lg font-semibold text-stone-900">
+                {booking.dogName}
+              </h3>
+              <p className="mt-0.5 truncate text-sm text-stone-500">
+                {booking.dogBreed}
+              </p>
+            </div>
+            <BookingStatusBadge status={booking.status} />
           </div>
-          <p className="mt-0.5 truncate text-sm text-stone-500">
-            {booking.dogBreed}
-          </p>
         </div>
-        <BookingStatusBadge status={booking.status} />
       </div>
 
       <div className="mt-3 space-y-1.5 text-sm text-stone-600">

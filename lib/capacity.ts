@@ -453,4 +453,42 @@ export async function getTodaysCapacityUsage(): Promise<
   };
 }
 
+export interface DayCapacityCount {
+  date: string;
+  daycare: number;
+  overnight: number;
+}
+
+export async function getMonthlyCapacityCounts(
+  year: number,
+  month: number,
+): Promise<CapacityResult<DayCapacityCount[]>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const facilityId = profileResult.data.facility_id;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const dates: string[] = [];
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const monthStr = String(month).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+    dates.push(`${year}-${monthStr}-${dayStr}`);
+  }
+
+  const counts = await Promise.all(
+    dates.map(async (date) => {
+      const [daycare, overnight] = await Promise.all([
+        countApprovedBookingsOnDate(facilityId, date, "daycare"),
+        countApprovedBookingsOnDate(facilityId, date, "boarding"),
+      ]);
+      return { date, daycare, overnight };
+    }),
+  );
+
+  return { data: counts, error: null };
+}
+
 export { INCOMPLETE_SETUP_MESSAGE };

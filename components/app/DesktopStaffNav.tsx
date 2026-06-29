@@ -6,12 +6,9 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/dogs", label: "Dogs" },
-  { href: "/clients", label: "Clients" },
   { href: "/bookings", label: "Bookings" },
   { href: "/checkins", label: "Check-ins" },
   { href: "/reports", label: "Reports" },
-  { href: "/settings", label: "Settings" },
 ] as const;
 
 export function DesktopStaffNav() {
@@ -26,8 +23,6 @@ export function DesktopStaffNav() {
         {NAV_ITEMS.map(({ href, label }) => {
           const isActive =
             pathname === href ||
-            (href === "/dogs" && pathname.startsWith("/dogs")) ||
-            (href === "/clients" && pathname.startsWith("/clients")) ||
             (href === "/bookings" && pathname.startsWith("/bookings")) ||
             (href === "/reports" && pathname.startsWith("/reports")) ||
             (href === "/checkins" && pathname.startsWith("/checkins"));

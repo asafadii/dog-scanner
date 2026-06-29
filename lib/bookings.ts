@@ -51,6 +51,7 @@ export function mapBookingRowToBooking(
   clientName = "",
   dogName = "",
   dogBreed = "",
+  dogPhotoUrl: string | null = null,
 ): Booking {
   return {
     id: row.id,
@@ -68,6 +69,7 @@ export function mapBookingRowToBooking(
     clientName,
     dogName,
     dogBreed,
+    dogPhotoUrl,
   };
 }
 
@@ -166,7 +168,7 @@ async function enrichBookings(
       .in("id", clientIds),
     supabase
       .from("dogs")
-      .select("id, name, breed")
+      .select("id, name, breed, photo_url")
       .eq("facility_id", facilityId)
       .in("id", dogIds),
   ]);
@@ -176,9 +178,19 @@ async function enrichBookings(
     clientNames.set(client.id, client.name);
   }
 
-  const dogInfo = new Map<string, { name: string; breed: string }>();
-  for (const dog of (dogsResult.data ?? []) as Pick<DogRow, "id" | "name" | "breed">[]) {
-    dogInfo.set(dog.id, { name: dog.name, breed: dog.breed });
+  const dogInfo = new Map<
+    string,
+    { name: string; breed: string; photoUrl: string | null }
+  >();
+  for (const dog of (dogsResult.data ?? []) as Pick<
+    DogRow,
+    "id" | "name" | "breed" | "photo_url"
+  >[]) {
+    dogInfo.set(dog.id, {
+      name: dog.name,
+      breed: dog.breed,
+      photoUrl: dog.photo_url,
+    });
   }
 
   return rows.map((row) => {
@@ -188,6 +200,7 @@ async function enrichBookings(
       clientNames.get(row.client_id) ?? "Unknown client",
       dog?.name ?? "Unknown dog",
       dog?.breed ?? "",
+      dog?.photoUrl ?? null,
     );
   });
 }

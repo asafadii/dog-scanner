@@ -6,21 +6,15 @@ import {
   CalendarDays,
   ClipboardCheck,
   Home,
-  PawPrint,
-  Settings,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/dogs", label: "Dogs", icon: PawPrint },
-  { href: "/clients", label: "Clients", icon: Users },
+  { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/checkins", label: "Check-ins", icon: ClipboardCheck },
   { href: "/reports", label: "Reports", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function MobileBottomNav() {
@@ -35,8 +29,6 @@ export function MobileBottomNav() {
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive =
             pathname === href ||
-            (href === "/dogs" && pathname.startsWith("/dogs")) ||
-            (href === "/clients" && pathname.startsWith("/clients")) ||
             (href === "/bookings" && pathname.startsWith("/bookings")) ||
             (href === "/reports" && pathname.startsWith("/reports")) ||
             (href === "/checkins" && pathname.startsWith("/checkins"));

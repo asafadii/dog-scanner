@@ -139,6 +139,7 @@ export interface Booking {
   clientName: string;
   dogName: string;
   dogBreed: string;
+  dogPhotoUrl: string | null;
 }
 
 export interface BookingFormData {
