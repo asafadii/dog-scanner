@@ -10,8 +10,10 @@ import {
 } from "@/lib/bookings";
 import { canApproveBooking } from "@/lib/capacity";
 import { checkInDog, getDogActiveCheckin } from "@/lib/checkins";
+import { slideUp } from "@/lib/motion";
 import type { Booking } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
   Car,
@@ -177,14 +179,18 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         </Link>
       </div>
 
-      {actionError && (
-        <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-          role="alert"
-        >
-          {actionError}
-        </div>
-      )}
+      <AnimatePresence>
+        {actionError && (
+          <motion.div
+            key="action-error"
+            {...slideUp}
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            role="alert"
+          >
+            {actionError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Card>
         <CardHeader className="pb-2">

@@ -22,8 +22,10 @@ import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
+import { slideUp } from "@/lib/motion";
 import type { CareTask, Dog, KennelAssignment, Payment, TimelineEvent } from "@/lib/types";
 import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightLeft,
   Activity,
@@ -303,14 +305,18 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           />
         )}
 
-        {actionError && (
-          <div
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-            role="alert"
-          >
-            {actionError}
-          </div>
-        )}
+        <AnimatePresence>
+          {actionError && (
+            <motion.div
+              key="action-error"
+              {...slideUp}
+              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              role="alert"
+            >
+              {actionError}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Critical alerts — always near top */}
         {criticalOnly.length > 0 && (

@@ -4,9 +4,11 @@ import { checkInDog } from "@/lib/checkins";
 import { resolveCheckinToken } from "@/lib/checkin/resolveToken";
 import { normalizeCheckinTokenInput } from "@/lib/portal/checkinToken";
 import { getDogById } from "@/lib/dogs";
+import { appearScale, slideUp } from "@/lib/motion";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, ScanLine } from "lucide-react";
 import QrScanner from "qr-scanner";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -115,88 +117,94 @@ export function ScanCheckin() {
     await handleToken(manualCode);
   }
 
-  if (phase === "success") {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <p className="text-2xl font-bold text-emerald-700">Checked in!</p>
-          <p className="mt-2 text-stone-600">
-            {successDogName ?? "Dog"} is now on site.
-          </p>
-          <Button className="mt-6" onClick={resetForNextScan}>
-            Scan next dog
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ScanLine className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
-            Scan QR code
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-0">
-          <div className="overflow-hidden rounded-2xl border border-stone-200 bg-stone-900">
-            <video
-              ref={videoRef}
-              className="aspect-[4/3] w-full object-cover"
-              muted
-              playsInline
-            />
-          </div>
-          {cameraError && (
-            <p className="text-sm text-amber-800" role="status">
-              {cameraError}
-            </p>
-          )}
-          {phase === "processing" && (
-            <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              Processing check-in...
-            </div>
-          )}
-        </CardContent>
-      </Card>
+    <AnimatePresence mode="wait">
+      {phase === "success" ? (
+        <motion.div key="success" {...appearScale}>
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-2xl font-bold text-emerald-700">Checked in!</p>
+              <p className="mt-2 text-stone-600">
+                {successDogName ?? "Dog"} is now on site.
+              </p>
+              <Button className="mt-6" onClick={resetForNextScan}>
+                Scan next dog
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <div key="scan" className="space-y-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ScanLine className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+                Scan QR code
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-0">
+              <div className="overflow-hidden rounded-2xl border border-stone-200 bg-stone-900">
+                <video
+                  ref={videoRef}
+                  className="aspect-[4/3] w-full object-cover"
+                  muted
+                  playsInline
+                />
+              </div>
+              {cameraError && (
+                <p className="text-sm text-amber-800" role="status">
+                  {cameraError}
+                </p>
+              )}
+              {phase === "processing" && (
+                <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  Processing check-in...
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Enter code manually</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <form onSubmit={handleManualSubmit} className="space-y-4">
-            <Input
-              label="Check-in code"
-              value={manualCode}
-              onChange={(event) => setManualCode(event.target.value)}
-              placeholder="Paste or type the code from the owner"
-              autoComplete="off"
-              disabled={phase === "processing"}
-            />
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              disabled={phase === "processing" || !manualCode.trim()}
-            >
-              {phase === "processing" ? "Processing..." : "Submit code"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Enter code manually</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <form onSubmit={handleManualSubmit} className="space-y-4">
+                <Input
+                  label="Check-in code"
+                  value={manualCode}
+                  onChange={(event) => setManualCode(event.target.value)}
+                  placeholder="Paste or type the code from the owner"
+                  autoComplete="off"
+                  disabled={phase === "processing"}
+                />
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full"
+                  disabled={phase === "processing" || !manualCode.trim()}
+                >
+                  {phase === "processing" ? "Processing..." : "Submit code"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-      {error && (
-        <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-          role="alert"
-        >
-          {error}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                key="scan-error"
+                {...slideUp}
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                role="alert"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
-    </div>
+    </AnimatePresence>
   );
 }

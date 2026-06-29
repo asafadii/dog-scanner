@@ -4,8 +4,10 @@ import { BookingCard } from "@/components/bookings/BookingCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { getBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { fadeIn } from "@/lib/motion";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -204,11 +206,11 @@ export function BookingsListView() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <motion.div className="grid gap-4 sm:grid-cols-2" {...fadeIn}>
           {filtered.map((booking) => (
             <BookingCard key={booking.id} booking={booking} />
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -23,6 +23,8 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import { fadeIn, appearScale, slideUp } from "@/lib/motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -208,7 +210,7 @@ export function DashboardView() {
   }
 
   return (
-    <div className="space-y-8">
+    <motion.div className="space-y-8" {...fadeIn}>
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-stone-900">
           {getTimeBasedGreeting()}!
@@ -218,32 +220,42 @@ export function DashboardView() {
         </p>
       </div>
 
-      {actionError && (
-        <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-          role="alert"
-        >
-          {actionError}
-        </div>
-      )}
+      <AnimatePresence>
+        {actionError && (
+          <motion.div
+            key="action-error"
+            {...slideUp}
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            role="alert"
+          >
+            {actionError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {STAT_CONFIG.map(({ key, label, icon: Icon, color, href }) => (
-          <Link key={key} href={href}>
-            <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="p-4">
-                <span
-                  className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${color}`}
-                >
-                  <Icon className="h-5 w-5" aria-hidden />
-                </span>
-                <p className="mt-3 text-2xl font-bold tabular-nums text-stone-900">
-                  {stats[key]}
-                </p>
-                <p className="text-sm text-stone-500">{label}</p>
-              </CardContent>
-            </Card>
-          </Link>
+        {STAT_CONFIG.map(({ key, label, icon: Icon, color, href }, index) => (
+          <motion.div
+            key={key}
+            {...appearScale}
+            transition={{ ...appearScale.transition, delay: index * 0.05 }}
+          >
+            <Link href={href}>
+              <Card className="transition-shadow hover:shadow-md">
+                <CardContent className="p-4">
+                  <span
+                    className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${color}`}
+                  >
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <p className="mt-3 text-2xl font-bold tabular-nums text-stone-900">
+                    {stats[key]}
+                  </p>
+                  <p className="text-sm text-stone-500">{label}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </motion.div>
         ))}
       </div>
 
@@ -331,6 +343,6 @@ export function DashboardView() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

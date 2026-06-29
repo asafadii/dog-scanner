@@ -1,6 +1,8 @@
 "use client";
 
+import { contentSwitch } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -69,11 +71,19 @@ export function LandingFAQ() {
                     aria-hidden
                   />
                 </button>
-                {isOpen && (
-                  <p className="px-5 pb-4 text-sm leading-relaxed text-[oklch(0.556_0.000_89.9)]">
-                    {item.answer}
-                  </p>
-                )}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      key="answer"
+                      {...contentSwitch}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-5 pb-4 text-sm leading-relaxed text-[oklch(0.556_0.000_89.9)]">
+                        {item.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}

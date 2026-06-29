@@ -2,7 +2,9 @@
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getCurrentUserProfile } from "@/lib/dogs";
+import { appearScale } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   CreditCard,
   LogOut,
@@ -103,11 +105,14 @@ export function AvatarDropdown() {
         {initial}
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-stone-200 bg-white py-1 shadow-lg"
-        >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="avatar-menu"
+            role="menu"
+            className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-stone-200 bg-white py-1 shadow-lg"
+            {...appearScale}
+          >
           {MENU_ITEMS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
@@ -130,8 +135,9 @@ export function AvatarDropdown() {
             <LogOut className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
             Sign Out
           </button>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

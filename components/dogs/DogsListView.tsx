@@ -11,7 +11,9 @@ import {
   getDogs,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
+import { slideUp } from "@/lib/motion";
 import type { Dog, Payment } from "@/lib/types";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -151,14 +153,18 @@ export function DogsListView() {
         </Link>
       </div>
 
-      {actionError && (
-        <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-          role="alert"
-        >
-          {actionError}
-        </div>
-      )}
+      <AnimatePresence>
+        {actionError && (
+          <motion.div
+            key="action-error"
+            {...slideUp}
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            role="alert"
+          >
+            {actionError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="relative">
         <Search

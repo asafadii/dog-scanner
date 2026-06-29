@@ -12,8 +12,10 @@ import {
 import { getTodaysBookings } from "@/lib/bookings";
 import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { getActiveAssignmentsMap } from "@/lib/kennels";
+import { slideUp } from "@/lib/motion";
 import type { Booking, Dog, KennelAssignment, Payment } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { ClipboardCheck, Loader2, ScanLine, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -232,14 +234,18 @@ export function CheckinsView() {
         </Link>
       </div>
 
-      {actionError && (
-        <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-          role="alert"
-        >
-          {actionError}
-        </div>
-      )}
+      <AnimatePresence>
+        {actionError && (
+          <motion.div
+            key="action-error"
+            {...slideUp}
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            role="alert"
+          >
+            {actionError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {todaysBookings.length > 0 && (
         <section className="space-y-3">

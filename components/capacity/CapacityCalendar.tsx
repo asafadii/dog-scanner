@@ -5,7 +5,9 @@ import {
   getMonthlyCapacityCounts,
   type DayCapacityCount,
 } from "@/lib/capacity";
+import { appearScale } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, ChevronDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -107,8 +109,13 @@ export function CapacityCalendar() {
           />
         </button>
 
-        {expanded && (
-          <div className="mt-4 space-y-4">
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              key="capacity-calendar-content"
+              className="mt-4 space-y-4"
+              {...appearScale}
+            >
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -173,8 +180,9 @@ export function CapacityCalendar() {
                 ))}
               </div>
             )}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
     </Card>
   );
