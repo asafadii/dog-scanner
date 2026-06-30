@@ -134,19 +134,24 @@ export function BookingsListView() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
-            aria-hidden
-          />
-          <Input
-            type="search"
-            placeholder="Search dog, owner, status, service..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="pl-10"
-            aria-label="Search bookings"
-          />
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-stone-700">
+            Search bookings
+          </span>
+          <div className="relative">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+              aria-hidden
+            />
+            <Input
+              type="search"
+              placeholder="Search dog, owner, status, service..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="pl-10"
+              aria-label="Search bookings"
+            />
+          </div>
         </div>
         <Input
           type="date"
