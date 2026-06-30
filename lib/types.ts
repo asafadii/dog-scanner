@@ -263,3 +263,21 @@ export interface DogDocument {
   uploadedByClientAccountId: string | null;
   createdAt: string;
 }
+
+export interface SubscriptionInfo {
+  plan: "dora" | "dora_unlimited";
+  status: "trialing" | "active" | "past_due" | "canceled";
+  trialEndsAt: string | null;
+  staffLimit: number;
+  isUnlimited: boolean;
+  isActive: boolean;
+  daysLeftInTrial: number | null;
+}
+
+export interface StaffMember {
+  id: string;
+  fullName: string;
+  email: string;
+  role: "admin" | "staff";
+  createdAt: string;
+}

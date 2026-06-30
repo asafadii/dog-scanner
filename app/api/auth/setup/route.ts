@@ -1,4 +1,5 @@
 import {
+  countProfilesForFacility,
   createFacility,
   createProfile,
   deleteFacility,
@@ -40,6 +41,9 @@ function parseSetupBody(body: unknown): AuthSetupRequest {
   }
   if (typeof record.email === "string" && record.email.trim()) {
     payload.email = record.email.trim().toLowerCase();
+  }
+  if (typeof record.facilityId === "string" && record.facilityId.trim()) {
+    payload.facilityId = record.facilityId.trim();
   }
 
   return payload;
@@ -189,6 +193,96 @@ export async function POST(request: Request) {
       profile: existingProfile,
     };
     return NextResponse.json(response);
+  }
+
+  // STAFF_LIMIT_GATE: enforced here when staff join flow is implemented.
+  // Staff joining an existing facility (facilityId in request) — not admin signup.
+  if (setupBody.facilityId) {
+    const { data: existingFacility, error: joinFacilityError } =
+      await findFacilityById(db, setupBody.facilityId);
+
+    if (joinFacilityError || !existingFacility) {
+      devLog("setup error: join facility not found", setupBody.facilityId);
+      return NextResponse.json(
+        { ok: false, error: "Facility not found" },
+        { status: 404 },
+      );
+    }
+
+    const { data: staffCount, error: countError } =
+      await countProfilesForFacility(db, existingFacility.id);
+
+    if (countError) {
+      devLog("setup error: staff count failed", countError.message);
+      return NextResponse.json(
+        { ok: false, error: countError.message },
+        { status: 500 },
+      );
+    }
+
+    if (staffCount >= existingFacility.staff_limit) {
+      return NextResponse.json(
+        { ok: false, error: "Staff limit reached for this plan" },
+        { status: 403 },
+      );
+    }
+
+    const {
+      data: staffProfile,
+      error: staffProfileError,
+      code: staffProfileErrorCode,
+    } = await createProfile(db, {
+      id: user.id,
+      facility_id: existingFacility.id,
+      full_name: fullName,
+      email,
+      role: "staff",
+    });
+
+    if (staffProfileError || !staffProfile) {
+      if (staffProfileErrorCode === "23505") {
+        const { data: racedProfile } = await findProfileByUserId(db, user.id);
+        if (racedProfile) {
+          const { data: racedFacility } = await findFacilityById(
+            db,
+            racedProfile.facility_id,
+          );
+          if (racedFacility) {
+            const response: AuthSetupSuccessResponse = {
+              ok: true,
+              alreadyExists: true,
+              facility: racedFacility,
+              profile: racedProfile,
+            };
+            return NextResponse.json(response);
+          }
+        }
+      }
+
+      devLog("setup error: staff profile creation failed", {
+        message: staffProfileError?.message,
+        code: staffProfileErrorCode,
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: staffProfileError?.message ?? "Failed to create profile",
+        },
+        { status: 500 },
+      );
+    }
+
+    devLog("staff profile created", {
+      profileId: staffProfile.id,
+      facilityId: existingFacility.id,
+    });
+
+    const response: AuthSetupSuccessResponse = {
+      ok: true,
+      facility: existingFacility,
+      profile: staffProfile,
+    };
+    return NextResponse.json(response, { status: 201 });
   }
 
   const { data: facility, error: facilityError } = await createFacility(

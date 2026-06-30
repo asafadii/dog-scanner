@@ -4,9 +4,10 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
+import { StaffAccountsSection } from "@/components/settings/StaffAccountsSection";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Building2, Bell, LogOut, User } from "lucide-react";
+import { Bell, Building2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const PLACEHOLDER_SECTIONS = [
@@ -14,11 +15,6 @@ const PLACEHOLDER_SECTIONS = [
     icon: Building2,
     title: "Facility",
     description: "Facility name, address, and operating hours.",
-  },
-  {
-    icon: User,
-    title: "Staff Accounts",
-    description: "Manage trainer and staff access.",
   },
   {
     icon: Bell,
@@ -68,6 +64,8 @@ export default function SettingsPage() {
       <KennelsSettingsSection />
 
       <PricingSettingsSection />
+
+      <StaffAccountsSection />
 
       <div className="space-y-4">
         {PLACEHOLDER_SECTIONS.map(({ icon: Icon, title, description }) => (

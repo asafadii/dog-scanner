@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { getRevenueReport, INCOMPLETE_SETUP_MESSAGE } from "@/lib/reports";
-import type { RevenueReport } from "@/lib/types";
+import { getSubscriptionInfo } from "@/lib/subscription";
+import type { RevenueReport, SubscriptionInfo } from "@/lib/types";
 import {
   cn,
   currentMonthDateRange,
@@ -12,6 +13,7 @@ import {
   formatReportDate,
 } from "@/lib/utils";
 import { BarChart3, Download, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 
@@ -28,6 +30,23 @@ export function ReportsView() {
   const [report, setReport] = useState<RevenueReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+  const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      const result = await getSubscriptionInfo();
+      if (!result.error) {
+        setSubscription(result.data);
+      }
+      setSubscriptionLoaded(true);
+    })();
+  }, []);
+
+  const isAdvancedGated =
+    subscriptionLoaded &&
+    subscription !== null &&
+    subscription.plan === "dora";
 
   const loadReport = useCallback(async () => {
     setLoading(true);
@@ -120,7 +139,15 @@ export function ReportsView() {
             <Button
               variant="outline"
               onClick={handleExport}
-              disabled={loading || !report || report.payments.length === 0}
+              disabled={
+                loading ||
+                !report ||
+                report.payments.length === 0 ||
+                isAdvancedGated
+              }
+              title={
+                isAdvancedGated ? "Available on DORA Unlimited" : undefined
+              }
             >
               <Download className="h-4 w-4" aria-hidden />
               Export Excel
@@ -222,7 +249,23 @@ export function ReportsView() {
               <CardTitle className="text-base">Payments</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {report.payments.length === 0 ? (
+              {isAdvancedGated && (
+                <div className="mb-4 rounded-xl border border-[oklch(0.531_0.092_185.0)]/20 bg-[#F0FAF9] px-4 py-3 text-sm text-stone-700">
+                  Upgrade to DORA Unlimited for advanced analytics and Excel
+                  export.{" "}
+                  <Link
+                    href="/subscription"
+                    className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                  >
+                    View plans
+                  </Link>
+                </div>
+              )}
+              {isAdvancedGated ? (
+                <p className="py-8 text-center text-sm text-stone-500">
+                  Payment details are available on DORA Unlimited.
+                </p>
+              ) : report.payments.length === 0 ? (
                 <p className="py-8 text-center text-sm text-stone-500">
                   No payments in this date range.
                 </p>

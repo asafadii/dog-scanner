@@ -229,6 +229,13 @@ export type CheckinTokenInsert = {
 export interface FacilityRow {
   id: string;
   name: string;
+  subscription_plan: "dora" | "dora_unlimited";
+  subscription_status: "trialing" | "active" | "past_due" | "canceled";
+  trial_ends_at: string | null;
+  staff_limit: number;
+  subscription_started_at: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   created_at: string;
 }
 
@@ -511,11 +518,25 @@ export type Database = {
         Insert: {
           id?: string;
           name: string;
+          subscription_plan?: "dora" | "dora_unlimited";
+          subscription_status?: "trialing" | "active" | "past_due" | "canceled";
+          trial_ends_at?: string | null;
+          staff_limit?: number;
+          subscription_started_at?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
+          subscription_plan?: "dora" | "dora_unlimited";
+          subscription_status?: "trialing" | "active" | "past_due" | "canceled";
+          trial_ends_at?: string | null;
+          staff_limit?: number;
+          subscription_started_at?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           created_at?: string;
         };
         Relationships: [];
@@ -664,6 +685,7 @@ export interface AuthSetupRequest {
   fullName?: string;
   facilityName?: string;
   email?: string;
+  facilityId?: string;
 }
 
 export interface AuthSetupSuccessResponse {

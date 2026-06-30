@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { FacilityRow, ProfileRow } from "@/lib/supabase/types";
+import type { FacilityRow, ProfileRow, UserRole } from "@/lib/supabase/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function findProfileByUserId(
@@ -51,6 +51,21 @@ export async function createFacility(
   };
 }
 
+export async function countProfilesForFacility(
+  db: SupabaseClient,
+  facilityId: string,
+): Promise<{ data: number; error: Error | null }> {
+  const { count, error } = await db
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("facility_id", facilityId);
+
+  return {
+    data: count ?? 0,
+    error: error ? new Error(error.message) : null,
+  };
+}
+
 export async function createProfile(
   db: SupabaseClient,
   profile: {
@@ -58,7 +73,7 @@ export async function createProfile(
     facility_id: string;
     full_name: string;
     email: string;
-    role: "admin";
+    role: UserRole;
   },
 ): Promise<{ data: ProfileRow | null; error: Error | null; code?: string }> {
   const { data, error } = await db
