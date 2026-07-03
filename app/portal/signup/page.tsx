@@ -88,7 +88,7 @@ export default function PortalSignupPage() {
             className="flex items-center gap-2 text-violet-700 transition-colors hover:text-violet-800"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm">
-              <Image src="/favicon-portal.svg" alt="DORA" width={32} height={32} />
+              <Image src="/portal-logo.svg" alt="DORA" width={32} height={32} />
             </span>
             <span className="text-lg font-semibold tracking-tight">
               DORA Portal
