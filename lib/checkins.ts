@@ -1,7 +1,7 @@
 import { getCurrentUserProfile } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { DogCheckinRow } from "@/lib/supabase/types";
-import type { Dog } from "@/lib/types";
+import type { BookingRow, DogCheckinRow } from "@/lib/supabase/types";
+import type { BookingServiceType, Dog } from "@/lib/types";
 
 export type CheckinsErrorCode =
   | "incomplete_setup"
@@ -37,6 +37,8 @@ export function enrichDogWithCheckin(
       ...dog,
       status: "checked_out",
       activeCheckinId: null,
+      activeBookingId: null,
+      serviceType: null,
       currentAssignment: null,
     };
   }
@@ -46,6 +48,7 @@ export function enrichDogWithCheckin(
     status: "checked_in",
     lastCheckIn: activeCheckin.checked_in_at,
     activeCheckinId: activeCheckin.id,
+    activeBookingId: activeCheckin.booking_id,
     currentAssignment: dog.currentAssignment ?? null,
   };
 }
@@ -58,6 +61,8 @@ export function enrichDogAfterCheckout(
     ...dog,
     status: "checked_out",
     activeCheckinId: null,
+    activeBookingId: null,
+    serviceType: null,
     currentAssignment: null,
     lastCheckOut: checkin.checked_out_at,
   };
@@ -74,6 +79,58 @@ export function enrichDogsWithCheckins(
   return dogs.map((dog) =>
     enrichDogWithCheckin(dog, activeByDogId.get(dog.id) ?? null),
   );
+}
+
+export async function enrichDogsWithBookingServiceType(
+  dogs: Dog[],
+  facilityId: string,
+): Promise<Dog[]> {
+  const bookingIds = [
+    ...new Set(
+      dogs
+        .map((dog) => dog.activeBookingId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+
+  if (bookingIds.length === 0) {
+    return dogs.map((dog) =>
+      dog.status === "checked_in" && !dog.activeBookingId
+        ? { ...dog, serviceType: "daycare" as BookingServiceType }
+        : dog,
+    );
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("id, service_type")
+    .eq("facility_id", facilityId)
+    .in("id", bookingIds);
+
+  if (error || !data) {
+    return dogs;
+  }
+
+  const serviceByBookingId = new Map(
+    (data as Pick<BookingRow, "id" | "service_type">[]).map((row) => [
+      row.id,
+      row.service_type,
+    ]),
+  );
+
+  return dogs.map((dog) => {
+    if (dog.status !== "checked_in") {
+      return dog;
+    }
+
+    if (!dog.activeBookingId) {
+      return { ...dog, serviceType: "daycare" as BookingServiceType };
+    }
+
+    const serviceType = serviceByBookingId.get(dog.activeBookingId) ?? "daycare";
+    return { ...dog, serviceType };
+  });
 }
 
 async function requireFacilityContext(): Promise<

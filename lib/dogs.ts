@@ -1,5 +1,6 @@
 import {
   enrichDogWithCheckin,
+  enrichDogsWithBookingServiceType,
   enrichDogsWithCheckins,
   getActiveCheckins,
   getDogActiveCheckin,
@@ -71,6 +72,14 @@ export function mapDogRowToDog(row: DogRow): Dog {
     status: "checked_out",
     clientId: row.client_id,
     client: null,
+    microchipNumber: row.microchip_number,
+    isNeutered: row.is_neutered,
+    healthCertificateNumber: row.health_certificate_number,
+    aggressionTowardsPeople: row.aggression_towards_people,
+    aggressionTowardsDogs: row.aggression_towards_dogs,
+    separationAnxiety: row.separation_anxiety,
+    kennelTrained: row.kennel_trained,
+    chewingRisk: row.chewing_risk,
     isReturning: false,
     alerts: {
       medication: row.medication_required,
@@ -98,6 +107,8 @@ export function mapDogRowToDog(row: DogRow): Dog {
     lastCheckIn: null,
     lastCheckOut: null,
     activeCheckinId: null,
+    activeBookingId: null,
+    serviceType: null,
     currentAssignment: null,
     todaysCare: [],
     timeline: [],
@@ -114,6 +125,14 @@ export function dogToFormData(dog: Dog): NewDogFormData {
     ownerName: dog.owner.name,
     ownerPhone: dog.owner.phone,
     ownerEmail: dog.owner.email,
+    microchipNumber: dog.microchipNumber ?? "",
+    isNeutered: dog.isNeutered,
+    healthCertificateNumber: dog.healthCertificateNumber ?? "",
+    aggressionTowardsPeople: dog.aggressionTowardsPeople,
+    aggressionTowardsDogs: dog.aggressionTowardsDogs,
+    separationAnxiety: dog.separationAnxiety ?? "",
+    kennelTrained: dog.kennelTrained ?? "",
+    chewingRisk: dog.chewingRisk ?? "",
     medication: dog.care.medication === "None" ? "" : dog.care.medication,
     feeding:
       dog.care.feeding === "Standard diet" ? "" : dog.care.feeding,
@@ -154,6 +173,14 @@ export function toDogInsert(
     allergies: input.allergies.trim(),
     aggression_risk: input.alerts.aggression,
     escape_risk: input.alerts.escapeRisk,
+    microchip_number: input.microchipNumber.trim() || null,
+    is_neutered: input.isNeutered,
+    aggression_towards_people: input.aggressionTowardsPeople,
+    aggression_towards_dogs: input.aggressionTowardsDogs,
+    separation_anxiety: input.separationAnxiety.trim() || null,
+    kennel_trained: input.kennelTrained.trim() || null,
+    chewing_risk: input.chewingRisk.trim() || null,
+    health_certificate_number: input.healthCertificateNumber.trim() || null,
     is_active: true,
   };
 }
@@ -178,6 +205,31 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
   if (input.allergies !== undefined) update.allergies = input.allergies.trim();
   if (input.behavior !== undefined) {
     update.behavior_notes = input.behavior.trim();
+  }
+  if (input.microchipNumber !== undefined) {
+    update.microchip_number = input.microchipNumber.trim() || null;
+  }
+  if (input.isNeutered !== undefined) {
+    update.is_neutered = input.isNeutered;
+  }
+  if (input.healthCertificateNumber !== undefined) {
+    update.health_certificate_number =
+      input.healthCertificateNumber.trim() || null;
+  }
+  if (input.aggressionTowardsPeople !== undefined) {
+    update.aggression_towards_people = input.aggressionTowardsPeople;
+  }
+  if (input.aggressionTowardsDogs !== undefined) {
+    update.aggression_towards_dogs = input.aggressionTowardsDogs;
+  }
+  if (input.separationAnxiety !== undefined) {
+    update.separation_anxiety = input.separationAnxiety.trim() || null;
+  }
+  if (input.kennelTrained !== undefined) {
+    update.kennel_trained = input.kennelTrained.trim() || null;
+  }
+  if (input.chewingRisk !== undefined) {
+    update.chewing_risk = input.chewingRisk.trim() || null;
   }
 
   if (input.alerts?.medication !== undefined) {
@@ -360,8 +412,12 @@ export async function getDogs(): Promise<DogsResult<Dog[]>> {
   }
 
   const withCheckins = enrichDogsWithCheckins(dogs, checkinsResult.data);
-  const withVisitStatus = await enrichDogsWithVisitStatus(
+  const withServiceType = await enrichDogsWithBookingServiceType(
     withCheckins,
+    profileResult.data.facility_id,
+  );
+  const withVisitStatus = await enrichDogsWithVisitStatus(
+    withServiceType,
     profileResult.data.facility_id,
   );
 

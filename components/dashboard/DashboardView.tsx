@@ -167,10 +167,24 @@ export function DashboardView() {
                 ...item,
                 status: "checked_out",
                 activeCheckinId: null,
+                activeBookingId: null,
+                serviceType: null,
                 currentAssignment: null,
                 lastCheckOut: payment.paidAt,
               }
             : item,
+        ),
+      );
+      void loadDashboard();
+    },
+    [loadDashboard],
+  );
+
+  const handleServiceTypeChange = useCallback(
+    (dogId: string, serviceType: Booking["serviceType"]) => {
+      setDogs((prev) =>
+        prev.map((item) =>
+          item.id === dogId ? { ...item, serviceType } : item,
         ),
       );
       void loadDashboard();
@@ -337,6 +351,7 @@ export function DashboardView() {
                 dog={dog}
                 onCheckToggle={(dogId) => void toggleCheckStatus(dogId)}
                 onCheckoutComplete={handleCheckoutComplete}
+                onServiceTypeChange={handleServiceTypeChange}
                 isToggling={togglingId === dog.id}
               />
             ))}

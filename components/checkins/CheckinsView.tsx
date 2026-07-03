@@ -132,7 +132,20 @@ export function CheckinsView() {
 
   const handleCheckoutComplete = useCallback((dogId: string, _payment: Payment) => {
     setCheckedIn((prev) => prev.filter((dog) => dog.id !== dogId));
-  }, []);
+    void loadCheckedIn();
+  }, [loadCheckedIn]);
+
+  const handleServiceTypeChange = useCallback(
+    (dogId: string, serviceType: Booking["serviceType"]) => {
+      setCheckedIn((prev) =>
+        prev.map((dog) =>
+          dog.id === dogId ? { ...dog, serviceType } : dog,
+        ),
+      );
+      void loadCheckedIn();
+    },
+    [loadCheckedIn],
+  );
 
   const handleAssignmentChange = useCallback(
     (dogId: string, assignment: KennelAssignment) => {
@@ -345,6 +358,7 @@ export function CheckinsView() {
               onCheckToggle={(dogId) => void toggleCheckStatus(dogId)}
               onAssignmentChange={handleAssignmentChange}
               onCheckoutComplete={handleCheckoutComplete}
+              onServiceTypeChange={handleServiceTypeChange}
               isToggling={togglingId === dog.id}
             />
           ))}

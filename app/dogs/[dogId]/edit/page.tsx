@@ -103,11 +103,12 @@ export default function EditDogPage() {
       )}
 
       <DogForm
+        dogId={dogId}
         initialData={initialData}
         existingPhotoUrl={existingPhotoUrl}
         submitPhase={submitPhase}
         submitLabel="Save Changes"
-        onSubmit={async (data, photo) => {
+        onSubmit={async (data, photo, _vaccinationFiles) => {
           if (submitPhase !== "idle") return;
 
           setError(null);

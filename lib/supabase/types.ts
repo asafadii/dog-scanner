@@ -24,6 +24,14 @@ export interface DogRow {
   allergies: string | null;
   aggression_risk: boolean;
   escape_risk: boolean;
+  microchip_number: string | null;
+  is_neutered: boolean | null;
+  aggression_towards_people: boolean | null;
+  aggression_towards_dogs: boolean | null;
+  separation_anxiety: string | null;
+  kennel_trained: string | null;
+  chewing_risk: string | null;
+  health_certificate_number: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -50,6 +58,14 @@ export type DogInsert = {
   allergies?: string | null;
   aggression_risk?: boolean;
   escape_risk?: boolean;
+  microchip_number?: string | null;
+  is_neutered?: boolean | null;
+  aggression_towards_people?: boolean | null;
+  aggression_towards_dogs?: boolean | null;
+  separation_anxiety?: string | null;
+  kennel_trained?: string | null;
+  chewing_risk?: string | null;
+  health_certificate_number?: string | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -76,6 +92,14 @@ export type DogUpdate = {
   allergies?: string | null;
   aggression_risk?: boolean;
   escape_risk?: boolean;
+  microchip_number?: string | null;
+  is_neutered?: boolean | null;
+  aggression_towards_people?: boolean | null;
+  aggression_towards_dogs?: boolean | null;
+  separation_anxiety?: string | null;
+  kennel_trained?: string | null;
+  chewing_risk?: string | null;
+  health_certificate_number?: string | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -228,7 +252,8 @@ export type CheckinTokenInsert = {
 
 export interface FacilityRow {
   id: string;
-  name: string;
+  name: string | null;
+  currency: string;
   subscription_plan: "dora" | "dora_unlimited";
   subscription_status: "trialing" | "active" | "past_due" | "canceled";
   trial_ends_at: string | null;
@@ -517,7 +542,8 @@ export type Database = {
         Row: FacilityRow;
         Insert: {
           id?: string;
-          name: string;
+          name?: string | null;
+          currency?: string;
           subscription_plan?: "dora" | "dora_unlimited";
           subscription_status?: "trialing" | "active" | "past_due" | "canceled";
           trial_ends_at?: string | null;
@@ -529,7 +555,8 @@ export type Database = {
         };
         Update: {
           id?: string;
-          name?: string;
+          name?: string | null;
+          currency?: string;
           subscription_plan?: "dora" | "dora_unlimited";
           subscription_status?: "trialing" | "active" | "past_due" | "canceled";
           trial_ends_at?: string | null;

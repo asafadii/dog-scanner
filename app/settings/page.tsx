@@ -1,21 +1,17 @@
 "use client";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import { FacilitySettingsSection } from "@/components/settings/FacilitySettingsSection";
 import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
 import { StaffAccountsSection } from "@/components/settings/StaffAccountsSection";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Bell, Building2, LogOut } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const PLACEHOLDER_SECTIONS = [
-  {
-    icon: Building2,
-    title: "Facility",
-    description: "Facility name, address, and operating hours.",
-  },
   {
     icon: Bell,
     title: "Notifications",
@@ -43,6 +39,8 @@ export default function SettingsPage() {
           Facility preferences and account settings.
         </p>
       </div>
+
+      <FacilitySettingsSection />
 
       {user && (
         <Card>

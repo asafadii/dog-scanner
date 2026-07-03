@@ -61,6 +61,14 @@ export default function PortalNewDogPage() {
     behavior: "",
     alerts: { ...defaultAlerts },
     overnight: false,
+    microchipNumber: "",
+    isNeutered: null,
+    healthCertificateNumber: "",
+    aggressionTowardsPeople: null,
+    aggressionTowardsDogs: null,
+    separationAnxiety: "",
+    kennelTrained: "",
+    chewingRisk: "",
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [vaccinationFile, setVaccinationFile] = useState<File | null>(null);

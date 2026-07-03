@@ -7,6 +7,7 @@ import {
   getCurrentUserProfile,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
+import { uploadStaffDogDocument } from "@/lib/documents";
 import { uploadDogPhoto } from "@/lib/storage";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -41,7 +42,7 @@ export default function NewDogPage() {
       <DogForm
         initialClientId={initialClientId}
         submitPhase={submitPhase}
-        onSubmit={async (data, photo) => {
+        onSubmit={async (data, photo, vaccinationFiles = []) => {
           if (submitPhase !== "idle") return;
 
           setError(null);
@@ -71,6 +72,22 @@ export default function NewDogPage() {
               setError(result.error.message);
               setSubmitPhase("idle");
               return;
+            }
+
+            if (vaccinationFiles.length > 0) {
+              setSubmitPhase("uploading");
+              for (const file of vaccinationFiles) {
+                const uploadResult = await uploadStaffDogDocument(
+                  result.data.id,
+                  file,
+                  "vaccination",
+                );
+                if (uploadResult.error) {
+                  setError(uploadResult.error.message);
+                  setSubmitPhase("idle");
+                  return;
+                }
+              }
             }
 
             router.push(`/dogs/${result.data.id}`);

@@ -417,4 +417,11 @@ export async function getTodaysBookings(): Promise<BookingsResult<Booking[]>> {
   });
 }
 
+export async function updateBookingServiceType(
+  bookingId: string,
+  serviceType: BookingFormData["serviceType"],
+): Promise<BookingsResult<Booking>> {
+  return updateBooking(bookingId, { serviceType });
+}
+
 export { INCOMPLETE_SETUP_MESSAGE };

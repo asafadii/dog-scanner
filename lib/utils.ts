@@ -67,11 +67,15 @@ export function formatBookingDateRange(
   return `${formatBookingDate(startDate)} – ${formatBookingDate(endDate)}`;
 }
 
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-IE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
+export function formatCurrency(value: number, currency = "EUR"): string {
+  try {
+    return new Intl.NumberFormat("en-IE", {
+      style: "currency",
+      currency,
+    }).format(value);
+  } catch {
+    return `€${value.toFixed(2)}`;
+  }
 }
 
 export function formatReportDate(value: string): string {

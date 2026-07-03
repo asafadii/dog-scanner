@@ -7,8 +7,9 @@ import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
 import { Button } from "@/components/ui/Button";
+import { updateBookingServiceType } from "@/lib/bookings";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
-import type { Dog, DogStatus, KennelAssignment, Payment } from "@/lib/types";
+import type { BookingServiceType, Dog, DogStatus, KennelAssignment, Payment } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
 import { ArrowRightLeft, Clock, Eye, Loader2, LogIn, LogOut, User } from "lucide-react";
 import Image from "next/image";
@@ -21,7 +22,32 @@ interface DogCardProps {
   isToggling?: boolean;
   onAssignmentChange?: (dogId: string, assignment: KennelAssignment) => void;
   onCheckoutComplete?: (dogId: string, payment: Payment) => void;
+  onServiceTypeChange?: (dogId: string, serviceType: BookingServiceType) => void;
   className?: string;
+}
+
+function formatServiceLabel(serviceType: BookingServiceType): string {
+  return serviceType === "daycare" ? "Daycare" : "Overnight";
+}
+
+function ServiceTypeBadge({
+  serviceType,
+}: {
+  serviceType: BookingServiceType;
+}) {
+  const isDaycare = serviceType === "daycare";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-bold uppercase tracking-wide",
+        isDaycare
+          ? "bg-amber-400 text-amber-950"
+          : "bg-indigo-700 text-white",
+      )}
+    >
+      {formatServiceLabel(serviceType)}
+    </span>
+  );
 }
 
 export function DogCard({
@@ -30,13 +56,42 @@ export function DogCard({
   isToggling = false,
   onAssignmentChange,
   onCheckoutComplete,
+  onServiceTypeChange,
   className,
 }: DogCardProps) {
   const router = useRouter();
   const [moveOpen, setMoveOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [serviceChangeOpen, setServiceChangeOpen] = useState(false);
+  const [serviceChangeLoading, setServiceChangeLoading] = useState(false);
+  const [serviceChangeError, setServiceChangeError] = useState<string | null>(null);
   const isCheckedIn = dog.status === "checked_in";
   const critical = hasCriticalAlerts(dog.alerts);
+  const serviceType = dog.serviceType ?? "daycare";
+  const canChangeServiceType = isCheckedIn && Boolean(dog.activeBookingId);
+  const alternateServiceType: BookingServiceType =
+    serviceType === "daycare" ? "boarding" : "daycare";
+
+  async function handleConfirmServiceChange() {
+    if (!dog.activeBookingId) return;
+
+    setServiceChangeLoading(true);
+    setServiceChangeError(null);
+
+    const result = await updateBookingServiceType(
+      dog.activeBookingId,
+      alternateServiceType,
+    );
+
+    if (result.error) {
+      setServiceChangeError(result.error.message);
+    } else {
+      onServiceTypeChange?.(dog.id, alternateServiceType);
+      setServiceChangeOpen(false);
+    }
+
+    setServiceChangeLoading(false);
+  }
 
   return (
     <article
@@ -80,6 +135,54 @@ export function DogCard({
         </div>
 
         <div className="min-w-0 flex-1">
+          {isCheckedIn && (
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <ServiceTypeBadge serviceType={serviceType} />
+              {canChangeServiceType && !serviceChangeOpen && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServiceChangeOpen(true);
+                    setServiceChangeError(null);
+                  }}
+                  className="text-xs font-semibold text-stone-500 underline-offset-2 hover:text-stone-700 hover:underline"
+                >
+                  Change
+                </button>
+              )}
+            </div>
+          )}
+
+          {serviceChangeOpen && canChangeServiceType && (
+            <div className="mb-2 rounded-xl border border-stone-200 bg-stone-50 p-3">
+              <p className="text-sm font-medium text-stone-800">
+                Change to {formatServiceLabel(alternateServiceType)}?
+              </p>
+              {serviceChangeError && (
+                <p className="mt-1 text-xs text-red-700" role="alert">
+                  {serviceChangeError}
+                </p>
+              )}
+              <div className="mt-2 flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => void handleConfirmServiceChange()}
+                  disabled={serviceChangeLoading}
+                >
+                  {serviceChangeLoading ? "Saving..." : "Confirm"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setServiceChangeOpen(false)}
+                  disabled={serviceChangeLoading}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h3 className="truncate text-lg font-semibold leading-tight text-stone-900">

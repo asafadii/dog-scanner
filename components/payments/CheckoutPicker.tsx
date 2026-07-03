@@ -6,8 +6,10 @@ import {
   recordPayment,
   type StayPriceResult,
 } from "@/lib/pricing";
+import { formatAmount } from "@/lib/currency";
+import { getFacilitySettings } from "@/lib/facility";
 import type { Payment, PaymentMethod } from "@/lib/types";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Banknote, CreditCard, Landmark, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -49,6 +51,18 @@ export function CheckoutPicker({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currency, setCurrency] = useState("EUR");
+
+  useEffect(() => {
+    void (async () => {
+      const result = await getFacilitySettings();
+      if (!result.error) {
+        setCurrency(result.data.currency);
+      }
+    })();
+  }, []);
+
+  const formatPrice = (value: number) => formatAmount(value, currency);
 
   const loadPrice = useCallback(async () => {
     setLoading(true);
@@ -139,14 +153,14 @@ export function CheckoutPicker({
                 {unitLabel(breakdown.serviceType, breakdown.units)}
               </span>
               <span className="font-medium tabular-nums text-stone-900">
-                {formatCurrency(breakdown.rate * breakdown.units)}
+                {formatPrice(breakdown.rate * breakdown.units)}
               </span>
             </div>
             {breakdown.transportFee > 0 && (
               <div className="mt-2 flex justify-between gap-3">
                 <span className="text-stone-600">Transport</span>
                 <span className="font-medium tabular-nums text-stone-900">
-                  {formatCurrency(breakdown.transportFee)}
+                  {formatPrice(breakdown.transportFee)}
                 </span>
               </div>
             )}
@@ -154,7 +168,7 @@ export function CheckoutPicker({
               <div className="mt-2 flex justify-between gap-3">
                 <span className="text-stone-600">Food add-on</span>
                 <span className="font-medium tabular-nums text-stone-900">
-                  {formatCurrency(breakdown.foodFee)}
+                  {formatPrice(breakdown.foodFee)}
                 </span>
               </div>
             )}
@@ -164,13 +178,13 @@ export function CheckoutPicker({
                   Seasonal surcharge ({breakdown.surchargePercent}%)
                 </span>
                 <span className="font-medium tabular-nums text-stone-900">
-                  {formatCurrency(breakdown.total - breakdown.subtotal)}
+                  {formatPrice(breakdown.total - breakdown.subtotal)}
                 </span>
               </div>
             )}
             <div className="mt-3 flex justify-between gap-3 border-t border-stone-100 pt-3 font-semibold text-stone-900">
               <span>Total</span>
-              <span className="tabular-nums">{formatCurrency(breakdown.total)}</span>
+              <span className="tabular-nums">{formatPrice(breakdown.total)}</span>
             </div>
           </div>
 
@@ -184,7 +198,7 @@ export function CheckoutPicker({
                 className="h-4 w-4 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
               />
               <span className="text-stone-800">
-                Add daycare food (+{formatCurrency(breakdown.configuredFoodFee)})
+                Add daycare food (+{formatPrice(breakdown.configuredFoodFee)})
               </span>
             </label>
           )}

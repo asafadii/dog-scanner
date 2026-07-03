@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { formatAmount } from "@/lib/currency";
+import { getFacilitySettings } from "@/lib/facility";
 import { getRevenueReport, INCOMPLETE_SETUP_MESSAGE } from "@/lib/reports";
 import { getSubscriptionInfo } from "@/lib/subscription";
 import type { RevenueReport, SubscriptionInfo } from "@/lib/types";
 import {
   cn,
   currentMonthDateRange,
-  formatCurrency,
   formatReportDate,
 } from "@/lib/utils";
 import { BarChart3, Download, Loader2 } from "lucide-react";
@@ -32,6 +33,18 @@ export function ReportsView() {
   const [error, setError] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
+  const [currency, setCurrency] = useState("EUR");
+
+  useEffect(() => {
+    void (async () => {
+      const result = await getFacilitySettings();
+      if (!result.error) {
+        setCurrency(result.data.currency);
+      }
+    })();
+  }, []);
+
+  const formatPrice = (value: number) => formatAmount(value, currency);
 
   useEffect(() => {
     void (async () => {
@@ -185,7 +198,7 @@ export function ReportsView() {
             {[
               {
                 label: "Total Revenue",
-                value: formatCurrency(report.totalRevenue),
+                value: formatPrice(report.totalRevenue),
               },
               { label: "Number of Stays", value: String(report.totalStays) },
               {
@@ -225,7 +238,7 @@ export function ReportsView() {
                       {PAYMENT_METHOD_LABELS[method]}
                     </span>
                     <span className="tabular-nums text-stone-900">
-                      {formatCurrency(total)}
+                      {formatPrice(total)}
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-stone-100">
@@ -297,7 +310,7 @@ export function ReportsView() {
                             {formatReportDate(payment.paidAt)}
                           </td>
                           <td className="px-2 py-3 tabular-nums text-stone-900">
-                            {formatCurrency(payment.total)}
+                            {formatPrice(payment.total)}
                           </td>
                           <td className="px-2 py-3 capitalize text-stone-700">
                             {PAYMENT_METHOD_LABELS[payment.paymentMethod]}

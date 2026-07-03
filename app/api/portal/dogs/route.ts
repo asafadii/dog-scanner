@@ -93,6 +93,14 @@ export async function POST(request: Request) {
     behavior: body.behavior?.trim() ?? "",
     alerts: body.alerts ?? defaultAlerts,
     overnight: body.overnight ?? false,
+    microchipNumber: "",
+    isNeutered: null,
+    healthCertificateNumber: "",
+    aggressionTowardsPeople: null,
+    aggressionTowardsDogs: null,
+    separationAnxiety: "",
+    kennelTrained: "",
+    chewingRisk: "",
   });
 
   const { data, error } = await db
