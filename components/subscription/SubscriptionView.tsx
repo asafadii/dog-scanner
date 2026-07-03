@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { staffFetch } from "@/lib/api";
 import {
   formatStaffLimit,
   getSubscriptionInfo,
@@ -9,6 +10,7 @@ import {
 import type { SubscriptionInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Check, CreditCard, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const PLAN_CARDS = [
@@ -81,9 +83,17 @@ function planDisplayName(plan: SubscriptionInfo["plan"]): string {
 }
 
 export function SubscriptionView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState<
+    SubscriptionInfo["plan"] | null
+  >(null);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const loadSubscription = useCallback(async () => {
     setLoading(true);
@@ -103,6 +113,71 @@ export function SubscriptionView() {
   useEffect(() => {
     void loadSubscription();
   }, [loadSubscription]);
+
+  useEffect(() => {
+    if (searchParams.get("success") !== "true") return;
+
+    setShowSuccessBanner(true);
+    router.replace("/subscription");
+
+    const timer = window.setTimeout(() => {
+      setShowSuccessBanner(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [searchParams, router]);
+
+  async function handleManageBilling() {
+    setPortalLoading(true);
+    setActionError(null);
+
+    try {
+      const response = await staffFetch("/api/stripe/portal", {
+        method: "POST",
+      });
+      const data = (await response.json()) as { url?: string; error?: string };
+
+      if (!response.ok || !data.url) {
+        setActionError(data.error ?? "Failed to open billing portal");
+        setPortalLoading(false);
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Failed to open billing portal",
+      );
+      setPortalLoading(false);
+    }
+  }
+
+  async function handleCheckout(plan: SubscriptionInfo["plan"]) {
+    setCheckoutPlan(plan);
+    setActionError(null);
+
+    try {
+      const response = await staffFetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = (await response.json()) as { url?: string; error?: string };
+
+      if (!response.ok || !data.url) {
+        setActionError(data.error ?? "Failed to start checkout");
+        setCheckoutPlan(null);
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Failed to start checkout",
+      );
+      setCheckoutPlan(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -146,7 +221,9 @@ export function SubscriptionView() {
   const staffLimitLabel =
     subscription.staffLimit > 100
       ? "Unlimited"
-      : `Up to ${subscription.staffLimit} staff members`;
+      : `Up to ${formatStaffLimit(subscription.staffLimit)} staff members`;
+
+  const showPlanButtons = subscription.status !== "active";
 
   return (
     <div className="space-y-8">
@@ -158,6 +235,24 @@ export function SubscriptionView() {
           Your plan, billing status, and upgrade options.
         </p>
       </div>
+
+      {showSuccessBanner && (
+        <div
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+          role="status"
+        >
+          Your subscription is active. Welcome to DORA!
+        </div>
+      )}
+
+      {actionError && (
+        <div
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          role="alert"
+        >
+          {actionError}
+        </div>
+      )}
 
       <Card>
         <CardHeader className="pb-2">
@@ -188,8 +283,15 @@ export function SubscriptionView() {
 
           <p className="text-sm text-stone-600">{staffLimitLabel}</p>
 
-          <Button disabled className="w-full sm:w-auto">
-            Manage Billing — Coming soon (Stripe integration in next update)
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => void handleManageBilling()}
+            disabled={portalLoading}
+          >
+            {portalLoading && (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            )}
+            {portalLoading ? "Opening billing..." : "Manage Billing"}
           </Button>
         </CardContent>
       </Card>
@@ -201,6 +303,7 @@ export function SubscriptionView() {
         <div className="grid gap-4 md:grid-cols-2">
           {PLAN_CARDS.map((plan) => {
             const isCurrent = subscription.plan === plan.id;
+            const isCheckingOut = checkoutPlan === plan.id;
             return (
               <div
                 key={plan.id}
@@ -238,6 +341,21 @@ export function SubscriptionView() {
                     </li>
                   ))}
                 </ul>
+
+                {showPlanButtons && (
+                  <Button
+                    className="mt-5 w-full"
+                    onClick={() => void handleCheckout(plan.id)}
+                    disabled={checkoutPlan !== null}
+                  >
+                    {isCheckingOut && (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    )}
+                    {isCheckingOut
+                      ? "Redirecting..."
+                      : `Start with ${plan.name}`}
+                  </Button>
+                )}
               </div>
             );
           })}

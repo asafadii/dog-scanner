@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { claimClientAccount } from "@/lib/portal/claim";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Heart } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -88,7 +88,7 @@ export default function PortalSignupPage() {
             className="flex items-center gap-2 text-violet-700 transition-colors hover:text-violet-800"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm">
-              <Heart className="h-5 w-5" aria-hidden />
+              <Image src="/favicon-portal.svg" alt="DORA" width={20} height={20} />
             </span>
             <span className="text-lg font-semibold tracking-tight">
               DORA Portal

@@ -3,7 +3,8 @@
 import { RequireClientAccount } from "@/components/portal/RequireClientAccount";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/Button";
-import { Heart, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -38,7 +39,7 @@ export default function PortalAuthenticatedLayout({
               className="flex items-center gap-2 text-violet-700 transition-colors hover:text-violet-800"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm">
-                <Heart className="h-5 w-5" aria-hidden />
+                <Image src="/favicon-portal.svg" alt="DORA" width={20} height={20} />
               </span>
               <div className="leading-tight">
                 <span className="block text-lg font-semibold tracking-tight">
