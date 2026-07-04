@@ -113,16 +113,16 @@ export function CheckoutPicker({
   return (
     <div
       className={cn(
-        "rounded-xl border border-stone-200 bg-stone-50 p-4",
+        "rounded-xl border border-border bg-muted p-4",
         className,
       )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-stone-900">Check Out & Pay</p>
+        <p className="text-sm font-semibold text-foreground">Check Out & Pay</p>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-200/70"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
           aria-label="Close checkout"
         >
           <X className="h-5 w-5" />
@@ -130,8 +130,9 @@ export function CheckoutPicker({
       </div>
 
       {error && (
+        // #FEF2F2 = documented Alert error tint (Alert.tsx precedent, D-04)
         <div
-          className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+          className="mb-3 rounded-lg border border-danger/25 bg-[#FEF2F2] px-3 py-2 text-sm text-danger"
           role="alert"
         >
           {error}
@@ -139,72 +140,72 @@ export function CheckoutPicker({
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 py-4 text-sm text-stone-500">
+        <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           Calculating price...
         </div>
       ) : breakdown ? (
         <div className="space-y-4">
-          <div className="rounded-lg border border-stone-200 bg-white p-3 text-sm">
+          <div className="rounded-lg border border-border bg-surface p-3 text-sm">
             <div className="flex justify-between gap-3">
-              <span className="text-stone-600">
+              <span className="text-muted-foreground">
                 {breakdown.serviceType === "daycare" ? "Daycare" : "Boarding"}{" "}
                 rate × {breakdown.units}{" "}
                 {unitLabel(breakdown.serviceType, breakdown.units)}
               </span>
-              <span className="font-medium tabular-nums text-stone-900">
+              <span className="font-medium tabular-nums text-foreground">
                 {formatPrice(breakdown.rate * breakdown.units)}
               </span>
             </div>
             {breakdown.transportFee > 0 && (
               <div className="mt-2 flex justify-between gap-3">
-                <span className="text-stone-600">Transport</span>
-                <span className="font-medium tabular-nums text-stone-900">
+                <span className="text-muted-foreground">Transport</span>
+                <span className="font-medium tabular-nums text-foreground">
                   {formatPrice(breakdown.transportFee)}
                 </span>
               </div>
             )}
             {breakdown.foodFee > 0 && (
               <div className="mt-2 flex justify-between gap-3">
-                <span className="text-stone-600">Food add-on</span>
-                <span className="font-medium tabular-nums text-stone-900">
+                <span className="text-muted-foreground">Food add-on</span>
+                <span className="font-medium tabular-nums text-foreground">
                   {formatPrice(breakdown.foodFee)}
                 </span>
               </div>
             )}
             {breakdown.surchargePercent > 0 && (
               <div className="mt-2 flex justify-between gap-3">
-                <span className="text-stone-600">
+                <span className="text-muted-foreground">
                   Seasonal surcharge ({breakdown.surchargePercent}%)
                 </span>
-                <span className="font-medium tabular-nums text-stone-900">
+                <span className="font-medium tabular-nums text-foreground">
                   {formatPrice(breakdown.total - breakdown.subtotal)}
                 </span>
               </div>
             )}
-            <div className="mt-3 flex justify-between gap-3 border-t border-stone-100 pt-3 font-semibold text-stone-900">
+            <div className="mt-3 flex justify-between gap-3 border-t border-border pt-3 font-semibold text-foreground">
               <span>Total</span>
               <span className="tabular-nums">{formatPrice(breakdown.total)}</span>
             </div>
           </div>
 
           {showFoodCheckbox && (
-            <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm">
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 text-sm">
               <input
                 type="checkbox"
                 checked={foodAddon}
                 onChange={(e) => setFoodAddon(e.target.checked)}
                 disabled={submitting}
-                className="h-4 w-4 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
-              <span className="text-stone-800">
+              <span className="text-foreground">
                 Add daycare food (+{formatPrice(breakdown.configuredFoodFee)})
               </span>
             </label>
           )}
 
           <div>
-            <p className="mb-2 text-sm font-medium text-stone-700">
+            <p className="mb-2 text-sm font-medium text-foreground">
               Payment method
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -217,8 +218,9 @@ export function CheckoutPicker({
                   className={cn(
                     "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
                     paymentMethod === value
-                      ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
-                      : "border-stone-200 bg-white text-stone-700 hover:border-[oklch(0.900_0.035_185.0)]",
+                      ? // mint-wash #EAF4F1 = documented D-04 selected tint (Wave-2 precedent)
+                        "border-primary bg-[#EAF4F1] text-primary"
+                      : "border-border bg-surface text-foreground hover:border-primary/40",
                   )}
                   aria-pressed={paymentMethod === value}
                 >

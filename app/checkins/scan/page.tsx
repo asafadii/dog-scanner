@@ -7,14 +7,14 @@ export default function ScanCheckinPage() {
       <div>
         <Link
           href="/checkins"
-          className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+          className="text-sm font-medium text-primary hover:underline"
         >
           Back to Check-ins
         </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-stone-900">
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
           Scan to Check In
         </h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Scan a client&apos;s QR code or enter their check-in code manually.
         </p>
       </div>

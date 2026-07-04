@@ -21,29 +21,29 @@ export function CapacityUsageBar({ label, usage }: CapacityUsageBarProps) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-        <span className="font-medium text-stone-700">{label}</span>
+        <span className="font-medium text-foreground">{label}</span>
         <span
           className={cn(
             "tabular-nums",
             isFull
-              ? "font-semibold text-red-700"
+              ? "font-semibold text-danger"
               : isHigh
-                ? "font-semibold text-amber-700"
-                : "text-stone-600",
+                ? "font-semibold text-warning"
+                : "text-muted-foreground",
           )}
         >
           {usage.used} / {usage.capacity}
         </span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-stone-100">
+      <div className="h-2.5 overflow-hidden rounded-full bg-muted">
         <div
           className={cn(
             "h-full rounded-full transition-all",
             isFull
-              ? "bg-red-500"
+              ? "bg-danger"
               : isHigh
-                ? "bg-amber-500"
-                : "bg-[oklch(0.531_0.092_185.0)]",
+                ? "bg-warning"
+                : "bg-primary",
           )}
           style={{ width: `${percent}%` }}
           role="progressbar"

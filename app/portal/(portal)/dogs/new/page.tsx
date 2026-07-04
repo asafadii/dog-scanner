@@ -104,7 +104,7 @@ export default function PortalNewDogPage() {
 
   if (!clientId || !facilityId) {
     return (
-      <p className="text-sm text-red-800" role="alert">
+      <p className="text-sm text-danger" role="alert">
         Missing facility context. Go back to the portal and try again.
       </p>
     );
@@ -198,10 +198,10 @@ export default function PortalNewDogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Add a Dog
         </h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Tell us about your dog and upload any required documents.
         </p>
       </div>
@@ -232,9 +232,10 @@ export default function PortalNewDogPage() {
               placeholder="e.g. 3 years"
             />
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Size
               </label>
+              {/* Operational-flat segmented control (active = mint-wash #EAF4F1); matches Plan-05 pattern, NO sticker */}
               <div className="grid grid-cols-3 gap-2">
                 {SIZES.map((size) => (
                   <button
@@ -244,8 +245,8 @@ export default function PortalNewDogPage() {
                     className={cn(
                       "rounded-xl border px-3 py-2 text-sm capitalize transition-colors",
                       form.size === size
-                        ? "border-violet-400 bg-violet-50 text-violet-800"
-                        : "border-stone-200 bg-white text-stone-600 hover:border-violet-200",
+                        ? "border-primary bg-[#EAF4F1] text-primary"
+                        : "border-border bg-surface text-muted-foreground hover:border-primary/40",
                     )}
                   >
                     {size}
@@ -315,32 +316,32 @@ export default function PortalNewDogPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-0">
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-700">
-                Profile photo <span className="font-normal text-stone-500">(optional)</span>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Profile photo <span className="font-normal text-muted-foreground">(optional)</span>
               </label>
               <input
                 type="file"
                 accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                 onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-stone-600 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-violet-700"
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
-              <p className="mt-1 text-xs text-stone-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 JPG, PNG, or WEBP up to 10 MB.
               </p>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Vaccination record
               </label>
               <input
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
                 onChange={(e) => setVaccinationFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-stone-600 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-violet-700"
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Optional additional document
               </label>
               <select
@@ -348,7 +349,7 @@ export default function PortalNewDogPage() {
                 onChange={(e) =>
                   setOptionalDocType(e.target.value as DogDocumentType)
                 }
-                className="mb-2 w-full rounded-xl border border-violet-200 bg-white px-4 py-3 text-sm"
+                className="mb-2 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 {DOCUMENT_TYPES.filter((t) => t.value !== "vaccination").map(
                   (type) => (
@@ -362,10 +363,10 @@ export default function PortalNewDogPage() {
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
                 onChange={(e) => setOptionalFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-stone-600 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-violet-700"
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
             </div>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-muted-foreground">
               PDF, JPG, PNG, or WEBP up to 10 MB each.
             </p>
           </CardContent>
@@ -373,7 +374,7 @@ export default function PortalNewDogPage() {
 
         {error && (
           <p
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
             role="alert"
           >
             {error}
@@ -381,7 +382,14 @@ export default function PortalNewDogPage() {
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" size="lg" disabled={isSubmitting}>
+          {/* Documented portal sticker exception (Plan 05): primary submit CTA only —
+              border 2.5px + shadow 4px 4px 0 #06342F. Nowhere else, never in staff app. */}
+          <Button
+            type="submit"
+            size="lg"
+            className="border-[2.5px] border-[#06342F] shadow-[4px_4px_0_#06342F] disabled:shadow-none"
+            disabled={isSubmitting}
+          >
             {phase === "creating"
               ? "Creating profile..."
               : phase === "uploading"

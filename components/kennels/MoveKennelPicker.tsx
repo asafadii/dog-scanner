@@ -79,16 +79,16 @@ export function MoveKennelPicker({
   return (
     <div
       className={cn(
-        "rounded-xl border border-stone-200 bg-stone-50 p-4",
+        "rounded-xl border border-border bg-muted p-4",
         className,
       )}
     >
       <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-stone-900">Move Kennel</p>
+        <p className="text-sm font-semibold text-foreground">Move Kennel</p>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-200/70"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
           aria-label="Close move kennel picker"
         >
           <X className="h-5 w-5" />
@@ -96,8 +96,9 @@ export function MoveKennelPicker({
       </div>
 
       {error && (
+        // #FEF2F2 = documented Alert error tint (Alert.tsx precedent, D-04)
         <div
-          className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+          className="mb-3 rounded-lg border border-danger/25 bg-[#FEF2F2] px-3 py-2 text-sm text-danger"
           role="alert"
         >
           {error}
@@ -108,7 +109,7 @@ export function MoveKennelPicker({
         <div>
           <label
             htmlFor={`move-location-${checkinId}`}
-            className="mb-1.5 block text-sm font-medium text-stone-700"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Location
           </label>
@@ -117,7 +118,7 @@ export function MoveKennelPicker({
             value={locationType}
             onChange={(e) => setLocationType(e.target.value as LocationType)}
             disabled={submitting}
-            className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-900 focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20"
+            className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             {LOCATION_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -131,17 +132,17 @@ export function MoveKennelPicker({
           <div>
             <label
               htmlFor={`move-kennel-${checkinId}`}
-              className="mb-1.5 block text-sm font-medium text-stone-700"
+              className="mb-1.5 block text-sm font-medium text-foreground"
             >
               Kennel
             </label>
             {loadingKennels ? (
-              <div className="flex items-center gap-2 py-2 text-sm text-stone-500">
+              <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 Loading kennels...
               </div>
             ) : kennels.length === 0 ? (
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 No active kennels configured. Add kennels in Settings.
               </p>
             ) : (
@@ -150,7 +151,7 @@ export function MoveKennelPicker({
                 value={kennelId}
                 onChange={(e) => setKennelId(e.target.value)}
                 disabled={submitting}
-                className="h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-900 focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20"
+                className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 {kennels.map((kennel) => (
                   <option key={kennel.id} value={kennel.id}>

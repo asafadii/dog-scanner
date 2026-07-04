@@ -80,18 +80,25 @@ export default function PortalSignupPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-[#F5F3FF]">
-      <header className="border-b border-violet-200/60 bg-white/90 backdrop-blur-sm">
+    <div className="flex min-h-full flex-col bg-background">
+      {/* Mint operational top bar (documented mint-wash literals #EAF4F1 / #D9EAE4), mirrors PortalShell (Plan 05) */}
+      <header className="border-b border-[#D9EAE4] bg-[#EAF4F1] backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-lg items-center px-4">
           <Link
             href="/"
-            className="flex items-center gap-2 text-violet-700 transition-colors hover:text-violet-800"
+            className="flex items-center gap-2 transition-opacity hover:opacity-90"
+            aria-label="DORA home"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm">
-              <Image src="/portal-logo.svg" alt="DORA" width={32} height={32} />
-            </span>
-            <span className="text-lg font-semibold tracking-tight">
-              DORA Portal
+            <Image
+              src="/dora-icon.svg"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              aria-hidden
+            />
+            <span className="font-display text-lg font-bold text-primary">
+              hello DORA
             </span>
           </Link>
         </div>
@@ -100,10 +107,10 @@ export default function PortalSignupPage() {
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="p-8">
-            <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Create client account
             </h1>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Sign up to manage your dogs at your daycare
             </p>
 
@@ -148,7 +155,7 @@ export default function PortalSignupPage() {
 
               {error && (
                 <p
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                  className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                   role="alert"
                 >
                   {error}
@@ -156,39 +163,42 @@ export default function PortalSignupPage() {
               )}
 
               {info && (
+                // Info notice on the mint operational register (documented mint-wash #EAF4F1 / #D9EAE4)
                 <p
-                  className="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-800"
+                  className="rounded-xl border border-[#D9EAE4] bg-[#EAF4F1] px-4 py-3 text-sm text-primary"
                   role="status"
                 >
                   {info}
                 </p>
               )}
 
+              {/* Documented portal sticker exception (Plan 05): primary submit CTA only —
+                  border 2.5px + shadow 4px 4px 0 #06342F. Nowhere else, never in staff app. */}
               <Button
                 type="submit"
                 size="lg"
-                className="w-full"
+                className="w-full border-[2.5px] border-[#06342F] shadow-[4px_4px_0_#06342F] disabled:shadow-none"
                 disabled={loading}
               >
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-stone-500">
+            <p className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="font-medium text-violet-600 hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 Sign in
               </Link>
             </p>
 
-            <p className="mt-3 text-center text-sm text-stone-500">
+            <p className="mt-3 text-center text-sm text-muted-foreground">
               Staff member?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-teal-600 hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 Facility signup
               </Link>

@@ -16,7 +16,7 @@ export default function PortalDogDetailPage({
 
   if (!clientId || !facilityId) {
     return (
-      <p className="text-sm text-red-800" role="alert">
+      <p className="text-sm text-danger" role="alert">
         Missing dog or facility context.
       </p>
     );

@@ -91,7 +91,7 @@ export function DogPhotoUpload({
     <div className={cn("space-y-3", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border border-stone-200 bg-stone-50",
+          "relative overflow-hidden rounded-2xl border border-border bg-muted",
           compact ? "h-40" : "h-48 sm:h-56",
         )}
       >
@@ -105,7 +105,7 @@ export function DogPhotoUpload({
             unoptimized={displayUrl.startsWith("blob:")}
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-stone-400">
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <PawPrint className="h-10 w-10" aria-hidden />
             <p className="text-sm">No photo selected</p>
           </div>
@@ -142,13 +142,13 @@ export function DogPhotoUpload({
           <Camera className="h-4 w-4" aria-hidden />
           {displayUrl ? "Change Photo" : "Add Photo"}
         </Button>
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-muted-foreground">
           JPG, PNG, or WEBP · Max 10 MB
         </p>
       </div>
 
       {error && (
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-sm text-danger" role="alert">
           {error}
         </p>
       )}

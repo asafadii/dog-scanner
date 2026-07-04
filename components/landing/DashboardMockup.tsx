@@ -1,70 +1,71 @@
 const STATS = [
-  { label: "Checked in", value: "24" },
-  { label: "Arrivals today", value: "9" },
-  { label: "Boarding", value: "6" },
+  { label: "Checked in", value: "24", tile: "bg-[#EAF4F1]", num: "text-[#06342F]", lab: "text-[#045C54]" },
+  { label: "Arrivals", value: "9", tile: "bg-[#F7E9C4]", num: "text-[#5a4a1e]", lab: "text-[#5a4a1e]" },
+  { label: "Boarding", value: "6", tile: "bg-primary", num: "text-white", lab: "text-[#bfe9e1]" },
 ];
 
 const DOGS = [
-  { name: "Biscuit", breed: "Golden Retriever", kennel: "A-12" },
-  { name: "Mochi", breed: "Shiba Inu", kennel: "B-04" },
-  { name: "Pepper", breed: "Border Collie", kennel: "C-07" },
+  { name: "Max", breed: "Golden Retriever", kennel: "A-12" },
+  { name: "Luna", breed: "Border Collie", kennel: "B-04" },
+  { name: "Rocky", breed: "Pit Bull Mix", kennel: "C-07" },
 ];
+
+function PawIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 28 28" fill="#077D73" aria-hidden>
+      <ellipse cx="14" cy="18.5" rx="6.6" ry="5.6" />
+      <circle cx="5.6" cy="12" r="2.5" />
+      <circle cx="10.6" cy="7.4" r="2.6" />
+      <circle cx="17.4" cy="7.4" r="2.6" />
+      <circle cx="22.4" cy="12" r="2.5" />
+    </svg>
+  );
+}
 
 export function DashboardMockup() {
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-[oklch(0.885_0.000_89.9)] bg-white shadow-xl shadow-[oklch(0.531_0.092_185.0/0.08)]"
+      className="rounded-[22px] border-[3px] border-[#06342F] bg-white p-[18px] shadow-sticker-xl"
       aria-hidden
     >
-      <div className="flex items-center gap-2 border-b border-[oklch(0.885_0.000_89.9)] bg-[oklch(0.985_0_0)] px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-[oklch(0.885_0.000_89.9)]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[oklch(0.885_0.000_89.9)]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[oklch(0.885_0.000_89.9)]" />
-        <div className="ml-3 h-6 flex-1 rounded-md bg-[oklch(0.885_0.000_89.9/0.6)]" />
-      </div>
-
-      <div className="p-5">
-        <div className="grid grid-cols-3 gap-3">
-          {STATS.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-[oklch(0.885_0.000_89.9)] bg-[oklch(0.985_0_0)] p-3"
+      <div className="grid grid-cols-3 gap-2.5">
+        {STATS.map((stat) => (
+          <div
+            key={stat.label}
+            className={`rounded-[13px] border-2 border-[#06342F] p-3 ${stat.tile}`}
+          >
+            <p className={`text-[11.5px] font-bold ${stat.lab}`}>{stat.label}</p>
+            <p
+              className={`font-display text-[30px] font-extrabold leading-[1.1] ${stat.num}`}
             >
-              <p className="text-xs text-[oklch(0.556_0.000_89.9)]">{stat.label}</p>
-              <p className="mt-1 text-2xl font-bold tabular-nums text-[oklch(0.205_0.006_89.9)]">
-                {stat.value}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 rounded-xl border border-[oklch(0.885_0.000_89.9)]">
-          <div className="border-b border-[oklch(0.885_0.000_89.9)] px-4 py-2.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[oklch(0.556_0.000_89.9)]">
-              Checked in now
+              {stat.value}
             </p>
           </div>
-          <ul className="divide-y divide-[oklch(0.885_0.000_89.9)]">
-            {DOGS.map((dog) => (
-              <li
-                key={dog.name}
-                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-              >
-                <div>
-                  <p className="font-semibold text-[oklch(0.205_0.006_89.9)]">
-                    {dog.name}
-                  </p>
-                  <p className="text-xs text-[oklch(0.556_0.000_89.9)]">
-                    {dog.breed}
-                  </p>
-                </div>
-                <span className="rounded-md bg-[oklch(0.828_0.050_180.2)] px-2 py-0.5 text-xs font-medium text-[oklch(0.531_0.092_185.0)]">
-                  {dog.kennel}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        ))}
+      </div>
+
+      <p className="mx-0.5 mb-2 mt-[15px] text-[11px] font-extrabold uppercase tracking-[0.08em] text-primary">
+        Checked in now
+      </p>
+
+      <div className="flex flex-col gap-[9px]">
+        {DOGS.map((dog) => (
+          <div
+            key={dog.name}
+            className="flex items-center gap-[11px] rounded-[13px] border-2 border-[#06342F] p-2.5"
+          >
+            <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-[#EAF4F1]">
+              <PawIcon />
+            </span>
+            <span className="flex-1">
+              <span className="block text-[14.5px] font-extrabold">{dog.name}</span>
+              <span className="block text-[12.5px] text-[#8a9089]">{dog.breed}</span>
+            </span>
+            <span className="rounded-[7px] bg-primary px-[9px] py-1 text-[12px] font-extrabold text-white">
+              {dog.kennel}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

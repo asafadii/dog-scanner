@@ -79,31 +79,31 @@ export function StaffAccountsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <User className="h-5 w-5 text-stone-400" aria-hidden />
+          <User className="h-5 w-5 text-muted-foreground" aria-hidden />
           Staff Accounts
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
         {loading ? (
-          <div className="flex items-center gap-2 py-4 text-sm text-stone-500">
+          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Loading staff accounts...
           </div>
         ) : error ? (
-          <p className="text-sm text-red-700" role="alert">
+          <p className="text-sm text-danger" role="alert">
             {error}
           </p>
         ) : (
           <>
             {showLimitUi && subscription && staffLimitLabel && (
               <div className="space-y-2">
-                <p className="text-sm text-stone-600">
+                <p className="text-sm text-muted-foreground">
                   {staffCount} of {staffLimitLabel} staff accounts used
                 </p>
                 {subscription.plan === "dora" && subscription.staffLimit <= 100 && (
-                  <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-[oklch(0.531_0.092_185.0)] transition-all"
+                      className="h-full rounded-full bg-primary transition-all"
                       style={{ width: `${usagePercent}%` }}
                       role="progressbar"
                       aria-valuenow={staffCount}
@@ -116,9 +116,9 @@ export function StaffAccountsSection() {
               </div>
             )}
 
-            <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200">
+            <ul className="divide-y divide-border rounded-xl border border-border">
               {staff.length === 0 ? (
-                <li className="px-4 py-6 text-center text-sm text-stone-500">
+                <li className="px-4 py-6 text-center text-sm text-muted-foreground">
                   No staff accounts yet.
                 </li>
               ) : (
@@ -128,10 +128,10 @@ export function StaffAccountsSection() {
                     className="flex items-center justify-between gap-3 px-4 py-3"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-stone-900">
+                      <p className="truncate font-medium text-foreground">
                         {member.fullName}
                       </p>
-                      <p className="truncate text-sm text-stone-500">
+                      <p className="truncate text-sm text-muted-foreground">
                         {member.email}
                       </p>
                     </div>
@@ -139,8 +139,8 @@ export function StaffAccountsSection() {
                       className={cn(
                         "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
                         member.role === "admin"
-                          ? "bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]"
-                          : "bg-stone-100 text-stone-600",
+                          ? "bg-[#EAF4F1] text-primary" // #EAF4F1 documented mint-wash (D-04)
+                          : "bg-muted text-muted-foreground",
                       )}
                     >
                       {member.role}

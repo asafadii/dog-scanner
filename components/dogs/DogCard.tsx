@@ -41,8 +41,9 @@ function ServiceTypeBadge({
       className={cn(
         "inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-bold uppercase tracking-wide",
         isDaycare
-          ? "bg-amber-400 text-amber-950"
-          : "bg-indigo-700 text-white",
+          ? // marker = #F2D98A; #5a4a1e = documented marker-text literal (D-04)
+            "bg-marker text-[#5a4a1e]"
+          : "bg-service-boarding text-white",
       )}
     >
       {formatServiceLabel(serviceType)}
@@ -96,10 +97,10 @@ export function DogCard({
   return (
     <article
       className={cn(
-        "relative overflow-hidden rounded-2xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md",
+        "relative overflow-hidden rounded-2xl border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md",
         critical
-          ? "border-red-200 ring-1 ring-red-100"
-          : "border-stone-200/80",
+          ? "border-danger/40 ring-1 ring-danger/20"
+          : "border-border",
         className,
       )}
       aria-label={`${dog.name}, ${dog.breed}, ${isCheckedIn ? "checked in" : "checked out"}`}
@@ -108,16 +109,16 @@ export function DogCard({
         className={cn(
           "absolute inset-y-0 left-0 w-1",
           critical
-            ? "bg-red-400"
+            ? "bg-danger"
             : isCheckedIn
-              ? "bg-emerald-400"
-              : "bg-stone-300",
+              ? "bg-success"
+              : "bg-muted-foreground/40",
         )}
         aria-hidden
       />
 
       <div className="flex gap-3 pl-2">
-        <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-stone-100 sm:h-20 sm:w-20">
+        <div className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-muted sm:h-20 sm:w-20">
           <Image
             src={getDogPhotoSrc(dog.photoUrl)}
             alt={`Photo of ${dog.name}`}
@@ -128,7 +129,7 @@ export function DogCard({
           <span
             className={cn(
               "absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white",
-              isCheckedIn ? "bg-emerald-500" : "bg-stone-400",
+              isCheckedIn ? "bg-success" : "bg-muted-foreground",
             )}
             aria-hidden
           />
@@ -145,7 +146,7 @@ export function DogCard({
                     setServiceChangeOpen(true);
                     setServiceChangeError(null);
                   }}
-                  className="text-xs font-semibold text-stone-500 underline-offset-2 hover:text-stone-700 hover:underline"
+                  className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                 >
                   Change
                 </button>
@@ -154,12 +155,12 @@ export function DogCard({
           )}
 
           {serviceChangeOpen && canChangeServiceType && (
-            <div className="mb-2 rounded-xl border border-stone-200 bg-stone-50 p-3">
-              <p className="text-sm font-medium text-stone-800">
+            <div className="mb-2 rounded-xl border border-border bg-muted p-3">
+              <p className="text-sm font-medium text-foreground">
                 Change to {formatServiceLabel(alternateServiceType)}?
               </p>
               {serviceChangeError && (
-                <p className="mt-1 text-xs text-red-700" role="alert">
+                <p className="mt-1 text-xs text-danger" role="alert">
                   {serviceChangeError}
                 </p>
               )}
@@ -185,10 +186,10 @@ export function DogCard({
 
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h3 className="truncate text-lg font-semibold leading-tight text-stone-900">
+              <h3 className="truncate text-lg font-semibold leading-tight text-foreground">
                 {dog.name}
               </h3>
-              <p className="mt-0.5 truncate text-sm text-stone-500">
+              <p className="mt-0.5 truncate text-sm text-muted-foreground">
                 {dog.breed}
                 <span aria-hidden> · </span>
                 {dog.age}
@@ -211,9 +212,9 @@ export function DogCard({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-stone-100 pt-3 pl-2 text-sm text-stone-500">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3 pl-2 text-sm text-muted-foreground">
         <span className="flex min-w-0 items-center gap-1.5">
-          <User className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
+          <User className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
           <span className="truncate" title={dog.owner.name}>
             {dog.owner.name}
           </span>
@@ -234,7 +235,7 @@ export function DogCard({
             className="flex items-center gap-1 tabular-nums"
             dateTime={dog.lastCheckIn ?? undefined}
           >
-            <Clock className="h-4 w-4 text-stone-400" aria-hidden />
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden />
             {formatCheckInTime(dog.lastCheckIn)}
           </time>
         </div>

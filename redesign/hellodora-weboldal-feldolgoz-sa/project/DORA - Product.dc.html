@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#E7E0D2;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-family:'Plus Jakarta Sans',sans-serif}
+  @keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-10px) rotate(var(--r,0deg))}}
+  .dora-scroll::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<div style="min-width:1360px;padding:0 0 120px;color:#17211D">
+
+  <!-- ============ DOC HEADER ============ -->
+  <div style="background:#06342F;color:#fff;padding:30px 48px;display:flex;flex-wrap:wrap;align-items:center;gap:22px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="dora-badge.svg" alt="DORA" width="52" height="52" style="border-radius:15px;display:block">
+      <div style="line-height:1.05">
+        <div style="font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;letter-spacing:-.01em">hello DORA</div>
+        <div style="font-size:13px;color:#A4D2C8;font-weight:600">Product design system &amp; screens · built on variant 1b</div>
+      </div>
+    </div>
+    <p style="margin:0;font-size:13.5px;line-height:1.55;color:#c8ddd7;max-width:560px">Favicon-derived palette (deep green <b style="color:#fff">#077D73</b>, mint <b style="color:#fff">#A4D2C8</b>). Landing keeps 100% playful energy; the staff app dials it down for operational clarity. Pan &amp; zoom the board.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-left:auto">
+      <a href="#ds" style="text-decoration:none;font-size:12.5px;font-weight:800;color:#06342F;background:#A4D2C8;padding:9px 15px;border-radius:999px">Design system</a>
+      <a href="#landing" style="text-decoration:none;font-size:12.5px;font-weight:800;color:#fff;background:#077D73;padding:9px 15px;border-radius:999px">Landing</a>
+      <a href="#staff" style="text-decoration:none;font-size:12.5px;font-weight:800;color:#fff;background:#077D73;padding:9px 15px;border-radius:999px">Staff app</a>
+      <a href="#portal" style="text-decoration:none;font-size:12.5px;font-weight:800;color:#fff;background:#077D73;padding:9px 15px;border-radius:999px">Owner portal</a>
+    </div>
+  </div>
+
+  <!-- fixed jump pill -->
+  <div style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;gap:3px;align-items:center;background:rgba(6,52,47,.94);backdrop-filter:blur(8px);padding:6px;border-radius:999px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)">
+    <a href="#ds" style="text-decoration:none;font-size:12px;font-weight:800;color:#fff;padding:8px 14px;border-radius:999px">DS</a>
+    <a href="#landing" style="text-decoration:none;font-size:12px;font-weight:800;color:#fff;padding:8px 14px;border-radius:999px">Landing</a>
+    <a href="#staff" style="text-decoration:none;font-size:12px;font-weight:800;color:#fff;padding:8px 14px;border-radius:999px">Staff</a>
+    <a href="#portal" style="text-decoration:none;font-size:12px;font-weight:800;color:#fff;padding:8px 14px;border-radius:999px">Portal</a>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- =============== 1 · DESIGN SYSTEM ================== -->
+  <!-- ==================================================== -->
+  <section id="ds" data-screen-label="Design System" style="padding:56px 48px 20px;scroll-margin-top:0">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 6px">
+        <span style="font-family:'Baloo 2',cursive;font-size:13px;font-weight:800;color:#fff;background:#077D73;padding:5px 13px;border-radius:999px">01</span>
+        <h2 style="font-family:'Baloo 2',cursive;font-size:34px;font-weight:800;letter-spacing:-.01em;margin:0">Design System</h2>
+      </div>
+      <p style="margin:0 0 30px;font-size:15px;color:#5b665f;max-width:640px">The building blocks, tuned to the hello DORA brand. Two registers: <b style="color:#17211D">Playful</b> (landing — sticker cards, hard shadows) and <b style="color:#17211D">Operational</b> (staff app — calm, dense, legible).</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+        <!-- BRAND / LOGO -->
+        <div style="grid-column:1/-1;background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:20px">Brand · logo is final, never redraw</div>
+          <div style="display:flex;flex-wrap:wrap;gap:36px;align-items:center">
+            <div style="text-align:center">
+              <div style="width:120px;height:120px;border-radius:28px;background:#FBF4E9;border:1.5px solid #E4DCCB;display:flex;align-items:center;justify-content:center"><img src="dora-icon.svg" alt="DORA icon" width="78" height="78" style="display:block"></div>
+              <div style="font-size:12px;color:#6E7A75;margin-top:8px;font-weight:600">Icon · light bg</div>
+            </div>
+            <div style="text-align:center">
+              <div style="width:120px;height:120px;border-radius:28px;background:#06342F;display:flex;align-items:center;justify-content:center"><img src="dora-badge.svg" alt="DORA badge" width="86" height="86" style="border-radius:20px;display:block"></div>
+              <div style="font-size:12px;color:#6E7A75;margin-top:8px;font-weight:600">Badge · dark bg</div>
+            </div>
+            <div style="border-left:1.5px solid #EEE7D8;padding-left:36px">
+              <div style="font-size:12px;color:#9a9280;font-weight:700;margin-bottom:12px">LOCKUP</div>
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+                <img src="dora-icon.svg" alt="" width="44" height="44" style="display:block">
+                <span style="line-height:1"><span style="display:block;font-size:12px;font-weight:600;color:#8a9089">hello</span><span style="display:block;font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;color:#077D73;letter-spacing:-.01em">DORA</span></span>
+              </div>
+              <div style="display:inline-flex;align-items:center;gap:10px;background:#06342F;padding:11px 16px;border-radius:14px">
+                <img src="dora-badge.svg" alt="" width="30" height="30" style="border-radius:8px;display:block">
+                <span style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:#fff">hello DORA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLOR -->
+        <div style="grid-column:1/-1;background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:20px">Color</div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
+            <div><div style="height:66px;border-radius:14px;background:#077D73;border:1px solid rgba(0,0,0,.06)"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Green</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#077D73</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#045C54"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Green dark</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#045C54</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#06342F"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Outline/ink</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#06342F</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#A4D2C8"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Mint</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#A4D2C8</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#EAF4F1;border:1px solid #E4DCCB"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Mint wash</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#EAF4F1</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#F2D98A"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Marker</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#F2D98A</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#FBF4E9;border:1px solid #E4DCCB"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Cream</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#FBF4E9</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#FAFAF8;border:1px solid #E4DCCB"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">App bg</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#FAFAF8</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#DC2626"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Danger</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#DC2626</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#EA580C"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Caution</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#EA580C</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#6D28D9"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Meds</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#6D28D9</div></div>
+            <div><div style="height:66px;border-radius:14px;background:#17211D"></div><div style="font-size:12.5px;font-weight:700;margin-top:7px">Ink</div><div style="font-size:11px;color:#8a9089;font-family:ui-monospace,monospace">#17211D</div></div>
+          </div>
+        </div>
+
+        <!-- TYPOGRAPHY -->
+        <div style="grid-column:1/-1;background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:20px">Typography</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+            <div>
+              <div style="font-size:12px;color:#8a9089;font-weight:700;margin-bottom:10px">Baloo 2 · display &amp; headings</div>
+              <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:46px;line-height:1;letter-spacing:-.01em">Good dogs<br>only.</div>
+              <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:24px;margin-top:16px">Section heading 24 / 700</div>
+              <div style="font-family:'Baloo 2',cursive;font-weight:600;font-size:18px;margin-top:8px;color:#3a463f">Card title 18 / 600</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:#8a9089;font-weight:700;margin-bottom:10px">Plus Jakarta Sans · UI &amp; body</div>
+              <p style="font-size:16px;line-height:1.6;color:#3a463f;margin:0 0 12px;max-width:360px">Body 16 / 400 — Manage bookings, check-ins, boarding and payments from one modern platform built for dog daycares.</p>
+              <p style="font-size:14px;font-weight:600;color:#17211D;margin:0 0 6px">Label 14 / 600 · Dog name</p>
+              <p style="font-size:13px;color:#6E7A75;margin:0 0 6px">Meta 13 / 400 · Border Collie · 2 years</p>
+              <p style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#077D73;margin:0">Overline 11 · Checked in now</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUTTONS -->
+        <div style="background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:18px">Buttons</div>
+          <div style="font-size:11px;color:#9a9280;font-weight:700;margin-bottom:10px">OPERATIONAL (app)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px">
+            <span style="display:inline-flex;align-items:center;height:44px;padding:0 20px;border-radius:12px;background:#077D73;color:#fff;font-size:14.5px;font-weight:700">Primary</span>
+            <span style="display:inline-flex;align-items:center;height:44px;padding:0 20px;border-radius:12px;background:#fff;border:1.5px solid #E0E4E0;color:#3a463f;font-size:14.5px;font-weight:700">Outline</span>
+            <span style="display:inline-flex;align-items:center;height:44px;padding:0 20px;border-radius:12px;background:#DC2626;color:#fff;font-size:14.5px;font-weight:700">Danger</span>
+            <span style="display:inline-flex;align-items:center;height:44px;padding:0 16px;border-radius:12px;color:#5b665f;font-size:14.5px;font-weight:700">Ghost</span>
+          </div>
+          <div style="font-size:11px;color:#9a9280;font-weight:700;margin-bottom:10px">PLAYFUL (landing)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center">
+            <span style="display:inline-flex;align-items:center;height:46px;padding:0 22px;border-radius:14px;background:#077D73;color:#fff;font-size:15px;font-weight:800;border:2.5px solid #06342F;box-shadow:4px 4px 0 #06342F">Sticker primary</span>
+            <span style="display:inline-flex;align-items:center;height:46px;padding:0 22px;border-radius:14px;background:#F2D98A;color:#5a4a1e;font-size:15px;font-weight:800;border:2.5px solid #06342F;box-shadow:4px 4px 0 #06342F">Marker</span>
+          </div>
+        </div>
+
+        <!-- FORM CONTROLS -->
+        <div style="background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:18px">Form controls</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div><div style="font-size:13px;font-weight:600;color:#3a463f;margin-bottom:6px">Text input</div><div style="height:46px;border-radius:12px;border:1.5px solid #E0E4E0;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:14px;color:#17211D">Biscuit</div></div>
+            <div><div style="font-size:13px;font-weight:600;color:#3a463f;margin-bottom:6px">Focused</div><div style="height:46px;border-radius:12px;border:2px solid #077D73;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:14px;color:#17211D;box-shadow:0 0 0 3px rgba(7,125,115,.15)">Golden Retriever</div></div>
+            <div style="display:flex;gap:10px"><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#3a463f;margin-bottom:6px">Segmented</div><div style="display:flex;gap:8px"><span style="flex:1;text-align:center;height:44px;line-height:44px;border-radius:12px;border:1.5px solid #077D73;background:#EAF4F1;color:#045C54;font-size:14px;font-weight:700">Daycare</span><span style="flex:1;text-align:center;height:44px;line-height:44px;border-radius:12px;border:1.5px solid #E0E4E0;background:#fff;color:#6E7A75;font-size:14px;font-weight:600">Boarding</span></div></div></div>
+            <label style="display:flex;align-items:center;gap:11px;height:46px;border-radius:12px;border:1.5px solid #E0E4E0;padding:0 14px"><span style="width:20px;height:20px;border-radius:6px;background:#077D73;display:inline-flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg></span><span style="font-size:14px;font-weight:600;color:#3a463f">Transport required</span></label>
+          </div>
+        </div>
+
+        <!-- STATUS BADGES -->
+        <div style="background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:18px">Status &amp; service badges</div>
+          <div style="font-size:11px;color:#9a9280;font-weight:700;margin-bottom:9px">DOG STATUS</div>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px"><span style="width:7px;height:7px;border-radius:50%;background:#10B981"></span>Checked in</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#F5F5F4;color:#57534E;border:1px solid #E7E5E4;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px"><span style="width:7px;height:7px;border-radius:50%;background:#A8A29E"></span>Checked out</span>
+          </div>
+          <div style="font-size:11px;color:#9a9280;font-weight:700;margin-bottom:9px">BOOKING STATUS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+            <span style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px">Pending</span>
+            <span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px">Approved</span>
+            <span style="background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px">Rejected</span>
+            <span style="background:#F5F5F4;color:#57534E;border:1px solid #E7E5E4;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px">Completed</span>
+          </div>
+          <div style="font-size:11px;color:#9a9280;font-weight:700;margin-bottom:9px">SERVICE TYPE</div>
+          <div style="display:flex;gap:8px">
+            <span style="background:#F2D98A;color:#5a4a1e;font-size:12px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:6px 12px;border-radius:9px">Daycare</span>
+            <span style="background:#4338CA;color:#fff;font-size:12px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:6px 12px;border-radius:9px">Overnight</span>
+          </div>
+        </div>
+
+        <!-- SAFETY FLAGS — emphasized -->
+        <div style="background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:6px">Safety flags <span style="color:#DC2626">· loudest element on any dog</span></div>
+          <p style="font-size:13px;color:#6E7A75;margin:0 0 16px">High-contrast solid fills. Priority: allergy → aggression → escape → medication. Never cute.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px">
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#DC2626;color:#fff;font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>Allergy</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#EA580C;color:#fff;font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/></svg>Aggression</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#E11D48;color:#fff;font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4H6v16h7"/><path d="M13 2v20l6-3V5z"/><circle cx="15.5" cy="12" r="1" fill="#fff" stroke="none"/></svg>Escape risk</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#6D28D9;color:#fff;font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5-7-7a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 1 1-7 7z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>Medication</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c0-3 2-5 5-5-.5 3-2 5-5 5zM12 22c-4 0-7-4-7-9 0-3 2-6 5-6 1.5 0 2 1 2 1s.5-1 2-1c3 0 5 3 5 6 0 5-3 9-7 9z"/></svg>Diet</span>
+          </div>
+          <div style="border:2px solid #FCA5A5;background:#FEF2F2;border-radius:14px;padding:14px 16px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#991B1B;margin-bottom:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>Critical alert callout</div>
+            <div style="background:#fff;border:1px solid #FECACA;border-radius:10px;padding:10px 12px"><div style="font-size:13px;font-weight:800;color:#991B1B">Aggression Caution</div><div style="font-size:13px;color:#B91C1C;margin-top:2px">Reactive to unfamiliar male dogs. Keep separate during group play.</div></div>
+          </div>
+        </div>
+
+        <!-- LIST ROW / CARD -->
+        <div style="background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:18px">Dog card · list row</div>
+          <div style="position:relative;overflow:hidden;border-radius:16px;border:1px solid #FECACA;box-shadow:0 1px 2px rgba(0,0,0,.04);background:#fff;padding:14px 14px 14px 16px">
+            <div style="position:absolute;inset-block:0;left:0;width:5px;background:#DC2626"></div>
+            <div style="display:flex;gap:12px">
+              <div style="width:60px;height:60px;border-radius:13px;background:#EAF4F1;flex:none;display:flex;align-items:center;justify-content:center;position:relative"><svg width="30" height="30" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg><span style="position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#10B981;border:2px solid #fff"></span></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+                  <div><div style="font-size:16px;font-weight:700;color:#17211D">Rocky</div><div style="font-size:13px;color:#6E7A75">Pit Bull Mix · 5 years · large</div></div>
+                  <span style="background:#4338CA;color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;padding:4px 9px;border-radius:8px">Overnight</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;background:#EA580C;color:#fff;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/></svg>Aggression</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;background:#6D28D9;color:#fff;font-size:11.5px;font-weight:800;padding:4px 9px;border-radius:8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5-7-7a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 1 1-7 7z"/></svg>Meds</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #F0EEE9;margin-top:12px;padding-top:11px;font-size:13px;color:#6E7A75"><span>Maria Garcia</span><span>30m ago</span></div>
+          </div>
+          <p style="font-size:12px;color:#9a9280;margin:12px 0 0">Red rail + ring = has a critical flag.</p>
+        </div>
+
+        <!-- BOTTOM NAV + EMPTY -->
+        <div style="background:#fff;border:1.5px solid #E4DCCB;border-radius:22px;padding:28px">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin-bottom:18px">Bottom navigation</div>
+          <div style="border:1px solid #E7E5E4;border-radius:16px;overflow:hidden;background:#fff;display:flex;justify-content:space-around;padding:8px 4px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#077D73;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span style="font-size:10.5px;font-weight:700">Dashboard</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg><span style="font-size:10.5px;font-weight:600">Bookings</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><span style="font-size:10.5px;font-weight:600">Check-ins</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="9"/></svg><span style="font-size:10.5px;font-weight:600">Reports</span></div>
+          </div>
+          <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9a9280;margin:22px 0 12px">Empty state</div>
+          <div style="border:1.5px dashed #D6CFC0;border-radius:16px;background:#FBF9F4;padding:26px;text-align:center">
+            <div style="width:48px;height:48px;border-radius:14px;background:#EAF4F1;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="24" height="24" viewBox="0 0 28 28" fill="#A4D2C8"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div>
+            <div style="font-size:14px;color:#5b665f;font-weight:600">No dogs checked in right now.</div>
+            <div style="font-size:13px;color:#9a9280;margin-top:3px">Scan a QR code to check one in.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+    <!-- ==================================================== -->
+  <!-- =============== 2 · LANDING PAGE =================== -->
+  <!-- ==================================================== -->
+  <section id="landing" data-screen-label="Landing page" style="padding:60px 48px 20px">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 6px">
+        <span style="font-family:'Baloo 2',cursive;font-size:13px;font-weight:800;color:#fff;background:#077D73;padding:5px 13px;border-radius:999px">02</span>
+        <h2 style="font-family:'Baloo 2',cursive;font-size:34px;font-weight:800;letter-spacing:-.01em;margin:0">Landing page</h2>
+      </div>
+      <p style="margin:0 0 26px;font-size:15px;color:#5b665f;max-width:680px">Variant 1b, recalibrated to the brand palette. Social-proof logo strip and pricing removed per the owner; footer carries the legal operator details.</p>
+
+      <!-- browser frame -->
+      <div style="border-radius:22px;overflow:hidden;border:3px solid #06342F;box-shadow:0 40px 80px -40px rgba(6,52,47,.55)">
+        <div style="background:#0b4a43;display:flex;align-items:center;gap:8px;padding:12px 16px">
+          <span style="width:12px;height:12px;border-radius:50%;background:#F2D98A"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:#A4D2C8"></span>
+          <span style="width:12px;height:12px;border-radius:50%;background:#6fb3a8"></span>
+          <div style="margin-left:14px;background:#083831;color:#9ec9c1;font-size:12.5px;font-weight:600;padding:6px 16px;border-radius:8px;display:flex;align-items:center;gap:8px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7fb8ae" stroke-width="2.5"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            hellodora.app
+          </div>
+        </div>
+
+        <!-- ===== LANDING BODY ===== -->
+        <div style="background:#FBF3E6;font-family:'Plus Jakarta Sans',sans-serif;color:#17211D">
+
+          <!-- HERO (green band) -->
+          <div style="position:relative;background:#077D73;overflow:hidden">
+            <div style="position:absolute;top:-40px;right:-30px;opacity:.10"><svg width="280" height="280" viewBox="0 0 28 28" fill="#fff"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div>
+
+            <!-- NAV -->
+            <nav style="position:relative;z-index:5;max-width:1140px;margin:0 auto;padding:22px 40px 8px;display:flex;align-items:center;gap:24px">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:#FBF3E6;border:2px solid #06342F;box-shadow:3px 3px 0 #06342F"><img src="dora-icon.svg" alt="" width="30" height="30" style="display:block"></span>
+                <span style="line-height:1"><span style="display:block;font-size:11px;font-weight:600;color:#a9ddd4">hello</span><span style="display:block;font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#fff">DORA</span></span>
+              </div>
+              <div style="display:flex;gap:28px;margin:0 auto;font-size:15px;font-weight:700">
+                <a href="#landing" style="text-decoration:none;color:#e8f6f2">Features</a>
+                <a href="#landing" style="text-decoration:none;color:#e8f6f2">How it works</a>
+                <a href="#landing" style="text-decoration:none;color:#e8f6f2">FAQ</a>
+              </div>
+              <div style="display:flex;align-items:center;gap:13px">
+                <a href="#landing" style="text-decoration:none;color:#fff;font-weight:700;font-size:15px">Sign In</a>
+                <a href="#landing" style="text-decoration:none;color:#077D73;background:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;border:2px solid #06342F;box-shadow:3px 3px 0 #06342F">Staff signup</a>
+                <a href="#landing" style="text-decoration:none;color:#fff;background:transparent;font-weight:800;font-size:14px;padding:10px 17px;border-radius:12px;border:2px solid rgba(255,255,255,.55)">Owner signup</a>
+              </div>
+            </nav>
+
+            <div style="position:relative;z-index:5;max-width:1140px;margin:0 auto;padding:46px 40px 84px;display:grid;grid-template-columns:1.02fr .98fr;gap:50px;align-items:center">
+              <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;background:#A4D2C8;color:#06342F;padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:800;border:2px solid #06342F;box-shadow:3px 3px 0 #06342F;text-transform:uppercase;letter-spacing:.03em"><img src="dora-icon.svg" alt="" width="15" height="15" style="display:block">Purpose-built for dog daycares</div>
+                <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:60px;line-height:1.08;letter-spacing:-.01em;margin:22px 0 0;color:#fff">The operating system for <span style="display:inline-block;position:relative;white-space:nowrap;color:#06342F;background:#F2D98A;padding:3px 12px;border-radius:10px;transform:rotate(-1.5deg);box-shadow:4px 4px 0 #06342F;margin-top:6px">dog daycares.</span></h1>
+                <p style="font-size:18.5px;line-height:1.6;color:#c9ece5;margin:40px 0 0;max-width:500px;font-weight:500">Manage bookings, check-ins, boarding, kennel assignments, payments, and daily operations from one modern platform built specifically for dog daycare businesses.</p>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:32px 0 0">
+                  <a href="#landing" style="text-decoration:none;color:#077D73;background:#fff;font-weight:800;font-size:16px;padding:16px 26px;border-radius:14px;border:2.5px solid #06342F;box-shadow:5px 5px 0 #06342F">Staff signup</a>
+                  <a href="#landing" style="text-decoration:none;color:#F2D98A;background:transparent;font-weight:800;font-size:16px;padding:15px 24px;border-radius:14px;border:2.5px solid #F2D98A">Owner signup</a>
+                  <a href="#landing" style="text-decoration:none;color:#fff;font-weight:800;font-size:16px;padding:15px 6px;display:inline-flex;align-items:center;gap:7px">Book a Demo →</a>
+                </div>
+                <p style="margin:22px 0 0;font-size:14px;color:#a9ddd4;font-weight:600">No credit card required · 14-day free trial</p>
+              </div>
+
+              <!-- hero sticker dashboard -->
+              <div style="position:relative">
+                <div style="position:absolute;top:-42px;left:-26px;z-index:3;--r:-10deg;animation:floaty 6s ease-in-out infinite"><span style="display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:20px;background:#F2D98A;border:3px solid #06342F;box-shadow:4px 4px 0 #06342F"><img src="dora-icon.svg" alt="" width="48" height="48" style="display:block"></span></div>
+                <div style="background:#fff;border:3px solid #06342F;border-radius:22px;box-shadow:8px 8px 0 #06342F;padding:18px">
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                    <div style="background:#EAF4F1;border:2px solid #06342F;border-radius:13px;padding:12px"><div style="font-size:11.5px;color:#045C54;font-weight:700">Checked in</div><div style="font-family:'Baloo 2',cursive;font-size:30px;font-weight:800;color:#06342F;line-height:1.1">24</div></div>
+                    <div style="background:#F7E9C4;border:2px solid #06342F;border-radius:13px;padding:12px"><div style="font-size:11.5px;color:#5a4a1e;font-weight:700">Arrivals</div><div style="font-family:'Baloo 2',cursive;font-size:30px;font-weight:800;color:#5a4a1e;line-height:1.1">9</div></div>
+                    <div style="background:#077D73;border:2px solid #06342F;border-radius:13px;padding:12px"><div style="font-size:11.5px;color:#bfe9e1;font-weight:700">Boarding</div><div style="font-family:'Baloo 2',cursive;font-size:30px;font-weight:800;color:#fff;line-height:1.1">6</div></div>
+                  </div>
+                  <div style="margin:15px 2px 9px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#077D73;text-transform:uppercase">Checked in now</div>
+                  <div style="display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:center;gap:11px;padding:10px;border:2px solid #06342F;border-radius:13px"><span style="width:34px;height:34px;border-radius:9px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><span style="flex:1"><span style="display:block;font-weight:800;font-size:14.5px">Max</span><span style="display:block;font-size:12.5px;color:#8a9089">Golden Retriever</span></span><span style="font-size:12px;font-weight:800;color:#fff;background:#077D73;padding:4px 9px;border-radius:7px">A-12</span></div>
+                    <div style="display:flex;align-items:center;gap:11px;padding:10px;border:2px solid #06342F;border-radius:13px"><span style="width:34px;height:34px;border-radius:9px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><span style="flex:1"><span style="display:block;font-weight:800;font-size:14.5px">Luna</span><span style="display:block;font-size:12.5px;color:#8a9089">Border Collie</span></span><span style="font-size:12px;font-weight:800;color:#fff;background:#077D73;padding:4px 9px;border-radius:7px">B-04</span></div>
+                    <div style="display:flex;align-items:center;gap:11px;padding:10px;border:2px solid #06342F;border-radius:13px"><span style="width:34px;height:34px;border-radius:9px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><span style="flex:1"><span style="display:block;font-weight:800;font-size:14.5px">Rocky</span><span style="display:block;font-size:12.5px;color:#8a9089">Pit Bull Mix</span></span><span style="font-size:12px;font-weight:800;color:#fff;background:#077D73;padding:4px 9px;border-radius:7px">C-07</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FEATURES -->
+          <div style="max-width:1140px;margin:0 auto;padding:80px 40px 40px;text-align:center">
+            <div style="display:inline-block;background:#F2D98A;color:#5a4a1e;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:999px;border:2px solid #06342F">Features</div>
+            <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:46px;letter-spacing:-.01em;color:#17211D;margin:16px 0 0;line-height:1.05">Everything your team needs, every day</h2>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:50px 0 0;text-align:left">
+              <div style="background:#fff;border:2.5px solid #06342F;border-radius:22px;padding:28px;box-shadow:6px 6px 0 #06342F"><span style="display:inline-flex;width:54px;height:54px;border-radius:16px;background:#A4D2C8;border:2px solid #06342F;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06342F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span><h3 style="font-family:'Baloo 2',cursive;font-size:21px;font-weight:700;margin:18px 0 7px">Live Dog Dashboard</h3><p style="margin:0;font-size:15px;line-height:1.55;color:#5b665f;font-weight:500">Know exactly which dogs are currently in your facility.</p></div>
+              <div style="background:#fff;border:2.5px solid #06342F;border-radius:22px;padding:28px;box-shadow:6px 6px 0 #06342F"><span style="display:inline-flex;width:54px;height:54px;border-radius:16px;background:#F2D98A;border:2px solid #06342F;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5a4a1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span><h3 style="font-family:'Baloo 2',cursive;font-size:21px;font-weight:700;margin:18px 0 7px">Online Bookings</h3><p style="margin:0;font-size:15px;line-height:1.55;color:#5b665f;font-weight:500">Let owners book daycare and boarding online.</p></div>
+              <div style="background:#fff;border:2.5px solid #06342F;border-radius:22px;padding:28px;box-shadow:6px 6px 0 #06342F"><span style="display:inline-flex;width:54px;height:54px;border-radius:16px;background:#A4D2C8;border:2px solid #06342F;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06342F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><line x1="14" y1="14" x2="14" y2="17"/><line x1="17" y1="14" x2="21" y2="14"/><line x1="21" y1="17" x2="21" y2="21"/><line x1="14" y1="21" x2="17" y2="21"/></svg></span><h3 style="font-family:'Baloo 2',cursive;font-size:21px;font-weight:700;margin:18px 0 7px">QR Check-In</h3><p style="margin:0;font-size:15px;line-height:1.55;color:#5b665f;font-weight:500">Fast owner check-in using secure QR codes.</p></div>
+              <div style="background:#fff;border:2.5px solid #06342F;border-radius:22px;padding:28px;box-shadow:6px 6px 0 #06342F"><span style="display:inline-flex;width:54px;height:54px;border-radius:16px;background:#F2D98A;border:2px solid #06342F;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5a4a1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 L12 3.5 L20 10.5 V20 H4 Z"/><rect x="9.5" y="13" width="5" height="7"/></svg></span><h3 style="font-family:'Baloo 2',cursive;font-size:21px;font-weight:700;margin:18px 0 7px">Kennel Management</h3><p style="margin:0;font-size:15px;line-height:1.55;color:#5b665f;font-weight:500">Assign dogs to kennels and track placements.</p></div>
+              <div style="background:#fff;border:2.5px solid #06342F;border-radius:22px;padding:28px;box-shadow:6px 6px 0 #06342F"><span style="display:inline-flex;width:54px;height:54px;border-radius:16px;background:#A4D2C8;border:2px solid #06342F;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06342F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="11" y2="15"/></svg></span><h3 style="font-family:'Baloo 2',cursive;font-size:21px;font-weight:700;margin:18px 0 7px">Payments &amp; Checkout</h3><p style="margin:0;font-size:15px;line-height:1.55;color:#5b665f;font-weight:500">Track cash, card, and booking revenue.</p></div>
+              <div style="background:#fff;border:2.5px solid #06342F;border-radius:22px;padding:28px;box-shadow:6px 6px 0 #06342F"><span style="display:inline-flex;width:54px;height:54px;border-radius:16px;background:#F2D98A;border:2px solid #06342F;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5a4a1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="20" y2="21"/><rect x="5.5" y="11" width="3.2" height="8" rx="1"/><rect x="10.4" y="6.5" width="3.2" height="12.5" rx="1"/><rect x="15.3" y="14" width="3.2" height="5" rx="1"/></svg></span><h3 style="font-family:'Baloo 2',cursive;font-size:21px;font-weight:700;margin:18px 0 7px">Reports</h3><p style="margin:0;font-size:15px;line-height:1.55;color:#5b665f;font-weight:500">Generate and export operational and financial reports instantly.</p></div>
+            </div>
+          </div>
+
+          <!-- OPERATIONS (mint band) -->
+          <div style="background:#DBEEE8;border-top:3px solid #06342F;border-bottom:3px solid #06342F;margin-top:40px">
+            <div style="max-width:1140px;margin:0 auto;padding:74px 40px;display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center">
+              <div>
+                <div style="display:inline-block;background:#fff;color:#077D73;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:999px;border:2px solid #06342F">Built for operations</div>
+                <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:44px;letter-spacing:-.01em;margin:16px 0 0;line-height:1.04">Built around the dogs, not spreadsheets.</h2>
+                <p style="font-size:17.5px;line-height:1.6;color:#3c524c;margin:20px 0 0;max-width:440px;font-weight:500">Most software focuses on customer databases. DORA focuses on daily operations, giving your team a real-time view of every dog currently in your facility.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 0">
+                  <span style="background:#077D73;color:#fff;font-size:13px;font-weight:800;padding:8px 15px;border-radius:999px;border:2px solid #06342F">First Visit</span>
+                  <span style="background:#fff;color:#17211D;font-size:13px;font-weight:800;padding:8px 15px;border-radius:999px;border:2px solid #06342F">Medication</span>
+                  <span style="background:#fff;color:#17211D;font-size:13px;font-weight:800;padding:8px 15px;border-radius:999px;border:2px solid #06342F">Transport Required</span>
+                  <span style="background:#fff;color:#17211D;font-size:13px;font-weight:800;padding:8px 15px;border-radius:999px;border:2px solid #06342F">Boarding</span>
+                  <span style="background:#fff;color:#17211D;font-size:13px;font-weight:800;padding:8px 15px;border-radius:999px;border:2px solid #06342F">Daycare</span>
+                </div>
+              </div>
+              <div style="background:#fff;border:3px solid #06342F;border-radius:22px;box-shadow:8px 8px 0 #06342F;padding:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 16px 11px"><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:700">In the facility now</span><span style="font-size:12.5px;font-weight:800;color:#fff;background:#077D73;padding:6px 12px;border-radius:999px;border:2px solid #06342F">24 dogs</span></div>
+                <div style="display:flex;flex-direction:column;gap:8px;padding:0 10px 10px">
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px;border:2px solid #06342F;border-radius:13px"><span style="width:38px;height:38px;border-radius:10px;background:#A4D2C8;border:2px solid #06342F;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 28 28" fill="#06342F"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><span style="flex:1"><span style="display:block;font-weight:800;font-size:15px">Max</span><span style="display:block;font-size:13px;color:#077D73;font-weight:700">Medication</span></span><span style="font-size:12.5px;font-weight:800;color:#17211D;background:#F7E9C4;padding:5px 10px;border-radius:8px;border:1.5px solid #06342F">A-12</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px;border:2px solid #06342F;border-radius:13px"><span style="width:38px;height:38px;border-radius:10px;background:#A4D2C8;border:2px solid #06342F;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 28 28" fill="#06342F"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><span style="flex:1"><span style="display:block;font-weight:800;font-size:15px">Luna</span><span style="display:block;font-size:13px;color:#8a9089">Boarding · Day 2</span></span><span style="font-size:12.5px;font-weight:800;color:#17211D;background:#F7E9C4;padding:5px 10px;border-radius:8px;border:1.5px solid #06342F">B-04</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px;border:2px solid #06342F;border-radius:13px"><span style="width:38px;height:38px;border-radius:10px;background:#A4D2C8;border:2px solid #06342F;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 28 28" fill="#06342F"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><span style="flex:1"><span style="display:block;font-weight:800;font-size:15px">Rocky</span><span style="display:block;font-size:13px;color:#8a9089">Daycare</span></span><span style="font-size:12.5px;font-weight:800;color:#17211D;background:#F7E9C4;padding:5px 10px;border-radius:8px;border:1.5px solid #06342F">C-07</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HOW IT WORKS -->
+          <div style="max-width:1140px;margin:0 auto;padding:80px 40px;text-align:center">
+            <div style="display:inline-block;background:#F2D98A;color:#5a4a1e;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:999px;border:2px solid #06342F">How it works</div>
+            <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:46px;letter-spacing:-.01em;margin:16px 0 50px;line-height:1.05">From booking to checkout in five steps</h2>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;text-align:center">
+              <div><div style="width:62px;height:62px;margin:0 auto;border-radius:50%;background:#077D73;color:#fff;border:3px solid #06342F;box-shadow:4px 4px 0 #06342F;font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;display:flex;align-items:center;justify-content:center">01</div><h3 style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:700;margin:16px 0 6px">Create accounts</h3><p style="margin:0;font-size:14px;line-height:1.5;color:#5b665f;font-weight:500">Owners create accounts and add their dogs.</p></div>
+              <div><div style="width:62px;height:62px;margin:0 auto;border-radius:50%;background:#A4D2C8;color:#06342F;border:3px solid #06342F;box-shadow:4px 4px 0 #06342F;font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;display:flex;align-items:center;justify-content:center">02</div><h3 style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:700;margin:16px 0 6px">Book online</h3><p style="margin:0;font-size:14px;line-height:1.5;color:#5b665f;font-weight:500">Owners book daycare or boarding online.</p></div>
+              <div><div style="width:62px;height:62px;margin:0 auto;border-radius:50%;background:#F2D98A;color:#5a4a1e;border:3px solid #06342F;box-shadow:4px 4px 0 #06342F;font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;display:flex;align-items:center;justify-content:center">03</div><h3 style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:700;margin:16px 0 6px">Check in with QR</h3><p style="margin:0;font-size:14px;line-height:1.5;color:#5b665f;font-weight:500">Staff check dogs in using QR codes.</p></div>
+              <div><div style="width:62px;height:62px;margin:0 auto;border-radius:50%;background:#A4D2C8;color:#06342F;border:3px solid #06342F;box-shadow:4px 4px 0 #06342F;font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;display:flex;align-items:center;justify-content:center">04</div><h3 style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:700;margin:16px 0 6px">Manage the stay</h3><p style="margin:0;font-size:14px;line-height:1.5;color:#5b665f;font-weight:500">Manage stays, kennel assignments and payments.</p></div>
+              <div><div style="width:62px;height:62px;margin:0 auto;border-radius:50%;background:#077D73;color:#fff;border:3px solid #06342F;box-shadow:4px 4px 0 #06342F;font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;display:flex;align-items:center;justify-content:center">05</div><h3 style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:700;margin:16px 0 6px">Report &amp; grow</h3><p style="margin:0;font-size:14px;line-height:1.5;color:#5b665f;font-weight:500">Generate reports and grow your business.</p></div>
+            </div>
+          </div>
+
+          <!-- FAQ -->
+          <div style="background:#DBEEE8;border-top:3px solid #06342F;border-bottom:3px solid #06342F">
+            <div style="max-width:760px;margin:0 auto;padding:74px 40px;text-align:center">
+              <div style="display:inline-block;background:#F2D98A;color:#5a4a1e;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border-radius:999px;border:2px solid #06342F">FAQ</div>
+              <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:46px;letter-spacing:-.01em;margin:16px 0 40px;line-height:1.05">Common questions</h2>
+              <div style="text-align:left;display:flex;flex-direction:column;gap:13px">
+                <div style="background:#fff;border:2.5px solid #06342F;border-radius:18px;padding:22px 24px;box-shadow:5px 5px 0 #06342F"><div style="display:flex;align-items:center;justify-content:space-between;gap:16px"><span style="font-family:'Baloo 2',cursive;font-size:17.5px;font-weight:700">How does owner check-in work?</span><span style="color:#077D73;font-size:22px;font-weight:800">–</span></div><p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#5b665f;font-weight:500">Owners receive a secure QR code tied to their booking. On arrival, staff scan it to instantly check the dog in, assign a kennel, and surface any notes like medication or first-visit flags.</p></div>
+                <div style="background:#fff;border:2.5px solid #06342F;border-radius:18px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px"><span style="font-family:'Baloo 2',cursive;font-size:17.5px;font-weight:700">Can I manage boarding and daycare?</span><span style="font-size:24px;font-weight:800">+</span></div>
+                <div style="background:#fff;border:2.5px solid #06342F;border-radius:18px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px"><span style="font-family:'Baloo 2',cursive;font-size:17.5px;font-weight:700">Can I export reports?</span><span style="font-size:24px;font-weight:800">+</span></div>
+                <div style="background:#fff;border:2.5px solid #06342F;border-radius:18px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px"><span style="font-family:'Baloo 2',cursive;font-size:17.5px;font-weight:700">Can multiple staff members use DORA?</span><span style="font-size:24px;font-weight:800">+</span></div>
+                <div style="background:#fff;border:2.5px solid #06342F;border-radius:18px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px"><span style="font-family:'Baloo 2',cursive;font-size:17.5px;font-weight:700">Can I migrate from spreadsheets?</span><span style="font-size:24px;font-weight:800">+</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CTA (yellow band) -->
+          <div style="position:relative;background:#F2D98A;overflow:hidden">
+            <div style="position:absolute;bottom:-50px;right:40px;opacity:.16"><svg width="170" height="170" viewBox="0 0 28 28" fill="#06342F"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div>
+            <div style="position:relative;max-width:820px;margin:0 auto;padding:80px 40px;text-align:center">
+              <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:54px;letter-spacing:-.01em;color:#17211D;margin:0;line-height:1.02">Run your daycare, not your paperwork.</h2>
+              <p style="font-size:18px;line-height:1.6;color:#5a4a1e;margin:18px auto 0;max-width:540px;font-weight:600">Everything you need to manage dogs, bookings, boarding, and payments in one place.</p>
+              <div style="display:flex;flex-wrap:wrap;gap:13px;justify-content:center;margin:32px 0 0">
+                <a href="#landing" style="text-decoration:none;color:#fff;background:#077D73;font-weight:800;font-size:16px;padding:16px 26px;border-radius:14px;border:2.5px solid #06342F;box-shadow:5px 5px 0 #06342F">Staff signup</a>
+                <a href="#landing" style="text-decoration:none;color:#17211D;background:#fff;font-weight:800;font-size:16px;padding:16px 26px;border-radius:14px;border:2.5px solid #06342F;box-shadow:5px 5px 0 #06342F">Owner signup</a>
+                <a href="#landing" style="text-decoration:none;color:#17211D;background:transparent;font-weight:800;font-size:16px;padding:15px 24px;border-radius:14px;border:2.5px solid #06342F">Book a Demo</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOOTER (dark green) -->
+          <div style="background:#06342F;color:#cfe7e2">
+            <div style="max-width:1140px;margin:0 auto;padding:52px 40px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px">
+              <div>
+                <div style="display:flex;align-items:center;gap:11px">
+                  <img src="dora-badge.svg" alt="" width="40" height="40" style="border-radius:11px;display:block">
+                  <span style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:#fff">hello DORA</span>
+                </div>
+                <p style="margin:14px 0 0;font-size:14.5px;color:#9ec9c1;font-weight:500;max-width:280px">The operating system for dog daycares.</p>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7fa9a2;margin-bottom:14px">Legal</div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:14.5px;font-weight:600">
+                  <a href="#landing" style="text-decoration:none;color:#cfe7e2">Privacy Policy</a>
+                  <a href="#landing" style="text-decoration:none;color:#cfe7e2">Service Agreement</a>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7fa9a2;margin-bottom:14px">Operator</div>
+                <p style="margin:0;font-size:13.5px;line-height:1.6;color:#9ec9c1">Safadi Abdulsalam MWN E.V.<br>1095 Budapest, Lechner Ödön fasor 2. em. 1, ajtó 6.<br>Hungary</p>
+                <a href="#landing" style="display:inline-block;margin-top:12px;text-decoration:none;color:#A4D2C8;font-size:14px;font-weight:700">info@hellodora.app</a>
+              </div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,.12)"><div style="max-width:1140px;margin:0 auto;padding:18px 40px;font-size:13px;color:#7fa9a2">© 2026 hello DORA. All rights reserved.</div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ==================================================== -->
+  <!-- =============== 3 · STAFF APP ===================== -->
+  <!-- ==================================================== -->
+  <section id="staff" data-screen-label="Staff app" style="padding:64px 48px 20px">
+    <div style="max-width:1280px;margin:0 auto 30px">
+      <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 6px">
+        <span style="font-family:'Baloo 2',cursive;font-size:13px;font-weight:800;color:#fff;background:#077D73;padding:5px 13px;border-radius:999px">03</span>
+        <h2 style="font-family:'Baloo 2',cursive;font-size:34px;font-weight:800;letter-spacing:-.01em;margin:0">Staff app <span style="font-size:17px;font-weight:600;color:#8a9089">· mobile-first, used on the floor</span></h2>
+      </div>
+      <p style="margin:0;font-size:15px;color:#5b665f;max-width:680px">Calmer than the landing — operational clarity first. Tabs: Dashboard · Bookings · Check-ins · Reports. Safety flags stay loud everywhere.</p>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:44px 40px;align-items:flex-start;justify-content:center">
+
+      <!-- ===== PHONE: DASHBOARD ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D">
+            <span>9:41</span>
+            <span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span>
+          </div>
+          <!-- app top bar -->
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 18px 12px;border-bottom:1px solid #EDEBE6;background:#FAFAF8">
+            <span style="display:inline-flex;align-items:center;gap:8px"><img src="dora-icon.svg" alt="" width="30" height="30" style="display:block"><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:800;color:#077D73">DORA</span></span>
+            <span style="width:34px;height:34px;border-radius:50%;background:#A4D2C8;border:1.5px solid #06342F;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#06342F">JL</span>
+          </div>
+
+          <div style="flex:1;padding:18px 16px 8px">
+            <div style="font-family:'Baloo 2',cursive;font-size:25px;font-weight:800;color:#17211D;line-height:1.1">Good morning!</div>
+            <p style="margin:3px 0 0;font-size:13.5px;color:#6E7A75">Here&apos;s what&apos;s happening at the facility today.</p>
+
+            <!-- KPIs -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px">
+              <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px"><span style="display:inline-flex;width:38px;height:38px;border-radius:11px;background:#ECFDF5;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span><div style="font-family:'Baloo 2',cursive;font-size:27px;font-weight:800;color:#17211D;line-height:1.15;margin-top:8px">24</div><div style="font-size:12.5px;color:#6E7A75;font-weight:500">Checked In</div></div>
+              <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px"><span style="display:inline-flex;width:38px;height:38px;border-radius:11px;background:#EFF6FF;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></span><div style="font-family:'Baloo 2',cursive;font-size:27px;font-weight:800;color:#17211D;line-height:1.15;margin-top:8px">9</div><div style="font-size:12.5px;color:#6E7A75;font-weight:500">Arrivals Today</div></div>
+              <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px"><span style="display:inline-flex;width:38px;height:38px;border-radius:11px;background:#EAF4F1;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><div style="font-family:'Baloo 2',cursive;font-size:27px;font-weight:800;color:#17211D;line-height:1.15;margin-top:8px">18</div><div style="font-size:12.5px;color:#6E7A75;font-weight:500">Daycare Today</div></div>
+              <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px"><span style="display:inline-flex;width:38px;height:38px;border-radius:11px;background:#FFFBEB;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></span><div style="font-family:'Baloo 2',cursive;font-size:27px;font-weight:800;color:#17211D;line-height:1.15;margin-top:8px">6</div><div style="font-size:12.5px;color:#6E7A75;font-weight:500">Overnight</div></div>
+            </div>
+
+            <!-- capacity calendar -->
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px;margin-top:14px">
+              <div style="display:flex;align-items:center;gap:9px"><span style="width:34px;height:34px;border-radius:10px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg></span><div><div style="font-size:14px;font-weight:700;color:#17211D">Capacity Calendar</div><div style="font-size:11.5px;color:#8a9089">Daycare &amp; overnight per day</div></div></div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px">
+                <div style="border:1px solid #EDEBE6;border-radius:11px;padding:8px 4px;text-align:center"><div style="font-size:11px;color:#8a9089;font-weight:600">Mon 9</div><div style="font-size:12px;margin-top:4px"><span style="color:#077D73;font-weight:800">14</span> <span style="color:#8a9089">day</span></div><div style="font-size:12px"><span style="color:#D97706;font-weight:800">5</span> <span style="color:#8a9089">o/n</span></div></div>
+                <div style="border:2px solid #077D73;background:#EAF4F1;border-radius:11px;padding:8px 4px;text-align:center"><div style="font-size:11px;color:#045C54;font-weight:800">Today</div><div style="font-size:12px;margin-top:4px"><span style="color:#077D73;font-weight:800">18</span> <span style="color:#6E7A75">day</span></div><div style="font-size:12px"><span style="color:#D97706;font-weight:800">6</span> <span style="color:#6E7A75">o/n</span></div></div>
+                <div style="border:1px solid #EDEBE6;border-radius:11px;padding:8px 4px;text-align:center"><div style="font-size:11px;color:#8a9089;font-weight:600">Wed 11</div><div style="font-size:12px;margin-top:4px"><span style="color:#077D73;font-weight:800">11</span> <span style="color:#8a9089">day</span></div><div style="font-size:12px"><span style="color:#D97706;font-weight:800">7</span> <span style="color:#8a9089">o/n</span></div></div>
+                <div style="border:1px solid #EDEBE6;border-radius:11px;padding:8px 4px;text-align:center"><div style="font-size:11px;color:#8a9089;font-weight:600">Thu 12</div><div style="font-size:12px;margin-top:4px"><span style="color:#077D73;font-weight:800">16</span> <span style="color:#8a9089">day</span></div><div style="font-size:12px"><span style="color:#D97706;font-weight:800">4</span> <span style="color:#8a9089">o/n</span></div></div>
+              </div>
+            </div>
+
+            <!-- upcoming bookings -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 2px 10px"><div style="font-size:15px;font-weight:700;color:#17211D">Upcoming Bookings</div><span style="font-size:12.5px;font-weight:700;color:#077D73">View all</span></div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #EDEBE6;border-radius:14px;padding:12px"><span style="width:36px;height:36px;border-radius:10px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></span><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:7px"><span style="font-size:14.5px;font-weight:700;color:#17211D">Bella</span><span style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px">Pending</span></div><div style="font-size:12.5px;color:#8a9089">James Wilson · Mar 12</div></div></div>
+              <div style="display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #EDEBE6;border-radius:14px;padding:12px"><span style="width:36px;height:36px;border-radius:10px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg></span><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:7px"><span style="font-size:14.5px;font-weight:700;color:#17211D">Cooper</span><span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px">Approved</span></div><div style="font-size:12.5px;color:#8a9089">Emily Chen · Mar 13–15</div></div></div>
+            </div>
+
+            <!-- currently checked in -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 2px 10px"><div style="font-size:15px;font-weight:700;color:#17211D">Currently Checked In</div><span style="font-size:12.5px;font-weight:700;color:#077D73">View all</span></div>
+            <div style="position:relative;overflow:hidden;border-radius:15px;border:1px solid #FECACA;background:#fff;padding:12px 12px 12px 14px">
+              <div style="position:absolute;inset-block:0;left:0;width:5px;background:#DC2626"></div>
+              <div style="display:flex;gap:11px">
+                <div style="width:52px;height:52px;border-radius:12px;background:#EAF4F1;flex:none;display:flex;align-items:center;justify-content:center;position:relative"><svg width="26" height="26" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg><span style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#10B981;border:2px solid #fff"></span></div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;justify-content:space-between;gap:6px"><div><div style="font-size:15px;font-weight:700;color:#17211D">Max</div><div style="font-size:12px;color:#8a9089">Golden Retriever · daycare</div></div><span style="background:#F2D98A;color:#5a4a1e;font-size:10px;font-weight:800;text-transform:uppercase;padding:3px 7px;border-radius:7px;height:fit-content">Daycare</span></div>
+                  <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><span style="display:inline-flex;align-items:center;gap:4px;background:#DC2626;color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:7px">Allergy</span><span style="display:inline-flex;align-items:center;gap:4px;background:#6D28D9;color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:7px">Meds</span><span style="display:inline-flex;align-items:center;gap:4px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:7px">Diet</span></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #F0EEE9;margin-top:11px;padding-top:9px;font-size:12.5px;color:#6E7A75"><span>Sarah Johnson · A-12</span><span>2h ago</span></div>
+            </div>
+
+          </div>
+
+          <!-- bottom nav -->
+          <div style="flex:none;border-top:1px solid #EDEBE6;background:#fff;display:flex;justify-content:space-around;padding:9px 6px 14px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#077D73;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span style="font-size:10px;font-weight:800">Dashboard</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg><span style="font-size:10px;font-weight:600">Bookings</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><span style="font-size:10px;font-weight:600">Check-ins</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="9"/></svg><span style="font-size:10px;font-weight:600">Reports</span></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Dashboard</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Checked-in count · arrivals · capacity</div>
+      </div>
+
+      <!-- ===== PHONE: CHECK-INS ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D">
+            <span>9:41</span>
+            <span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span>
+          </div>
+          <div style="flex:1;padding:16px 16px 8px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <div style="display:flex;align-items:flex-start;gap:11px">
+                <span style="width:44px;height:44px;border-radius:14px;background:#ECFDF5;display:inline-flex;align-items:center;justify-content:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>
+                <div><div style="font-family:'Baloo 2',cursive;font-size:23px;font-weight:800;color:#17211D;line-height:1.1">Check-ins</div><div style="font-size:12.5px;color:#6E7A75">3 dogs currently on site</div></div>
+              </div>
+            </div>
+            <a href="#staff" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-top:14px;height:46px;border-radius:13px;background:#077D73;color:#fff;font-size:14.5px;font-weight:700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>Scan to Check In</a>
+
+            <div style="font-size:14px;font-weight:700;color:#17211D;margin:18px 2px 4px">Today&apos;s bookings</div>
+            <p style="font-size:12px;color:#8a9089;margin:0 2px 10px">Approved bookings ready for check-in.</p>
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:14px;padding:13px">
+              <div style="display:flex;align-items:center;gap:7px"><span style="font-size:14.5px;font-weight:700;color:#17211D">Cooper</span><span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px">Approved</span></div>
+              <div style="font-size:12.5px;color:#8a9089;margin-top:2px">Emily Chen · Mar 13–15 · Boarding</div>
+              <div style="display:flex;gap:8px;margin-top:11px"><span style="flex:1;text-align:center;height:38px;line-height:38px;border:1.5px solid #E0E4E0;border-radius:11px;font-size:13px;font-weight:700;color:#3a463f">View booking</span><span style="flex:1;text-align:center;height:38px;line-height:38px;background:#077D73;color:#fff;border-radius:11px;font-size:13px;font-weight:700">Check in</span></div>
+            </div>
+
+            <div style="font-size:14px;font-weight:700;color:#17211D;margin:18px 2px 10px">On site now</div>
+            <div style="position:relative;display:flex;align-items:center;margin-bottom:11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" style="position:absolute;left:13px"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div style="width:100%;height:44px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px 0 38px;font-size:13.5px;color:#A8A29E">Search by dog or owner name…</div></div>
+
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <!-- Max card -->
+              <div style="position:relative;overflow:hidden;border-radius:15px;border:1px solid #FECACA;background:#fff;padding:12px 12px 12px 14px">
+                <div style="position:absolute;inset-block:0;left:0;width:5px;background:#DC2626"></div>
+                <div style="display:flex;gap:11px">
+                  <div style="width:52px;height:52px;border-radius:12px;background:#EAF4F1;flex:none;display:flex;align-items:center;justify-content:center;position:relative"><svg width="26" height="26" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg><span style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#10B981;border:2px solid #fff"></span></div>
+                  <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:6px"><div><div style="font-size:15px;font-weight:700;color:#17211D">Max</div><div style="font-size:12px;color:#8a9089">Golden Retriever · 3 years</div></div><span style="background:#F2D98A;color:#5a4a1e;font-size:10px;font-weight:800;text-transform:uppercase;padding:3px 7px;border-radius:7px;height:fit-content">Daycare</span></div>
+                  <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><span style="background:#DC2626;color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:7px">Allergy</span><span style="background:#6D28D9;color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:7px">Meds</span></div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:2fr 3fr;gap:8px;margin-top:11px"><span style="text-align:center;height:38px;line-height:38px;border:1.5px solid #E0E4E0;border-radius:11px;font-size:13px;font-weight:700;color:#3a463f">Profile</span><span style="text-align:center;height:38px;line-height:38px;background:#DC2626;color:#fff;border-radius:11px;font-size:13px;font-weight:700">Check Out</span></div>
+              </div>
+              <!-- Luna card -->
+              <div style="position:relative;overflow:hidden;border-radius:15px;border:1px solid #FECACA;background:#fff;padding:12px 12px 12px 14px">
+                <div style="position:absolute;inset-block:0;left:0;width:5px;background:#E11D48"></div>
+                <div style="display:flex;gap:11px">
+                  <div style="width:52px;height:52px;border-radius:12px;background:#EAF4F1;flex:none;display:flex;align-items:center;justify-content:center;position:relative"><svg width="26" height="26" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg><span style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#10B981;border:2px solid #fff"></span></div>
+                  <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:6px"><div><div style="font-size:15px;font-weight:700;color:#17211D">Luna</div><div style="font-size:12px;color:#8a9089">Border Collie · 2 years</div></div><span style="background:#4338CA;color:#fff;font-size:10px;font-weight:800;text-transform:uppercase;padding:3px 7px;border-radius:7px;height:fit-content">Overnight</span></div>
+                  <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"><span style="background:#E11D48;color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:7px">Escape risk</span></div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:2fr 3fr;gap:8px;margin-top:11px"><span style="text-align:center;height:38px;line-height:38px;border:1.5px solid #E0E4E0;border-radius:11px;font-size:13px;font-weight:700;color:#3a463f">Profile</span><span style="text-align:center;height:38px;line-height:38px;background:#DC2626;color:#fff;border-radius:11px;font-size:13px;font-weight:700">Check Out</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- bottom nav (check-ins active) -->
+          <div style="flex:none;border-top:1px solid #EDEBE6;background:#fff;display:flex;justify-content:space-around;padding:9px 6px 14px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span style="font-size:10px;font-weight:600">Dashboard</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg><span style="font-size:10px;font-weight:600">Bookings</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#077D73;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><span style="font-size:10px;font-weight:800">Check-ins</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="9"/></svg><span style="font-size:10px;font-weight:600">Reports</span></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Check-ins</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">On-site roster · today&apos;s bookings</div>
+      </div>
+
+      <!-- ===== PHONE: QR SCAN ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:8px 18px 14px;border-bottom:1px solid #EDEBE6"><span style="width:38px;height:38px;border-radius:11px;border:1.5px solid #E0E4E0;background:#fff;display:inline-flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#17211D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:700;color:#17211D">Scan to check in</span></div>
+
+          <div style="flex:1;padding:18px 16px">
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#17211D;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>Scan QR code</div>
+              <div style="position:relative;border-radius:16px;background:#0c1a17;height:250px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                <div style="position:absolute;top:20px;left:20px;width:34px;height:34px;border-top:4px solid #A4D2C8;border-left:4px solid #A4D2C8;border-radius:8px 0 0 0"></div>
+                <div style="position:absolute;top:20px;right:20px;width:34px;height:34px;border-top:4px solid #A4D2C8;border-right:4px solid #A4D2C8;border-radius:0 8px 0 0"></div>
+                <div style="position:absolute;bottom:20px;left:20px;width:34px;height:34px;border-bottom:4px solid #A4D2C8;border-left:4px solid #A4D2C8;border-radius:0 0 0 8px"></div>
+                <div style="position:absolute;bottom:20px;right:20px;width:34px;height:34px;border-bottom:4px solid #A4D2C8;border-right:4px solid #A4D2C8;border-radius:0 0 8px 0"></div>
+                <div style="position:absolute;left:20px;right:20px;height:3px;background:linear-gradient(90deg,transparent,#A4D2C8,transparent);top:50%;box-shadow:0 0 12px #A4D2C8"></div>
+                <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="#3a5750" stroke-width="1.4"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="16" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="19" width="7" height="2"/></svg>
+              </div>
+              <p style="margin:12px 0 0;text-align:center;font-size:13px;color:#6E7A75">Point at the owner&apos;s check-in QR code.</p>
+            </div>
+
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:14px;margin-top:14px">
+              <div style="font-size:14px;font-weight:700;color:#17211D;margin-bottom:11px">Enter code manually</div>
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Check-in code</div>
+              <div style="height:46px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:13.5px;color:#A8A29E;font-family:ui-monospace,monospace">Paste or type the code…</div>
+              <div style="height:46px;margin-top:12px;border-radius:12px;background:#077D73;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:700">Submit code</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">QR Check-in</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Camera scan · manual fallback</div>
+      </div>
+
+      <!-- ===== PHONE: SCAN SUCCESS ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 26px;text-align:center">
+            <div style="width:112px;height:112px;border-radius:50%;background:#ECFDF5;border:3px solid #06342F;box-shadow:5px 5px 0 #06342F;display:flex;align-items:center;justify-content:center"><svg width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"/></svg></div>
+            <div style="font-family:'Baloo 2',cursive;font-size:32px;font-weight:800;color:#065F46;margin-top:26px">Checked in!</div>
+            <p style="font-size:16px;color:#3a463f;margin:10px 0 0">Max is now on site.</p>
+            <div style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #EDEBE6;border-radius:14px;padding:11px 14px;margin-top:24px"><span style="width:40px;height:40px;border-radius:11px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></span><div style="text-align:left"><div style="font-size:14.5px;font-weight:700;color:#17211D">Max · Golden Retriever</div><div style="font-size:12.5px;color:#8a9089">Assigned kennel A-12 · daycare</div></div></div>
+            <div style="width:100%;height:50px;margin-top:26px;border-radius:14px;background:#077D73;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;border:2.5px solid #06342F;box-shadow:4px 4px 0 #06342F">Scan next dog</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Scan · success</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Confirmation + kennel assigned</div>
+      </div>
+
+      <!-- ===== PHONE: DOG PROFILE (the heart) ===== -->
+      <div style="width:384px;flex:none" id="dogprofile">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+
+          <!-- hero -->
+          <div style="position:relative;height:220px;background:linear-gradient(150deg,#A4D2C8,#077D73);overflow:hidden">
+            <div style="position:absolute;inset:0;opacity:.16"><svg width="220" height="220" viewBox="0 0 28 28" fill="#06342F" style="position:absolute;right:-30px;top:10px"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div>
+            <div style="position:absolute;top:34px;left:16px;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:rgba(6,52,47,.35);backdrop-filter:blur(4px)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div style="position:absolute;top:34px;right:16px;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:11px;background:rgba(6,52,47,.35);backdrop-filter:blur(4px);color:#fff;font-size:13px;font-weight:600"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit</div>
+            <div style="position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to top,rgba(6,52,47,.7),transparent)"></div>
+            <div style="position:absolute;bottom:14px;left:16px;right:16px;color:#fff">
+              <div style="font-family:'Baloo 2',cursive;font-size:30px;font-weight:800;line-height:1">Rocky</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.9);margin-top:3px">Pit Bull Mix · 5 years · large</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+                <span style="display:inline-flex;align-items:center;gap:5px;background:#ECFDF5;color:#065F46;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#10B981"></span>Checked in</span>
+                <span style="background:rgba(255,255,255,.9);color:#17211D;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px">Kennel C-07</span>
+                <span style="background:rgba(6,52,47,.4);color:#fff;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px">↺ Returning</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:1;padding:16px 15px 16px">
+            <!-- CRITICAL ALERTS -->
+            <div style="border:2px solid #FCA5A5;background:#FEF2F2;border-radius:16px;padding:14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#991B1B;margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>Critical Alerts</div>
+              <div style="background:#fff;border:1px solid #FECACA;border-radius:11px;padding:11px 12px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#991B1B"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/></svg>Aggression Caution</div><div style="font-size:13px;color:#B91C1C;margin-top:3px;line-height:1.45">Reactive to unfamiliar male dogs. Keep separate during group play. Sweet with people.</div></div>
+              <div style="background:#fff;border:1px solid #DDD6FE;border-radius:11px;padding:11px 12px"><div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#5B21B6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B21B6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5-7-7a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 1 1-7 7z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>Medication required</div><div style="font-size:13px;color:#6D28D9;margin-top:3px;line-height:1.45">Gabapentin 100mg once daily for anxiety. Give with breakfast.</div></div>
+            </div>
+
+            <!-- Owner -->
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:15px;margin-top:13px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#17211D;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Owner Information</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-size:15px;font-weight:700;color:#17211D">Maria Garcia</div><div style="font-size:13px;color:#077D73;font-weight:600">(555) 345-6789</div></div><span style="width:42px;height:42px;border-radius:12px;border:1.5px solid #E0E4E0;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></span></div>
+              <div style="border-top:1px solid #F0EEE9;margin-top:12px;padding-top:11px;display:flex;flex-direction:column;gap:9px;font-size:13px">
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089">Emergency</span><span style="color:#077D73;font-weight:600;text-align:right">Carlos Garcia — (555) 765-4321</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089;display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9089" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v5.5a3.5 3.5 0 0 1-7 0V2M4.5 11.5V15a7.5 7.5 0 0 0 15 0v-1"/><circle cx="19" cy="8" r="2"/></svg>Vet</span><span style="text-align:right"><span style="display:block;color:#17211D;font-weight:600">Dr. Lisa Patel — Sunny Paws Vet</span><span style="color:#077D73;font-weight:600">(555) 456-7890</span></span></div>
+              </div>
+            </div>
+
+            <!-- Care instructions -->
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:15px;margin-top:13px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#17211D;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Care Instructions</div>
+              <div style="display:flex;flex-direction:column;gap:12px;font-size:13px">
+                <div><div style="display:flex;align-items:center;gap:7px;font-weight:700;color:#17211D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5-7-7a4.95 4.95 0 1 1 7-7l7 7a4.95 4.95 0 1 1-7 7z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>Medication</div><div style="color:#5b665f;padding-left:22px;margin-top:2px;line-height:1.45">Gabapentin 100mg once daily for anxiety. Give with breakfast.</div></div>
+                <div><div style="display:flex;align-items:center;gap:7px;font-weight:700;color:#17211D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c0-3 2-5 5-5-.5 3-2 5-5 5zM12 22c-4 0-7-4-7-9 0-3 2-6 5-6 1.5 0 2 1 2 1s.5-1 2-1c3 0 5 3 5 6 0 5-3 9-7 9z"/></svg>Feeding</div><div style="color:#5b665f;padding-left:22px;margin-top:2px;line-height:1.45">2 cups standard kibble, morning and evening.</div></div>
+                <div><div style="display:flex;align-items:center;gap:7px;font-weight:700;color:#17211D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>Allergies</div><div style="color:#5b665f;padding-left:22px;margin-top:2px;line-height:1.45">None known.</div></div>
+                <div><div style="display:flex;align-items:center;gap:7px;font-weight:700;color:#17211D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Behavior</div><div style="color:#5b665f;padding-left:22px;margin-top:2px;line-height:1.45">Reactive to unfamiliar male dogs. Keep separate during group play. Sweet with people.</div></div>
+              </div>
+            </div>
+
+            <!-- Today's care -->
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:15px;margin-top:13px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#17211D;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>Today&apos;s Care</div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:center;gap:11px;border:1px solid #A7F3D0;background:#ECFDF5;border-radius:12px;padding:11px"><span style="width:24px;height:24px;border-radius:50%;background:#059669;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg></span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:#065F46">Morning medication</div><div style="font-size:11.5px;color:#059669">8:30 AM</div></div></div>
+                <div style="display:flex;align-items:center;gap:11px;border:1px solid #E0E4E0;background:#fff;border-radius:12px;padding:11px"><span style="width:24px;height:24px;border-radius:50%;border:2px solid #D6D3CE"></span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:#3a463f">Solo play session</div></div></div>
+                <div style="display:flex;align-items:center;gap:11px;border:1px solid #E0E4E0;background:#fff;border-radius:12px;padding:11px"><span style="width:24px;height:24px;border-radius:50%;border:2px solid #D6D3CE"></span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:#3a463f">Evening medication</div></div></div>
+              </div>
+            </div>
+
+            <!-- Documents -->
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:15px;margin-top:13px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#17211D;margin-bottom:12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Documents</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #EDEBE6;border-radius:12px;padding:10px 12px"><span style="width:34px;height:34px;border-radius:9px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13V7l-5-5H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6"/><path d="M14 2v6h6"/><path d="M16 17l2 2 4-4"/></svg></span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:#17211D">Vaccination record</div><div style="font-size:11.5px;color:#8a9089">Uploaded by owner · PDF</div></div></div>
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #EDEBE6;border-radius:12px;padding:10px 12px"><span style="width:34px;height:34px;border-radius:9px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:#17211D">Pedigree certificate</div><div style="font-size:11.5px;color:#8a9089">Uploaded by owner · PDF</div></div></div>
+              </div>
+            </div>
+
+            <!-- Timeline -->
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:15px;margin-top:13px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#17211D;margin-bottom:14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Activity Timeline</div>
+              <div style="display:flex;gap:11px">
+                <div style="display:flex;flex-direction:column;align-items:center"><span style="width:32px;height:32px;border-radius:50%;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center;color:#077D73"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></span></div>
+                <div style="flex:1;padding-bottom:4px"><div style="font-size:11.5px;color:#8a9089">30 min ago</div><div style="font-size:13.5px;font-weight:600;color:#17211D">Checked in by Maria Garcia</div><div style="font-size:11.5px;color:#8a9089">by Jessica L.</div></div>
+              </div>
+            </div>
+
+            <p style="text-align:center;font-size:11.5px;color:#A8A29E;margin:14px 0 4px">Last check-in: 30 minutes ago</p>
+          </div>
+
+          <!-- sticky bottom actions -->
+          <div style="flex:none;border-top:1px solid #EDEBE6;background:#fff;padding:12px 14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:9px">
+            <span style="height:44px;border:1.5px solid #E0E4E0;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;color:#3a463f"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a463f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Note</span>
+            <span style="height:44px;border:1.5px solid #E0E4E0;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;color:#3a463f"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a463f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>Call Owner</span>
+            <span style="grid-column:1/-1;height:50px;border-radius:13px;background:#DC2626;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Check Out Rocky</span>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Dog profile · the heart</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Critical alerts · care · docs · timeline</div>
+      </div>
+
+      <!-- ===== PHONE: BOOKINGS LIST ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 18px 12px;border-bottom:1px solid #EDEBE6;background:#FAFAF8"><span style="display:inline-flex;align-items:center;gap:8px"><img src="dora-icon.svg" alt="" width="30" height="30" style="display:block"><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:800;color:#077D73">DORA</span></span><span style="width:34px;height:34px;border-radius:50%;background:#A4D2C8;border:1.5px solid #06342F;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#06342F">JL</span></div>
+
+          <div style="flex:1;padding:16px 16px 8px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+              <div><div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#17211D;line-height:1.1">Bookings</div><div style="font-size:12.5px;color:#6E7A75;margin-top:2px">3 of 4 bookings</div></div>
+              <span style="display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 15px;border-radius:12px;background:#077D73;color:#fff;font-size:13.5px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New</span>
+            </div>
+
+            <div style="position:relative;display:flex;align-items:center;margin-top:14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" style="position:absolute;left:13px"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div style="width:100%;height:44px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px 0 38px;font-size:13.5px;color:#A8A29E">Search dog, owner, status…</div></div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;overflow:hidden">
+              <span style="flex:none;height:38px;line-height:36px;padding:0 15px;border-radius:11px;border:1.5px solid #077D73;background:#EAF4F1;color:#045C54;font-size:13px;font-weight:700">All</span>
+              <span style="flex:none;height:38px;line-height:36px;padding:0 15px;border-radius:11px;border:1.5px solid #E0E4E0;background:#fff;color:#6E7A75;font-size:13px;font-weight:600">Pending</span>
+              <span style="flex:none;height:38px;line-height:36px;padding:0 15px;border-radius:11px;border:1.5px solid #E0E4E0;background:#fff;color:#6E7A75;font-size:13px;font-weight:600">Approved</span>
+              <span style="flex:none;height:38px;line-height:36px;padding:0 15px;border-radius:11px;border:1.5px solid #E0E4E0;background:#fff;color:#6E7A75;font-size:13px;font-weight:600">Done</span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+              <!-- Bella pending -->
+              <div style="border:1px solid #EDEBE6;background:#fff;border-radius:16px;padding:14px">
+                <div style="display:flex;align-items:flex-start;gap:11px">
+                  <div style="width:52px;height:52px;border-radius:12px;background:#EAF4F1;flex:none;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div>
+                  <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><div><div style="font-size:16px;font-weight:700;color:#17211D">Bella</div><div style="font-size:12.5px;color:#8a9089">French Bulldog</div></div><span style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px">Pending</span></div></div>
+                </div>
+                <div style="margin-top:11px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:#5b665f">
+                  <span style="display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>James Wilson</span>
+                  <span style="display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg>Mar 12, 2026</span>
+                  <span><b style="color:#3a463f;font-weight:600">Service:</b> Daycare</span>
+                </div>
+                <div style="margin-top:12px;border-top:1px solid #F0EEE9;padding-top:11px"><div style="height:40px;border:1.5px solid #E0E4E0;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;color:#3a463f"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a463f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>View Booking</div></div>
+              </div>
+              <!-- Cooper approved -->
+              <div style="border:1px solid #EDEBE6;background:#fff;border-radius:16px;padding:14px">
+                <div style="display:flex;align-items:flex-start;gap:11px">
+                  <div style="width:52px;height:52px;border-radius:12px;background:#EAF4F1;flex:none;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div>
+                  <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><div><div style="font-size:16px;font-weight:700;color:#17211D">Cooper</div><div style="font-size:12.5px;color:#8a9089">Labrador Retriever</div></div><span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px">Approved</span></div></div>
+                </div>
+                <div style="margin-top:11px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:#5b665f">
+                  <span style="display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Emily Chen</span>
+                  <span style="display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg>Mar 13 – 15, 2026</span>
+                  <span><b style="color:#3a463f;font-weight:600">Service:</b> Boarding · Transport required</span>
+                </div>
+                <div style="margin-top:12px;border-top:1px solid #F0EEE9;padding-top:11px"><div style="height:40px;border:1.5px solid #E0E4E0;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700;color:#3a463f"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a463f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>View Booking</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:none;border-top:1px solid #EDEBE6;background:#fff;display:flex;justify-content:space-around;padding:9px 6px 14px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span style="font-size:10px;font-weight:600">Dashboard</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#077D73;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/></svg><span style="font-size:10px;font-weight:800">Bookings</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg><span style="font-size:10px;font-weight:600">Check-ins</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#A8A29E;flex:1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="9"/></svg><span style="font-size:10px;font-weight:600">Reports</span></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Bookings</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Filter by status · search</div>
+      </div>
+
+      <!-- ===== PHONE: BOOKING DETAIL (pending → approve/reject) ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:8px 18px 14px;border-bottom:1px solid #EDEBE6"><span style="width:38px;height:38px;border-radius:11px;border:1.5px solid #E0E4E0;background:#fff;display:inline-flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#17211D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:700;color:#17211D">Booking</span></div>
+
+          <div style="flex:1;padding:18px 16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <div><div style="display:flex;align-items:center;gap:9px"><span style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#17211D">Bella</span><span style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px">Pending</span></div><div style="font-size:13px;color:#6E7A75;margin-top:2px">Daycare booking</div></div>
+              <span style="height:38px;padding:0 14px;border:1.5px solid #E0E4E0;border-radius:11px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#3a463f"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a463f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit</span>
+            </div>
+
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:16px;margin-top:16px">
+              <div style="font-size:14px;font-weight:700;color:#17211D;margin-bottom:13px">Booking Details</div>
+              <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089;display:inline-flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 28 28" fill="#A8A29E"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg>Dog</span><span style="color:#077D73;font-weight:700">Bella</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089;display:inline-flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Client</span><span style="color:#077D73;font-weight:700">James Wilson</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089;display:inline-flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg>Dates</span><span style="color:#17211D;font-weight:600">Mar 12, 2026</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089">Service</span><span style="color:#17211D;font-weight:600">Daycare</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#8a9089;display:inline-flex;align-items:center;gap:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h11l4 5v5h-2"/><circle cx="7.5" cy="17.5" r="2"/><circle cx="16.5" cy="17.5" r="2"/></svg>Transport</span><span style="color:#17211D;font-weight:600">Not required</span></div>
+                <div style="border-top:1px solid #F0EEE9;padding-top:11px"><div style="color:#8a9089">Notes</div><div style="color:#3a463f;margin-top:3px;line-height:1.45">Bella is heat-sensitive — please keep her in a shaded, cool spot.</div></div>
+              </div>
+            </div>
+
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:16px;margin-top:13px">
+              <div style="font-size:14px;font-weight:700;color:#17211D;margin-bottom:11px">Admin Actions</div>
+              <div style="background:#F5F5F4;border:1px solid #E7E5E4;border-radius:11px;padding:11px 12px;font-size:12.5px;color:#57534E;margin-bottom:12px">Daycare has room on Mar 12 — 18 of 24 spots used.</div>
+              <div style="display:flex;gap:9px">
+                <div style="flex:1;height:46px;border-radius:12px;background:#077D73;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:700">Approve</div>
+                <div style="flex:1;height:46px;border-radius:12px;background:#DC2626;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:700">Reject</div>
+              </div>
+            </div>
+
+            <!-- status flow strip -->
+            <div style="margin-top:16px;padding:14px;border:1px dashed #D6CFC0;border-radius:14px;background:#FBF9F4">
+              <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9a9280;margin-bottom:10px">Status flow</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700">
+                <span style="background:#FEF3C7;color:#92400E;padding:4px 9px;border-radius:999px;border:1px solid #FDE68A">Pending</span>
+                <span style="color:#C4BCA8">→</span>
+                <span style="background:#fff;color:#8a9089;padding:4px 9px;border-radius:999px;border:1px solid #E7E5E4">Approved</span>
+                <span style="color:#C4BCA8">→</span>
+                <span style="background:#fff;color:#8a9089;padding:4px 9px;border-radius:999px;border:1px solid #E7E5E4">Checked in</span>
+                <span style="color:#C4BCA8">→</span>
+                <span style="background:#fff;color:#8a9089;padding:4px 9px;border-radius:999px;border:1px solid #E7E5E4">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Booking detail</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Approve · reject · check in</div>
+      </div>
+
+      <!-- ===== PHONE: NEW BOOKING ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FAFAF8;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:8px 18px 14px;border-bottom:1px solid #EDEBE6"><span style="width:38px;height:38px;border-radius:11px;border:1.5px solid #E0E4E0;background:#fff;display:inline-flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#17211D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:700;color:#17211D">New Booking</span></div>
+
+          <div style="flex:1;padding:18px 16px">
+            <div style="background:#fff;border:1px solid #EDEBE6;border-radius:16px;padding:16px">
+              <div style="font-size:14px;font-weight:700;color:#17211D;margin-bottom:14px">Booking Details</div>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Client</div>
+              <div style="height:46px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:14px;color:#17211D;margin-bottom:14px">Maria Garcia<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Dog</div>
+              <div style="height:46px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:14px;color:#17211D;margin-bottom:14px">Rocky (Pit Bull Mix)<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Service Type</div>
+              <div style="display:flex;gap:9px;margin-bottom:14px"><span style="flex:1;text-align:center;height:44px;line-height:44px;border-radius:12px;border:1.5px solid #E0E4E0;background:#fff;color:#6E7A75;font-size:14px;font-weight:600">Daycare</span><span style="flex:1;text-align:center;height:44px;line-height:44px;border-radius:12px;border:1.5px solid #077D73;background:#EAF4F1;color:#045C54;font-size:14px;font-weight:700">Boarding</span></div>
+
+              <div style="display:flex;gap:10px;margin-bottom:14px">
+                <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Start Date</div><div style="height:46px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 12px;font-size:13.5px;color:#17211D">Mar 13, 2026</div></div>
+                <div style="flex:1"><div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">End Date</div><div style="height:46px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 12px;font-size:13.5px;color:#17211D">Mar 15, 2026</div></div>
+              </div>
+
+              <label style="display:flex;align-items:center;gap:11px;height:48px;border:1.5px solid #E0E4E0;border-radius:12px;padding:0 14px;margin-bottom:14px"><span style="width:22px;height:22px;border-radius:6px;background:#077D73;display:inline-flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg></span><span style="font-size:14px;font-weight:600;color:#3a463f">Transport required</span></label>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Notes</div>
+              <div style="min-height:70px;border:1.5px solid #E0E4E0;border-radius:12px;background:#fff;padding:11px 14px;font-size:13.5px;color:#A8A29E;line-height:1.45">Pickup instructions, special requests…</div>
+            </div>
+
+            <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#92400E;line-height:1.45">Boarding is near capacity for Mar 13–15 — 5 of 6 kennels booked.</div>
+
+            <div style="height:52px;margin-top:16px;border-radius:14px;background:#077D73;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:700">Create Booking</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">New booking</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Client · dog · dates · capacity check</div>
+      </div>
+
+    </div>
+  </section>
+  <!-- ==================================================== -->
+  <!-- =============== 4 · OWNER PORTAL ================== -->
+  <!-- ==================================================== -->
+  <section id="portal" data-screen-label="Owner portal" style="padding:64px 48px 40px">
+    <div style="max-width:1280px;margin:0 auto 30px">
+      <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 6px">
+        <span style="font-family:'Baloo 2',cursive;font-size:13px;font-weight:800;color:#fff;background:#077D73;padding:5px 13px;border-radius:999px">04</span>
+        <h2 style="font-family:'Baloo 2',cursive;font-size:34px;font-weight:800;letter-spacing:-.01em;margin:0">Owner portal <span style="font-size:17px;font-weight:600;color:#8a9089">· consumer-facing, mobile</span></h2>
+      </div>
+      <p style="margin:0;font-size:15px;color:#5b665f;max-width:680px">Where owners manage their dogs and request stays. Warm and welcoming, same brand palette — a little more playful than the staff app.</p>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:44px 40px;align-items:flex-start;justify-content:center">
+
+      <!-- ===== PHONE: PORTAL HOME ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FBFCFB;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+
+          <!-- portal top bar (mint) -->
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:9px 18px 13px;background:#EAF4F1;border-bottom:1px solid #D9EAE4">
+            <span style="display:inline-flex;align-items:center;gap:8px"><img src="dora-icon.svg" alt="" width="28" height="28" style="display:block"><span style="font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;color:#077D73">hello DORA</span></span>
+            <span style="width:34px;height:34px;border-radius:50%;background:#077D73;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff">SJ</span>
+          </div>
+
+          <div style="flex:1;padding:18px 16px 8px">
+            <div style="font-family:'Baloo 2',cursive;font-size:26px;font-weight:800;color:#17211D;line-height:1.1">Welcome, Sarah</div>
+            <p style="margin:3px 0 0;font-size:13.5px;color:#6E7A75">Manage your dogs and bookings.</p>
+
+            <!-- facility picker -->
+            <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #D9EAE4;border-radius:14px;padding:12px 14px;margin-top:16px">
+              <span style="width:36px;height:36px;border-radius:10px;background:#EAF4F1;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 3l8 7.5"/><path d="M6 9.5V21h12V9.5"/><path d="M10 21v-5h4v5"/></svg></span>
+              <div style="flex:1"><div style="font-size:11px;color:#8a9089;font-weight:600">Facility</div><div style="font-size:14.5px;font-weight:700;color:#17211D">Happy Tails Daycare</div></div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+
+            <!-- Your dogs -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 2px 11px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:#17211D"><svg width="19" height="19" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg>Your Dogs</div>
+              <span style="display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 13px;border-radius:10px;background:#077D73;color:#fff;font-size:12.5px;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+              <div style="border:1.5px solid #D9EAE4;background:#fff;border-radius:16px;padding:12px"><div style="width:100%;height:74px;border-radius:11px;background:#EAF4F1;display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 28 28" fill="#A4D2C8"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div><div style="font-size:15px;font-weight:700;color:#17211D;margin-top:9px">Max</div><div style="font-size:12px;color:#8a9089">Golden Retriever · large</div><span style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#10B981"></span>Checked in</span></div>
+              <div style="border:1.5px solid #D9EAE4;background:#fff;border-radius:16px;padding:12px"><div style="width:100%;height:74px;border-radius:11px;background:#EAF4F1;display:flex;align-items:center;justify-content:center"><svg width="40" height="40" viewBox="0 0 28 28" fill="#A4D2C8"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg></div><div style="font-size:15px;font-weight:700;color:#17211D;margin-top:9px">Ollie</div><div style="font-size:12px;color:#8a9089">Beagle · small</div><span style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;background:#F5F5F4;color:#57534E;border:1px solid #E7E5E4;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#A8A29E"></span>Home</span></div>
+            </div>
+
+            <!-- Your bookings -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 2px 11px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:#17211D"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="10" y1="15" x2="14" y2="15"/></svg>Your Bookings</div>
+              <span style="display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 13px;border-radius:10px;border:1.5px solid #077D73;color:#077D73;font-size:12.5px;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#077D73" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div style="border:1.5px solid #D9EAE4;background:#fff;border-radius:16px;padding:14px">
+                <div style="display:flex;align-items:start;justify-content:space-between;gap:8px"><div style="display:flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg><span style="font-size:15px;font-weight:700;color:#17211D">Max</span></div><span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px">Approved</span></div>
+                <div style="font-size:12.5px;color:#8a9089;margin:8px 0 0;display:flex;align-items:center;gap:7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg>Mar 12, 2026</div>
+                <div style="font-size:12.5px;color:#5b665f;margin-top:4px"><b style="color:#3a463f;font-weight:600">Service:</b> Daycare</div>
+              </div>
+              <div style="border:1.5px solid #D9EAE4;background:#fff;border-radius:16px;padding:14px">
+                <div style="display:flex;align-items:start;justify-content:space-between;gap:8px"><div style="display:flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 28 28" fill="#077D73"><ellipse cx="14" cy="18.5" rx="6.6" ry="5.6"/><circle cx="5.6" cy="12" r="2.5"/><circle cx="10.6" cy="7.4" r="2.6"/><circle cx="17.4" cy="7.4" r="2.6"/><circle cx="22.4" cy="12" r="2.5"/></svg><span style="font-size:15px;font-weight:700;color:#17211D">Max</span></div><span style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px">Pending</span></div>
+                <div style="font-size:12.5px;color:#8a9089;margin:8px 0 0;display:flex;align-items:center;gap:7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><line x1="3" y1="9.5" x2="21" y2="9.5"/></svg>Mar 20 – 23, 2026</div>
+                <div style="font-size:12.5px;color:#5b665f;margin-top:4px"><b style="color:#3a463f;font-weight:600">Service:</b> Boarding · Transport required</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Portal · home</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">My dogs · my bookings</div>
+      </div>
+
+      <!-- ===== PHONE: PORTAL NEW BOOKING ===== -->
+      <div style="width:384px;flex:none">
+        <div style="position:relative;background:#FBFCFB;border:9px solid #06342F;border-radius:46px;box-shadow:14px 14px 0 rgba(6,52,47,.85);overflow:hidden;min-height:800px;display:flex;flex-direction:column">
+          <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:118px;height:24px;background:#06342F;border-radius:0 0 15px 15px;z-index:30"></div>
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:13px 26px 7px;font-size:13px;font-weight:800;color:#17211D"><span>9:41</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="#17211D"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".3"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#17211D" stroke-width="1.6"><path d="M1 4.5a10 10 0 0 1 14 0M3.5 7a6.5 6.5 0 0 1 9 0"/><circle cx="8" cy="10" r="1" fill="#17211D" stroke="none"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#17211D" stroke-opacity=".5"/><rect x="3" y="3" width="15" height="6" rx="1" fill="#17211D"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#17211D" fill-opacity=".5"/></svg></span></div>
+          <div style="flex:none;display:flex;align-items:center;gap:12px;padding:9px 18px 14px;background:#EAF4F1;border-bottom:1px solid #D9EAE4"><span style="width:38px;height:38px;border-radius:11px;border:1.5px solid #C5DED6;background:#fff;display:inline-flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#17211D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></span><span style="font-family:'Baloo 2',cursive;font-size:19px;font-weight:700;color:#17211D">Book a Stay</span></div>
+
+          <div style="flex:1;padding:16px 16px">
+            <p style="font-size:13.5px;color:#6E7A75;margin:0 2px 14px">Request daycare or boarding for your dog.</p>
+            <div style="background:#fff;border:1.5px solid #D9EAE4;border-radius:16px;padding:16px">
+              <div style="font-size:14px;font-weight:700;color:#17211D;margin-bottom:14px">Booking details</div>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Dog</div>
+              <div style="height:46px;border:1.5px solid #C5DED6;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:14px;color:#17211D;margin-bottom:14px">Max (Golden Retriever)<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Service type</div>
+              <div style="display:flex;gap:9px;margin-bottom:14px"><span style="flex:1;text-align:center;height:44px;line-height:44px;border-radius:12px;border:1.5px solid #077D73;background:#EAF4F1;color:#045C54;font-size:14px;font-weight:700">Daycare</span><span style="flex:1;text-align:center;height:44px;line-height:44px;border-radius:12px;border:1.5px solid #C5DED6;background:#fff;color:#6E7A75;font-size:14px;font-weight:600">Boarding</span></div>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Start date</div>
+              <div style="height:46px;border:1.5px solid #C5DED6;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:13.5px;color:#17211D;margin-bottom:14px">Mar 24, 2026</div>
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">End date</div>
+              <div style="height:46px;border:1.5px solid #C5DED6;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:13.5px;color:#17211D;margin-bottom:14px">Mar 24, 2026</div>
+
+              <label style="display:flex;align-items:center;gap:11px;margin-bottom:14px"><span style="width:20px;height:20px;border-radius:6px;border:1.5px solid #C5DED6;background:#fff"></span><span style="font-size:14px;color:#3a463f">Transport required</span></label>
+
+              <div style="font-size:12.5px;font-weight:600;color:#3a463f;margin-bottom:6px">Notes</div>
+              <div style="min-height:64px;border:1.5px solid #C5DED6;border-radius:12px;background:#fff;padding:11px 14px;font-size:13.5px;color:#A8A29E;line-height:1.45">Anything we should know for this stay?</div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <div style="flex:1;height:52px;border-radius:14px;background:#077D73;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;border:2.5px solid #06342F;box-shadow:4px 4px 0 #06342F">Submit Request</div>
+              <div style="width:110px;height:52px;border-radius:14px;border:1.5px solid #C5DED6;background:#fff;color:#3a463f;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">Cancel</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;color:#17211D">Portal · new booking</div>
+        <div style="text-align:center;font-size:12.5px;color:#6E7A75">Owner requests a stay</div>
+      </div>
+
+    </div>
+  </section>
+  <!--APPEND-HERE-->
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

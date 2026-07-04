@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
-type LandingButtonVariant = "primary" | "secondary" | "outline" | "inverted";
+type LandingButtonVariant = "primary" | "marker" | "outline" | "ghost";
 
 interface LandingButtonBaseProps {
   variant?: LandingButtonVariant;
@@ -21,13 +21,12 @@ type LandingButtonProps = LandingButtonAsButton | LandingButtonAsLink;
 
 const variantClasses: Record<LandingButtonVariant, string> = {
   primary:
-    "bg-[oklch(0.531_0.092_185.0)] text-white hover:bg-[oklch(0.481_0.092_185.0)]",
-  secondary:
-    "bg-[oklch(0.828_0.050_180.2)] text-[oklch(0.205_0.006_89.9)] hover:bg-[oklch(0.798_0.050_180.2)]",
+    "bg-primary text-white border-[2.5px] border-[#06342F] shadow-[5px_5px_0_#06342F] transition-transform hover:-translate-y-0.5",
+  marker:
+    "bg-transparent text-[#F2D98A] border-[2.5px] border-[#F2D98A]",
   outline:
-    "border border-[oklch(0.885_0.000_89.9)] bg-white text-[oklch(0.205_0.006_89.9)] hover:bg-[oklch(0.985_0_0)]",
-  inverted:
-    "bg-white text-[oklch(0.531_0.092_185.0)] hover:bg-[oklch(0.985_0_0)]",
+    "bg-white text-[#06342F] border-[2.5px] border-[#06342F] shadow-[5px_5px_0_#06342F] transition-transform hover:-translate-y-0.5",
+  ghost: "bg-transparent text-[#06342F]",
 };
 
 const sizeClasses = {
@@ -44,8 +43,8 @@ export function LandingButton({
   ...props
 }: LandingButtonProps) {
   const classes = cn(
-    "inline-flex items-center justify-center font-semibold transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.531_0.092_185.0)] focus-visible:ring-offset-2",
+    "inline-flex items-center justify-center font-semibold",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
     variantClasses[variant],
     sizeClasses[size],
     className,

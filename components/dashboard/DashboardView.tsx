@@ -5,6 +5,7 @@ import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { CapacityCalendar } from "@/components/capacity/CapacityCalendar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { StatCard } from "@/components/ui/StatCard";
 import {
   checkInDog,
   enrichDogWithCheckin,
@@ -33,28 +34,24 @@ const STAT_CONFIG = [
     key: "checkedIn" as const,
     label: "Checked In",
     icon: ClipboardCheck,
-    color: "text-emerald-600 bg-emerald-50",
     href: "/checkins",
   },
   {
     key: "arrivalsToday" as const,
     label: "Arrivals Today",
     icon: LogIn,
-    color: "text-blue-600 bg-blue-50",
     href: "/checkins",
   },
   {
     key: "daycareToday" as const,
     label: "Daycare Today",
     icon: Sun,
-    color: "text-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9]",
     href: "/checkins",
   },
   {
     key: "overnight" as const,
     label: "Overnight",
     icon: Moon,
-    color: "text-amber-600 bg-amber-50",
     href: "/checkins",
   },
 ];
@@ -196,18 +193,18 @@ export function DashboardView() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading dashboard...</p>
+        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+      <div className="rounded-2xl border border-danger/25 bg-[#FEF2F2] px-6 py-12 text-center">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -226,10 +223,10 @@ export function DashboardView() {
   return (
     <motion.div className="space-y-8" {...fadeIn}>
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h2 className="font-display text-2xl tracking-tight text-foreground">
           {getTimeBasedGreeting()}!
         </h2>
-        <p className="mt-1 text-stone-500">
+        <p className="mt-1 text-muted-foreground">
           Here&apos;s what&apos;s happening at the facility today.
         </p>
       </div>
@@ -239,7 +236,7 @@ export function DashboardView() {
           <motion.div
             key="action-error"
             {...slideUp}
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
             role="alert"
           >
             {actionError}
@@ -248,26 +245,19 @@ export function DashboardView() {
       </AnimatePresence>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {STAT_CONFIG.map(({ key, label, icon: Icon, color, href }, index) => (
+        {STAT_CONFIG.map(({ key, label, icon: Icon, href }, index) => (
           <motion.div
             key={key}
             {...appearScale}
             transition={{ ...appearScale.transition, delay: index * 0.05 }}
           >
             <Link href={href}>
-              <Card className="transition-shadow hover:shadow-md">
-                <CardContent className="p-4">
-                  <span
-                    className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${color}`}
-                  >
-                    <Icon className="h-5 w-5" aria-hidden />
-                  </span>
-                  <p className="mt-3 text-2xl font-bold tabular-nums text-stone-900">
-                    {stats[key]}
-                  </p>
-                  <p className="text-sm text-stone-500">{label}</p>
-                </CardContent>
-              </Card>
+              <StatCard
+                className="tabular-nums transition-shadow hover:shadow-md"
+                value={stats[key]}
+                label={label}
+                icon={<Icon className="h-5 w-5" aria-hidden />}
+              />
             </Link>
           </motion.div>
         ))}
@@ -277,19 +267,19 @@ export function DashboardView() {
 
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-stone-900">
+          <h3 className="font-display text-lg text-foreground">
             Upcoming Bookings
           </h3>
           <Link
             href="/bookings"
-            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+            className="text-sm font-medium text-primary hover:underline"
           >
             View all
           </Link>
         </div>
         {upcomingBookings.length === 0 ? (
           <Card>
-            <CardContent className="py-10 text-center text-stone-500">
+            <CardContent className="py-10 text-center text-muted-foreground">
               No upcoming bookings scheduled.
             </CardContent>
           </Card>
@@ -299,17 +289,18 @@ export function DashboardView() {
               <Link key={booking.id} href={`/bookings/${booking.id}`}>
                 <Card className="transition-shadow hover:shadow-md">
                   <CardContent className="flex items-center gap-4 p-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
+                    {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EAF4F1] text-primary">
                       <CalendarDays className="h-5 w-5" aria-hidden />
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-stone-900">
+                        <p className="font-semibold text-foreground">
                           {booking.dogName}
                         </p>
                         <BookingStatusBadge status={booking.status} />
                       </div>
-                      <p className="mt-0.5 truncate text-sm text-stone-500">
+                      <p className="mt-0.5 truncate text-sm text-muted-foreground">
                         {booking.clientName} ·{" "}
                         {formatBookingDateRange(
                           booking.startDate,
@@ -327,19 +318,19 @@ export function DashboardView() {
 
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-stone-900">
+          <h3 className="font-display text-lg text-foreground">
             Currently Checked In
           </h3>
           <Link
             href="/checkins"
-            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+            className="text-sm font-medium text-primary hover:underline"
           >
             View all
           </Link>
         </div>
         {checkedInDogs.length === 0 ? (
           <Card>
-            <CardContent className="py-10 text-center text-stone-500">
+            <CardContent className="py-10 text-center text-muted-foreground">
               No dogs checked in right now.
             </CardContent>
           </Card>

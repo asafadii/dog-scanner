@@ -54,7 +54,7 @@ export default function PortalNewBookingPage() {
 
   if (!clientId || !facilityId) {
     return (
-      <p className="text-sm text-red-800" role="alert">
+      <p className="text-sm text-danger" role="alert">
         Missing facility context. Go back to the portal and try again.
       </p>
     );
@@ -86,10 +86,10 @@ export default function PortalNewBookingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
           Book a Stay
         </h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Request daycare or boarding for your dog.
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function PortalNewBookingPage() {
             <div>
               <label
                 htmlFor="portal-booking-dog"
-                className="mb-2 block text-sm font-medium text-stone-700"
+                className="mb-2 block text-sm font-medium text-foreground"
               >
                 Dog
               </label>
@@ -113,7 +113,7 @@ export default function PortalNewBookingPage() {
                 value={form.dogId}
                 disabled={loadingDogs || dogs.length === 0}
                 onChange={(e) => setForm({ ...form, dogId: e.target.value })}
-                className="w-full rounded-xl border border-violet-200 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-200"
+                className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">
                   {loadingDogs ? "Loading dogs..." : "Select a dog"}
@@ -125,16 +125,17 @@ export default function PortalNewBookingPage() {
                 ))}
               </select>
               {!loadingDogs && dogs.length === 0 && (
-                <p className="mt-2 text-sm text-stone-500">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Add a dog before creating a booking.
                 </p>
               )}
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-stone-700">
+              <label className="mb-2 block text-sm font-medium text-foreground">
                 Service type
               </label>
+              {/* Operational-flat segmented control (active = mint-wash #EAF4F1); matches Plan-04 pattern, NO sticker */}
               <div className="grid grid-cols-2 gap-2">
                 {SERVICE_TYPES.map((serviceType) => (
                   <button
@@ -144,8 +145,8 @@ export default function PortalNewBookingPage() {
                     className={cn(
                       "rounded-xl border px-3 py-2 text-sm capitalize transition-colors",
                       form.serviceType === serviceType
-                        ? "border-violet-400 bg-violet-50 text-violet-800"
-                        : "border-stone-200 bg-white text-stone-600 hover:border-violet-200",
+                        ? "border-primary bg-[#EAF4F1] text-primary"
+                        : "border-border bg-surface text-muted-foreground hover:border-primary/40",
                     )}
                   >
                     {serviceType}
@@ -170,14 +171,14 @@ export default function PortalNewBookingPage() {
               onChange={(e) => setForm({ ...form, endDate: e.target.value })}
             />
 
-            <label className="flex items-center gap-3 text-sm text-stone-700">
+            <label className="flex items-center gap-3 text-sm text-foreground">
               <input
                 type="checkbox"
                 checked={form.transportRequired}
                 onChange={(e) =>
                   setForm({ ...form, transportRequired: e.target.checked })
                 }
-                className="h-4 w-4 rounded border-stone-300 text-violet-600 focus:ring-violet-500"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
               Transport required
             </label>
@@ -193,7 +194,7 @@ export default function PortalNewBookingPage() {
 
         {error && (
           <p
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
             role="alert"
           >
             {error}
@@ -201,12 +202,15 @@ export default function PortalNewBookingPage() {
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
+          {/* Documented portal sticker exception (Pitfall 5, [ASSUMED A1], design line 982):
+              primary submit CTA ONLY — border 2.5px + shadow 4px 4px 0 #06342F. Nowhere else, never in staff app. */}
           <Button
             type="submit"
             size="lg"
             disabled={submitting || dogs.length === 0}
+            className="border-[2.5px] border-[#06342F] shadow-[4px_4px_0_#06342F] disabled:shadow-none"
           >
-            {submitting ? "Submitting..." : "Submit Booking Request"}
+            {submitting ? "Submitting..." : "Submit Request"}
           </Button>
           <Link href="/portal">
             <Button type="button" variant="outline" size="lg" className="w-full">

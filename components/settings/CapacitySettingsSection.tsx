@@ -66,18 +66,18 @@ export function CapacitySettingsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Gauge className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+          <Gauge className="h-5 w-5 text-primary" aria-hidden />
           Capacity
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-muted-foreground">
           Set maximum approved bookings per day. Approval is blocked when
           capacity is full.
         </p>
 
         {loading ? (
-          <div className="flex items-center gap-2 py-4 text-sm text-stone-500">
+          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Loading capacity settings...
           </div>
@@ -85,18 +85,20 @@ export function CapacitySettingsSection() {
           <>
             {error && (
               <div
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                 role="alert"
               >
+                {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
                 {error}
               </div>
             )}
 
             {success && (
               <div
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm text-success"
                 role="status"
               >
+                {/* #ECFDF5 documented success-tint (D-04, mirrors Alert.tsx) */}
                 {success}
               </div>
             )}
@@ -144,7 +146,7 @@ export function CapacitySettingsSection() {
             </Button>
 
             {error === INCOMPLETE_SETUP_MESSAGE && (
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 Complete account setup before configuring capacity.
               </p>
             )}

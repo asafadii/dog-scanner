@@ -123,8 +123,8 @@ export function ScanCheckin() {
         <motion.div key="success" {...appearScale}>
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-2xl font-bold text-emerald-700">Checked in!</p>
-              <p className="mt-2 text-stone-600">
+              <p className="font-display text-2xl text-success">Checked in!</p>
+              <p className="mt-2 text-muted-foreground">
                 {successDogName ?? "Dog"} is now on site.
               </p>
               <Button className="mt-6" onClick={resetForNextScan}>
@@ -138,26 +138,40 @@ export function ScanCheckin() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <ScanLine className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+                <ScanLine className="h-5 w-5 text-primary" aria-hidden />
                 Scan QR code
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-0">
-              <div className="overflow-hidden rounded-2xl border border-stone-200 bg-stone-900">
+              {/* QR-frame overlay (design 591-599): dark viewport + mint corner brackets + scan line
+                  wraps the existing qr-scanner <video>; decode/camera behavior untouched.
+                  #0c1a17 = design dark viewport literal, documented D-04 exception (no named token). */}
+              <div className="relative h-[250px] overflow-hidden rounded-2xl bg-[#0c1a17]">
                 <video
                   ref={videoRef}
-                  className="aspect-[4/3] w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   muted
                   playsInline
                 />
+                <div className="pointer-events-none absolute inset-0">
+                  <div className="absolute left-5 top-5 h-[34px] w-[34px] rounded-tl-lg border-l-[4px] border-t-[4px] border-mint" />
+                  <div className="absolute right-5 top-5 h-[34px] w-[34px] rounded-tr-lg border-r-[4px] border-t-[4px] border-mint" />
+                  <div className="absolute bottom-5 left-5 h-[34px] w-[34px] rounded-bl-lg border-b-[4px] border-l-[4px] border-mint" />
+                  <div className="absolute bottom-5 right-5 h-[34px] w-[34px] rounded-br-lg border-b-[4px] border-r-[4px] border-mint" />
+                  {/* scan line: mint gradient (#A4D2C8 = --dora-mint) + glow */}
+                  <div className="absolute inset-x-5 top-1/2 h-[3px] bg-[linear-gradient(90deg,transparent,#A4D2C8,transparent)] shadow-[0_0_12px_#A4D2C8]" />
+                </div>
               </div>
+              <p className="text-center text-sm text-muted-foreground">
+                Point at the owner&apos;s check-in QR code.
+              </p>
               {cameraError && (
-                <p className="text-sm text-amber-800" role="status">
+                <p className="text-sm text-warning" role="status">
                   {cameraError}
                 </p>
               )}
               {phase === "processing" && (
-                <div className="flex items-center justify-center gap-2 text-sm text-stone-500">
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   Processing check-in...
                 </div>
@@ -196,7 +210,7 @@ export function ScanCheckin() {
               <motion.div
                 key="scan-error"
                 {...slideUp}
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                 role="alert"
               >
                 {error}

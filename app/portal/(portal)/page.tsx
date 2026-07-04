@@ -136,10 +136,10 @@ export default function PortalPage() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-violet-600"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading your portal...</p>
+        <p className="text-sm text-muted-foreground">Loading your portal...</p>
       </div>
     );
   }
@@ -150,10 +150,10 @@ export default function PortalPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Welcome{accountName ? `, ${accountName.split(" ")[0]}` : ""}
           </h1>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Link your account to get started
           </p>
         </div>
@@ -161,12 +161,12 @@ export default function PortalPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <KeyRound className="h-5 w-5 text-violet-600" aria-hidden />
+              <KeyRound className="h-5 w-5 text-primary" aria-hidden />
               Claim your account
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="mb-4 text-sm text-stone-500">
+            <p className="mb-4 text-sm text-muted-foreground">
               Enter the invite code your daycare gave you to link your profile.
             </p>
             <form onSubmit={handleClaim} className="space-y-4">
@@ -182,7 +182,7 @@ export default function PortalPage() {
 
               {claimError && (
                 <p
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                  className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                   role="alert"
                 >
                   {claimError}
@@ -209,10 +209,10 @@ export default function PortalPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Welcome{accountName ? `, ${accountName.split(" ")[0]}` : ""}
         </h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Manage your dogs and bookings
         </p>
       </div>
@@ -225,14 +225,14 @@ export default function PortalPage() {
 
       {contentLoading ? (
         <div className="flex min-h-[20vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-violet-600" aria-hidden />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden />
         </div>
       ) : (
         <>
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-                <PawPrint className="h-5 w-5 text-violet-600" aria-hidden />
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <PawPrint className="h-5 w-5 text-primary" aria-hidden />
                 Your Dogs
               </h2>
               <Link href={newDogHref}>
@@ -245,7 +245,7 @@ export default function PortalPage() {
 
             {dogs.length === 0 ? (
               <Card>
-                <CardContent className="py-10 text-center text-sm text-stone-500">
+                <CardContent className="py-10 text-center text-sm text-muted-foreground">
                   No dogs on file yet. Add your first dog to get started.
                 </CardContent>
               </Card>
@@ -267,8 +267,8 @@ export default function PortalPage() {
 
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
-                <CalendarPlus className="h-5 w-5 text-violet-600" aria-hidden />
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <CalendarPlus className="h-5 w-5 text-primary" aria-hidden />
                 Your Bookings
               </h2>
               <Link href={newBookingHref}>
@@ -281,7 +281,7 @@ export default function PortalPage() {
 
             {bookings.length === 0 ? (
               <Card>
-                <CardContent className="py-10 text-center text-sm text-stone-500">
+                <CardContent className="py-10 text-center text-sm text-muted-foreground">
                   No bookings yet. Request a stay when you&apos;re ready.
                 </CardContent>
               </Card>
@@ -319,7 +319,7 @@ export default function PortalPage() {
 
                 {claimError && (
                   <p
-                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                    className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                     role="alert"
                   >
                     {claimError}

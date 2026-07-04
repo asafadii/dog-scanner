@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { StatCard } from "@/components/ui/StatCard";
 import { formatAmount } from "@/lib/currency";
 import { getFacilitySettings } from "@/lib/facility";
 import { getRevenueReport, INCOMPLETE_SETUP_MESSAGE } from "@/lib/reports";
@@ -113,14 +114,15 @@ export function ReportsView() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF4F1] text-primary">
+          {/* #EAF4F1 documented mint-wash (D-04) — no named token */}
           <BarChart3 className="h-6 w-6" aria-hidden />
         </span>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+          <h2 className="font-display text-2xl text-foreground">
             Reports
           </h2>
-          <p className="mt-1 text-stone-500">
+          <p className="mt-1 text-muted-foreground">
             Revenue and payment history for your facility.
           </p>
         </div>
@@ -172,14 +174,15 @@ export function ReportsView() {
       {loading ? (
         <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3">
           <Loader2
-            className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+            className="h-8 w-8 animate-spin text-primary"
             aria-hidden
           />
-          <p className="text-sm text-stone-500">Loading report...</p>
+          <p className="text-sm text-muted-foreground">Loading report...</p>
         </div>
       ) : error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-          <p className="text-sm font-medium text-red-800" role="alert">
+        <div className="rounded-2xl border border-danger/25 bg-[#FEF2F2] px-6 py-12 text-center">
+          {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
+          <p className="text-sm font-medium text-danger" role="alert">
             {error}
           </p>
           {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -210,14 +213,12 @@ export function ReportsView() {
                 value: String(report.boardingStays),
               },
             ].map((stat) => (
-              <Card key={stat.label}>
-                <CardContent className="pt-6">
-                  <p className="text-sm text-stone-500">{stat.label}</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-stone-900">
-                    {stat.value}
-                  </p>
-                </CardContent>
-              </Card>
+              <StatCard
+                key={stat.label}
+                className="tabular-nums"
+                value={stat.value}
+                label={stat.label}
+              />
             ))}
           </div>
 
@@ -234,20 +235,20 @@ export function ReportsView() {
               ).map(([method, total]) => (
                 <div key={method}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="font-medium capitalize text-stone-700">
+                    <span className="font-medium capitalize text-foreground">
                       {PAYMENT_METHOD_LABELS[method]}
                     </span>
-                    <span className="tabular-nums text-stone-900">
+                    <span className="tabular-nums text-foreground">
                       {formatPrice(total)}
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                  <div className="h-2 overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn(
                         "h-full rounded-full",
-                        method === "cash" && "bg-emerald-500",
-                        method === "card" && "bg-[oklch(0.531_0.092_185.0)]",
-                        method === "transfer" && "bg-violet-500",
+                        method === "cash" && "bg-success",
+                        method === "card" && "bg-primary",
+                        method === "transfer" && "bg-marker",
                       )}
                       style={{ width: `${(total / maxBreakdown) * 100}%` }}
                     />
@@ -263,30 +264,31 @@ export function ReportsView() {
             </CardHeader>
             <CardContent className="pt-0">
               {isAdvancedGated && (
-                <div className="mb-4 rounded-xl border border-[oklch(0.531_0.092_185.0)]/20 bg-[#F0FAF9] px-4 py-3 text-sm text-stone-700">
+                <div className="mb-4 rounded-xl border border-primary/20 bg-[#EAF4F1] px-4 py-3 text-sm text-foreground">
+                  {/* #EAF4F1 documented mint-wash (D-04) — no named token */}
                   Upgrade to DORA Unlimited for advanced analytics and Excel
                   export.{" "}
                   <Link
                     href="/subscription"
-                    className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                    className="font-medium text-primary hover:underline"
                   >
                     View plans
                   </Link>
                 </div>
               )}
               {isAdvancedGated ? (
-                <p className="py-8 text-center text-sm text-stone-500">
+                <p className="py-8 text-center text-sm text-muted-foreground">
                   Payment details are available on DORA Unlimited.
                 </p>
               ) : report.payments.length === 0 ? (
-                <p className="py-8 text-center text-sm text-stone-500">
+                <p className="py-8 text-center text-sm text-muted-foreground">
                   No payments in this date range.
                 </p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-stone-200 text-stone-500">
+                      <tr className="border-b border-border text-muted-foreground">
                         <th className="px-2 py-3 font-medium">Dog</th>
                         <th className="px-2 py-3 font-medium">Service</th>
                         <th className="px-2 py-3 font-medium">Date</th>
@@ -298,21 +300,21 @@ export function ReportsView() {
                       {report.payments.map((payment) => (
                         <tr
                           key={payment.id}
-                          className="border-b border-stone-100 last:border-0"
+                          className="border-b border-border last:border-0"
                         >
-                          <td className="px-2 py-3 font-medium text-stone-900">
+                          <td className="px-2 py-3 font-medium text-foreground">
                             {payment.dogName}
                           </td>
-                          <td className="px-2 py-3 capitalize text-stone-700">
+                          <td className="px-2 py-3 capitalize text-muted-foreground">
                             {payment.serviceType}
                           </td>
-                          <td className="px-2 py-3 text-stone-700">
+                          <td className="px-2 py-3 text-muted-foreground">
                             {formatReportDate(payment.paidAt)}
                           </td>
-                          <td className="px-2 py-3 tabular-nums text-stone-900">
+                          <td className="px-2 py-3 tabular-nums text-foreground">
                             {formatPrice(payment.total)}
                           </td>
-                          <td className="px-2 py-3 capitalize text-stone-700">
+                          <td className="px-2 py-3 capitalize text-muted-foreground">
                             {PAYMENT_METHOD_LABELS[payment.paymentMethod]}
                           </td>
                         </tr>

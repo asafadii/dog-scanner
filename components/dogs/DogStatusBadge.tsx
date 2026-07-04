@@ -25,7 +25,7 @@ export function DogStatusBadge({
       <span
         className={cn(
           "h-1.5 w-1.5 rounded-full",
-          isCheckedIn ? "bg-emerald-500 motion-safe:animate-pulse" : "bg-stone-400",
+          isCheckedIn ? "bg-success motion-safe:animate-pulse" : "bg-muted-foreground",
         )}
         aria-hidden
       />

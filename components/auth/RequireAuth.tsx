@@ -17,32 +17,38 @@ export function RequireAuth({ children }: RequireAuthProps) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 bg-[#FAFAF8]">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 bg-background">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading...</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center bg-[#FAFAF8] px-4 py-12">
+      <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center p-8 text-center">
-            <Image
-              src="/dora-logo.svg"
-              alt="DORA"
-              width={120}
-              height={40}
-              className="h-10 w-auto"
-            />
-            <h2 className="mt-4 text-xl font-semibold text-stone-900">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/dora-icon.svg"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8"
+                aria-hidden
+              />
+              <span className="font-display text-xl font-bold text-primary">
+                DORA
+              </span>
+            </div>
+            <h2 className="mt-4 font-display text-xl font-semibold text-foreground">
               Please log in
             </h2>
-            <p className="mt-2 text-sm text-stone-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               You must be signed in to access DORA.
             </p>
             <Link href="/login" className="mt-6 w-full">

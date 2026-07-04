@@ -4,6 +4,7 @@ import { DogPhotoUpload } from "@/components/dogs/DogPhotoUpload";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { getClients } from "@/lib/clients";
 import {
@@ -304,9 +305,12 @@ export function DogForm({
             />
           </div>
           <div>
-            <span className="mb-2 block text-sm font-medium text-stone-700">
+            <span className="mb-2 block text-sm font-medium text-foreground">
               Size
             </span>
+            {/* Segmented control stays operational-flat (no sticker shadow — that
+                portal exception is Plan 05 only). Active = mint-wash #EAF4F1
+                (documented D-04 exception, Wave-2 precedent). */}
             <div className="flex gap-2">
               {SIZES.map((size) => (
                 <button
@@ -317,8 +321,8 @@ export function DogForm({
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.size === size
-                      ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
-                      : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
+                      ? "border-primary bg-[#EAF4F1] text-primary"
+                      : "border-border bg-surface text-muted-foreground hover:bg-muted",
                     isSubmitting && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -327,15 +331,15 @@ export function DogForm({
               ))}
             </div>
           </div>
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-stone-200 px-4 py-3">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
             <input
               type="checkbox"
               checked={form.overnight}
               disabled={isSubmitting}
               onChange={(e) => updateField("overnight", e.target.checked)}
-              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
             />
-            <span className="text-sm font-medium text-stone-700">
+            <span className="text-sm font-medium text-foreground">
               Overnight boarding stay
             </span>
           </label>
@@ -354,15 +358,15 @@ export function DogForm({
             placeholder="e.g. 985112345678901"
             disabled={isSubmitting}
           />
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-stone-200 px-4 py-3">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
             <input
               type="checkbox"
               checked={form.isNeutered === true}
               disabled={isSubmitting}
               onChange={(e) => updateField("isNeutered", e.target.checked)}
-              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
             />
-            <span className="text-sm font-medium text-stone-700">Neutered</span>
+            <span className="text-sm font-medium text-foreground">Neutered</span>
           </label>
           <Input
             label="Health certificate number"
@@ -382,22 +386,12 @@ export function DogForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label
-              htmlFor="client-select"
-              className="mb-2 block text-sm font-medium text-stone-700"
-            >
-              Link to Client
-            </label>
-            <select
+            <Select
               id="client-select"
+              label="Link to Client"
               value={form.clientId ?? ""}
               onChange={(e) => handleClientChange(e.target.value)}
               disabled={isSubmitting || clientsLoading}
-              className={cn(
-                "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
-                "focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20",
-                (isSubmitting || clientsLoading) && "cursor-not-allowed opacity-60",
-              )}
             >
               <option value="">No client — enter owner manually</option>
               {clients.map((client) => (
@@ -406,9 +400,9 @@ export function DogForm({
                   {client.phone ? ` (${client.phone})` : ""}
                 </option>
               ))}
-            </select>
+            </Select>
             {clientsLoading && (
-              <p className="mt-1 text-xs text-stone-500">Loading clients...</p>
+              <p className="mt-1 text-xs text-muted-foreground">Loading clients...</p>
             )}
           </div>
           <Input
@@ -451,8 +445,8 @@ export function DogForm({
               className={cn(
                 "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
                 form.alerts[key]
-                  ? "border-[oklch(0.900_0.035_185.0)] bg-[#F0FAF9]/50"
-                  : "border-stone-200 hover:bg-stone-50",
+                  ? "border-primary/40 bg-[#EAF4F1]/50"
+                  : "border-border hover:bg-muted",
                 isSubmitting && "cursor-not-allowed opacity-60",
               )}
             >
@@ -461,13 +455,13 @@ export function DogForm({
                 checked={form.alerts[key]}
                 disabled={isSubmitting}
                 onChange={() => toggleAlert(key)}
-                className="mt-0.5 h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+                className="mt-0.5 h-5 w-5 rounded border-border text-primary focus:ring-ring"
               />
               <div>
-                <span className="text-sm font-medium text-stone-800">
+                <span className="text-sm font-medium text-foreground">
                   {label}
                 </span>
-                <p className="text-xs text-stone-500">{description}</p>
+                <p className="text-xs text-muted-foreground">{description}</p>
               </div>
             </label>
           ))}
@@ -479,7 +473,7 @@ export function DogForm({
           <CardTitle>Behaviour &amp; Safety</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-stone-200 px-4 py-3">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
             <input
               type="checkbox"
               checked={form.aggressionTowardsPeople === true}
@@ -487,13 +481,13 @@ export function DogForm({
               onChange={(e) =>
                 updateField("aggressionTowardsPeople", e.target.checked)
               }
-              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
             />
-            <span className="text-sm font-medium text-stone-700">
+            <span className="text-sm font-medium text-foreground">
               Aggressive towards people?
             </span>
           </label>
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-stone-200 px-4 py-3">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
             <input
               type="checkbox"
               checked={form.aggressionTowardsDogs === true}
@@ -501,9 +495,9 @@ export function DogForm({
               onChange={(e) =>
                 updateField("aggressionTowardsDogs", e.target.checked)
               }
-              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
             />
-            <span className="text-sm font-medium text-stone-700">
+            <span className="text-sm font-medium text-foreground">
               Aggressive towards other dogs?
             </span>
           </label>
@@ -579,19 +573,19 @@ export function DogForm({
           <CardTitle>Documents</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-muted-foreground">
             Upload vaccination stamps (JPG, PNG, or PDF). You can add multiple
             files.
           </p>
 
           {documentError && (
-            <p className="text-sm text-red-700" role="alert">
+            <p className="text-sm text-danger" role="alert">
               {documentError}
             </p>
           )}
 
           {dogId && documentsLoading ? (
-            <div className="flex items-center gap-2 text-sm text-stone-500">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               Loading documents...
             </div>
@@ -601,14 +595,14 @@ export function DogForm({
                 {existingDocuments.map((doc) => (
                   <li
                     key={doc.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted px-3 py-2"
                   >
                     <button
                       type="button"
                       onClick={() => void handleOpenDocument(doc.id)}
-                      className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm text-stone-800 hover:text-[oklch(0.420_0.075_185.0)]"
+                      className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm text-foreground hover:text-primary"
                     >
-                      <FileText className="h-4 w-4 shrink-0 text-stone-400" />
+                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <span className="truncate">
                         Vaccination stamp · {formatDocumentDate(doc.createdAt)}
                       </span>
@@ -617,7 +611,7 @@ export function DogForm({
                       type="button"
                       onClick={() => void handleDeleteDocument(doc.id)}
                       disabled={deletingDocumentId === doc.id || isSubmitting}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-danger hover:bg-danger/10 disabled:opacity-50"
                       aria-label="Delete vaccination document"
                     >
                       {deletingDocumentId === doc.id ? (
@@ -636,7 +630,7 @@ export function DogForm({
             <div>
               <label
                 htmlFor="vaccination-upload-edit"
-                className="mb-2 block text-sm font-medium text-stone-700"
+                className="mb-2 block text-sm font-medium text-foreground"
               >
                 Add vaccination stamps
               </label>
@@ -664,7 +658,7 @@ export function DogForm({
                   }
                   e.target.value = "";
                 }}
-                className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#F0FAF9] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[oklch(0.420_0.075_185.0)]"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
             </div>
           )}
@@ -673,7 +667,7 @@ export function DogForm({
             <div>
               <label
                 htmlFor="vaccination-upload-new"
-                className="mb-2 block text-sm font-medium text-stone-700"
+                className="mb-2 block text-sm font-medium text-foreground"
               >
                 Vaccination stamps
               </label>
@@ -684,21 +678,21 @@ export function DogForm({
                 multiple
                 disabled={isSubmitting}
                 onChange={(e) => handleVaccinationFileChange(e.target.files)}
-                className="block w-full text-sm text-stone-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#F0FAF9] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[oklch(0.420_0.075_185.0)]"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
               {vaccinationFiles.length > 0 && (
                 <ul className="mt-3 space-y-2">
                   {vaccinationFiles.map((file, index) => (
                     <li
                       key={`${file.name}-${index}`}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 px-3 py-2 text-sm"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2 text-sm"
                     >
-                      <span className="truncate text-stone-700">{file.name}</span>
+                      <span className="truncate text-foreground">{file.name}</span>
                       <button
                         type="button"
                         onClick={() => removePendingVaccinationFile(index)}
                         disabled={isSubmitting}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-danger hover:text-danger/80"
                         aria-label={`Remove ${file.name}`}
                       >
                         <Trash2 className="h-4 w-4" />

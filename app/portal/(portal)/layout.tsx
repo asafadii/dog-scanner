@@ -1,11 +1,8 @@
 "use client";
 
+import { PortalShell } from "@/components/portal/PortalShell";
 import { RequireClientAccount } from "@/components/portal/RequireClientAccount";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Button } from "@/components/ui/Button";
-import { LogOut } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -31,40 +28,12 @@ export default function PortalAuthenticatedLayout({
 
   return (
     <RequireClientAccount>
-      <div className="flex min-h-full flex-col bg-[#F5F3FF]">
-        <header className="border-b border-violet-200/60 bg-white/90 backdrop-blur-sm">
-          <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
-            <Link
-              href="/portal"
-              className="flex items-center gap-2 text-violet-700 transition-colors hover:text-violet-800"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white shadow-sm">
-                <Image src="/portal-logo.svg" alt="DORA" width={32} height={32} />
-              </span>
-              <div className="leading-tight">
-                <span className="block text-lg font-semibold tracking-tight">
-                  DORA Portal
-                </span>
-                <span className="block text-xs text-stone-500">
-                  {displayName}
-                </span>
-              </div>
-            </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void handleSignOut()}
-            >
-              <LogOut className="h-4 w-4" aria-hidden />
-              Sign out
-            </Button>
-          </div>
-        </header>
-
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-          {children}
-        </main>
-      </div>
+      <PortalShell
+        displayName={displayName}
+        onSignOut={() => void handleSignOut()}
+      >
+        {children}
+      </PortalShell>
     </RequireClientAccount>
   );
 }

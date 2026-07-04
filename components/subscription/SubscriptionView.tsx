@@ -50,19 +50,19 @@ function StatusBadge({ status }: { status: SubscriptionInfo["status"] }) {
   const config = {
     trialing: {
       label: "Trial",
-      className: "bg-amber-50 text-amber-800 border-amber-200",
+      className: "bg-warning/10 text-warning border-warning/25",
     },
     active: {
       label: "Active",
-      className: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      className: "bg-[#ECFDF5] text-success border-success/25",
     },
     past_due: {
       label: "Past due",
-      className: "bg-red-50 text-red-800 border-red-200",
+      className: "bg-[#FEF2F2] text-danger border-danger/25",
     },
     canceled: {
       label: "Canceled",
-      className: "bg-stone-100 text-stone-600 border-stone-200",
+      className: "bg-muted text-muted-foreground border-border",
     },
   }[status];
 
@@ -183,19 +183,19 @@ export function SubscriptionView() {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-lg bg-stone-200" />
-          <div className="h-4 w-72 animate-pulse rounded bg-stone-100" />
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-muted" />
+          <div className="h-4 w-72 animate-pulse rounded bg-muted" />
         </div>
         <Card>
           <CardContent className="space-y-4 p-6">
-            <div className="h-6 w-32 animate-pulse rounded bg-stone-200" />
-            <div className="h-4 w-24 animate-pulse rounded bg-stone-100" />
-            <div className="h-10 w-40 animate-pulse rounded-xl bg-stone-100" />
+            <div className="h-6 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+            <div className="h-10 w-40 animate-pulse rounded-xl bg-muted" />
           </CardContent>
         </Card>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="h-64 animate-pulse rounded-2xl bg-stone-100" />
-          <div className="h-64 animate-pulse rounded-2xl bg-stone-100" />
+          <div className="h-64 animate-pulse rounded-2xl bg-muted" />
+          <div className="h-64 animate-pulse rounded-2xl bg-muted" />
         </div>
       </div>
     );
@@ -203,8 +203,9 @@ export function SubscriptionView() {
 
   if (error || !subscription) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+      <div className="rounded-2xl border border-danger/25 bg-[#FEF2F2] px-6 py-12 text-center">
+        {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
+        <p className="text-sm font-medium text-danger" role="alert">
           {error ?? "Unable to load subscription details."}
         </p>
         <Button
@@ -228,28 +229,30 @@ export function SubscriptionView() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h2 className="font-display text-2xl text-foreground">
           Subscription
         </h2>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Your plan, billing status, and upgrade options.
         </p>
       </div>
 
       {showSuccessBanner && (
         <div
-          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+          className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm font-medium text-success"
           role="status"
         >
+          {/* #ECFDF5 documented success-tint (D-04, mirrors Alert.tsx) */}
           Your subscription is active. Welcome to DORA!
         </div>
       )}
 
       {actionError && (
         <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
           role="alert"
         >
+          {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
           {actionError}
         </div>
       )}
@@ -258,7 +261,7 @@ export function SubscriptionView() {
         <CardHeader className="pb-2">
           <CardTitle className="flex flex-wrap items-center gap-2 text-base">
             <CreditCard
-              className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]"
+              className="h-5 w-5 text-primary"
               aria-hidden
             />
             Current plan
@@ -266,7 +269,7 @@ export function SubscriptionView() {
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
           <div className="flex flex-wrap items-center gap-3">
-            <p className="text-xl font-bold text-stone-900">
+            <p className="text-xl font-bold text-foreground">
               {planDisplayName(subscription.plan)}
             </p>
             <StatusBadge status={subscription.status} />
@@ -274,14 +277,14 @@ export function SubscriptionView() {
 
           {subscription.status === "trialing" &&
             subscription.daysLeftInTrial !== null && (
-              <p className="text-sm text-amber-800">
+              <p className="text-sm text-warning">
                 {subscription.daysLeftInTrial} day
                 {subscription.daysLeftInTrial !== 1 ? "s" : ""} left in your
                 trial
               </p>
             )}
 
-          <p className="text-sm text-stone-600">{staffLimitLabel}</p>
+          <p className="text-sm text-muted-foreground">{staffLimitLabel}</p>
 
           <Button
             className="w-full sm:w-auto"
@@ -297,7 +300,7 @@ export function SubscriptionView() {
       </Card>
 
       <div>
-        <h3 className="mb-4 text-lg font-semibold text-stone-900">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">
           Compare plans
         </h3>
         <div className="grid gap-4 md:grid-cols-2">
@@ -310,31 +313,31 @@ export function SubscriptionView() {
                 className={cn(
                   "relative rounded-2xl border-2 p-6",
                   isCurrent
-                    ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9]"
-                    : "border-stone-200 bg-white",
+                    ? "border-primary bg-[#EAF4F1]" // #EAF4F1 documented mint-wash (D-04)
+                    : "border-border bg-surface",
                 )}
               >
                 {isCurrent && (
-                  <span className="absolute -top-3 left-4 rounded-full bg-[oklch(0.531_0.092_185.0)] px-3 py-1 text-xs font-semibold text-white">
+                  <span className="absolute -top-3 left-4 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
                     Current plan
                   </span>
                 )}
-                <h4 className="text-lg font-bold text-stone-900">{plan.name}</h4>
+                <h4 className="text-lg font-bold text-foreground">{plan.name}</h4>
                 <p className="mt-1">
-                  <span className="text-2xl font-bold text-[oklch(0.531_0.092_185.0)]">
+                  <span className="text-2xl font-bold text-primary">
                     {plan.price}
                   </span>
-                  <span className="text-sm text-stone-500">{plan.period}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
                 </p>
-                <p className="mt-2 text-sm text-stone-600">{plan.description}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
                 <ul className="mt-4 space-y-2">
                   {plan.features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2 text-sm text-stone-600"
+                      className="flex items-start gap-2 text-sm text-muted-foreground"
                     >
                       <Check
-                        className="mt-0.5 h-4 w-4 shrink-0 text-[oklch(0.531_0.092_185.0)]"
+                        className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                         aria-hidden
                       />
                       {feature}

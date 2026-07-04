@@ -67,17 +67,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-[#FAFAF8]">
-      <header className="border-b border-stone-200/80 bg-white/80 backdrop-blur-sm">
+    <div className="flex min-h-full flex-col bg-background">
+      <header className="border-b border-border bg-surface/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-lg items-center px-4">
-          <Link href="/" className="inline-flex transition-opacity hover:opacity-90">
+          <Link
+            href="/"
+            className="flex items-center gap-2 transition-opacity hover:opacity-90"
+            aria-label="DORA home"
+          >
             <Image
-              src="/dora-logo.svg"
-              alt="DORA"
-              width={160}
-              height={53}
-              className="h-12 w-auto"
+              src="/dora-icon.svg"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              aria-hidden
             />
+            <span className="font-display text-xl font-bold text-primary">
+              DORA
+            </span>
           </Link>
         </div>
       </header>
@@ -85,10 +93,10 @@ export default function LoginPage() {
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="p-8">
-            <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
               Sign in
             </h1>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Sign in as staff or client
             </p>
 
@@ -114,7 +122,8 @@ export default function LoginPage() {
 
               {error && (
                 <p
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                  /* Alert error tint #FEF2F2 — documented D-04 exception (Alert.tsx precedent) */
+                  className="rounded-xl border border-danger/20 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                   role="alert"
                 >
                   {error}
@@ -131,20 +140,20 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-stone-500">
+            <p className="mt-6 text-center text-sm text-muted-foreground">
               Facility staff?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 Create facility account
               </Link>
             </p>
-            <p className="mt-2 text-center text-sm text-stone-500">
+            <p className="mt-2 text-center text-sm text-muted-foreground">
               Dog owner?{" "}
               <Link
                 href="/portal/signup"
-                className="font-medium text-violet-600 hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 Client portal signup
               </Link>

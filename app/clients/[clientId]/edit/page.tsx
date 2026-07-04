@@ -50,10 +50,10 @@ export default function EditClientPage() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading client...</p>
+        <p className="text-sm text-muted-foreground">Loading client...</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function EditClientPage() {
   if (error && !initialData) {
     return (
       <div className="mx-auto max-w-2xl space-y-4 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -83,17 +83,17 @@ export default function EditClientPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
           Edit Client
         </h2>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Update contact details and notes for this client.
         </p>
       </div>
 
       {error && (
         <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
           role="alert"
         >
           {error}

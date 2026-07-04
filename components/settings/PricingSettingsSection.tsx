@@ -83,18 +83,18 @@ export function PricingSettingsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Euro className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+          <Euro className="h-5 w-5 text-primary" aria-hidden />
           Pricing
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-muted-foreground">
           Set default rates and fees used when checking out and recording
           payments.
         </p>
 
         {loading ? (
-          <div className="flex items-center gap-2 py-4 text-sm text-stone-500">
+          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Loading pricing settings...
           </div>
@@ -102,18 +102,20 @@ export function PricingSettingsSection() {
           <>
             {error && (
               <div
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                 role="alert"
               >
+                {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
                 {error}
               </div>
             )}
 
             {success && (
               <div
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm text-success"
                 role="status"
               >
+                {/* #ECFDF5 documented success-tint (D-04, mirrors Alert.tsx) */}
                 {success}
               </div>
             )}
@@ -181,8 +183,8 @@ export function PricingSettingsSection() {
               />
             </div>
 
-            <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
-              <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-sm font-medium text-stone-800">
+            <div className="rounded-xl border border-border bg-muted p-4">
+              <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-sm font-medium text-foreground">
                 <input
                   type="checkbox"
                   checked={form.seasonalSurchargeEnabled}
@@ -193,7 +195,7 @@ export function PricingSettingsSection() {
                     }))
                   }
                   disabled={saving}
-                  className="h-4 w-4 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                 />
                 Enable seasonal surcharge
               </label>
@@ -230,7 +232,7 @@ export function PricingSettingsSection() {
             </Button>
 
             {error === INCOMPLETE_SETUP_MESSAGE && (
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 Complete account setup before configuring pricing.
               </p>
             )}

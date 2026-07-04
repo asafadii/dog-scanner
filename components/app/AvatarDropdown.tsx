@@ -97,9 +97,9 @@ export function AvatarDropdown() {
         aria-label="Account menu"
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-full",
-          "bg-[oklch(0.531_0.092_185.0)] text-sm font-semibold text-white",
+          "bg-primary text-sm font-semibold text-primary-foreground",
           "transition-opacity hover:opacity-90 focus-visible:outline-none",
-          "focus-visible:ring-2 focus-visible:ring-[oklch(0.531_0.092_185.0)]/40 focus-visible:ring-offset-2",
+          "focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
         )}
       >
         {initial}
@@ -110,7 +110,7 @@ export function AvatarDropdown() {
           <motion.div
             key="avatar-menu"
             role="menu"
-            className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-stone-200 bg-white py-1 shadow-lg"
+            className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-lg"
             {...appearScale}
           >
           {MENU_ITEMS.map(({ href, label, icon: Icon }) => (
@@ -119,20 +119,20 @@ export function AvatarDropdown() {
               href={href}
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex min-h-[44px] items-center gap-3 px-4 py-2.5 text-sm text-stone-700 transition-colors hover:bg-stone-50"
+              className="flex min-h-[44px] items-center gap-3 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
             >
-              <Icon className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
+              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               {label}
             </Link>
           ))}
-          <div className="my-1 border-t border-stone-100" />
+          <div className="my-1 border-t border-border" />
           <button
             type="button"
             role="menuitem"
             onClick={() => void handleSignOut()}
-            className="flex min-h-[44px] w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-50"
+            className="flex min-h-[44px] w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
           >
-            <LogOut className="h-4 w-4 shrink-0 text-stone-400" aria-hidden />
+            <LogOut className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             Sign Out
           </button>
           </motion.div>

@@ -13,7 +13,7 @@ interface AppShellProps {
 
 export function AppShell({ children, className }: AppShellProps) {
   return (
-    <div className="flex min-h-full flex-col bg-[#FAFAF8]">
+    <div className="flex min-h-full flex-col bg-background">
       <TopBar />
       <DesktopStaffNav />
       <main

@@ -78,10 +78,10 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading client...</p>
+        <p className="text-sm text-muted-foreground">Loading client...</p>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
   if (error || !client) {
     return (
       <div className="space-y-4 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error ?? "Client not found"}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -100,7 +100,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
         <div>
           <Link
             href="/clients"
-            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+            className="text-sm font-medium text-primary hover:underline"
           >
             Back to Clients
           </Link>
@@ -113,14 +113,14 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[oklch(0.950_0.020_185.0)] to-amber-50">
-            <User className="h-8 w-8 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-muted">
+            <User className="h-8 w-8 text-primary" aria-hidden />
           </div>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
               {client.name}
             </h2>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               {dogs.length} {dogs.length === 1 ? "dog" : "dogs"} on file
             </p>
           </div>
@@ -144,20 +144,20 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+            <User className="h-5 w-5 text-primary" aria-hidden />
             Contact Information
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pt-0 text-sm">
           {client.phone && (
             <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-2 text-stone-500">
+              <span className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="h-4 w-4" aria-hidden />
                 Phone
               </span>
               <a
                 href={`tel:${client.phone}`}
-                className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 {client.phone}
               </a>
@@ -165,13 +165,13 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           )}
           {client.email && (
             <div className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-2 text-stone-500">
+              <span className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="h-4 w-4" aria-hidden />
                 Email
               </span>
               <a
                 href={`mailto:${client.email}`}
-                className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 {client.email}
               </a>
@@ -179,19 +179,19 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           )}
           {client.address && (
             <div className="flex items-start justify-between gap-3">
-              <span className="flex items-center gap-2 text-stone-500">
+              <span className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-4 w-4" aria-hidden />
                 Address
               </span>
-              <span className="max-w-[60%] text-right font-medium text-stone-800">
+              <span className="max-w-[60%] text-right font-medium text-foreground">
                 {client.address}
               </span>
             </div>
           )}
           {client.emergencyContact && (
-            <div className="border-t border-stone-100 pt-3">
-              <p className="text-stone-500">Emergency Contact</p>
-              <p className="mt-1 font-medium text-stone-900">
+            <div className="border-t border-border pt-3">
+              <p className="text-muted-foreground">Emergency Contact</p>
+              <p className="mt-1 font-medium text-foreground">
                 {client.emergencyContact}
               </p>
             </div>
@@ -204,16 +204,17 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           <CardTitle className="text-base">Client Portal</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pt-0">
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-muted-foreground">
             Share an invite code so this client can link their portal account.
           </p>
           {client.inviteCode ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-[oklch(0.950_0.020_185.0)] bg-[#F0FAF9]/50 px-4 py-3">
+            // mint-wash #EAF4F1 tint = documented D-04 exception (Wave-2 precedent)
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/25 bg-[#EAF4F1]/50 px-4 py-3">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Invite code
                 </p>
-                <p className="mt-1 font-mono text-lg font-semibold tracking-widest text-stone-900">
+                <p className="mt-1 font-mono text-lg font-semibold tracking-widest text-foreground">
                   {client.inviteCode}
                 </p>
               </div>
@@ -237,7 +238,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
             </Button>
           )}
           {inviteError && (
-            <p className="text-sm text-red-800" role="alert">
+            <p className="text-sm text-danger" role="alert">
               {inviteError}
             </p>
           )}
@@ -249,17 +250,17 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           <CardHeader className="pb-2">
             <CardTitle>Notes</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 text-sm text-stone-700">
+          <CardContent className="pt-0 text-sm text-foreground">
             <p className="whitespace-pre-wrap">{client.notes}</p>
           </CardContent>
         </Card>
       )}
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-stone-900">Dogs</h3>
+        <h3 className="text-lg font-semibold text-foreground">Dogs</h3>
         {dogs.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-stone-300 bg-white py-12 text-center">
-            <p className="text-stone-600">No dogs linked to this client yet.</p>
+          <div className="rounded-2xl border border-dashed border-border bg-surface py-12 text-center">
+            <p className="text-muted-foreground">No dogs linked to this client yet.</p>
             <Link href={`/dogs/new?clientId=${clientId}`}>
               <Button variant="outline" className="mt-4">
                 <Plus className="h-4 w-4" aria-hidden />

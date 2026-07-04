@@ -145,18 +145,18 @@ export function KennelsSettingsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Home className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+          <Home className="h-5 w-5 text-primary" aria-hidden />
           Kennels
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-muted-foreground">
           Configure kennel spaces for placement during check-in. Inactive kennels
           stay in history but cannot be assigned.
         </p>
 
         {loading ? (
-          <div className="flex items-center gap-2 py-4 text-sm text-stone-500">
+          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Loading kennels...
           </div>
@@ -164,24 +164,26 @@ export function KennelsSettingsSection() {
           <>
             {error && (
               <div
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                 role="alert"
               >
+                {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
                 {error}
               </div>
             )}
 
             {success && (
               <div
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm text-success"
                 role="status"
               >
+                {/* #ECFDF5 documented success-tint (D-04, mirrors Alert.tsx) */}
                 {success}
               </div>
             )}
 
             {kennels.length === 0 ? (
-              <p className="text-sm text-stone-500">No kennels yet.</p>
+              <p className="text-sm text-muted-foreground">No kennels yet.</p>
             ) : (
               <div className="space-y-3">
                 {kennels.map((kennel) => {
@@ -194,8 +196,8 @@ export function KennelsSettingsSection() {
                       className={cn(
                         "rounded-xl border p-4",
                         kennel.isActive
-                          ? "border-stone-200 bg-white"
-                          : "border-stone-200 bg-stone-50 opacity-80",
+                          ? "border-border bg-surface"
+                          : "border-border bg-muted opacity-80",
                       )}
                     >
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -251,7 +253,7 @@ export function KennelsSettingsSection() {
                           {kennel.isActive ? "Mark Inactive" : "Mark Active"}
                         </Button>
                         {!kennel.isActive && (
-                          <span className="text-xs font-medium uppercase tracking-wide text-stone-400">
+                          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                             Inactive
                           </span>
                         )}
@@ -262,8 +264,8 @@ export function KennelsSettingsSection() {
               </div>
             )}
 
-            <div className="rounded-xl border border-dashed border-stone-300 p-4">
-              <p className="mb-3 text-sm font-medium text-stone-800">
+            <div className="rounded-xl border border-dashed border-border p-4">
+              <p className="mb-3 text-sm font-medium text-foreground">
                 Add Kennel
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -298,7 +300,7 @@ export function KennelsSettingsSection() {
             </div>
 
             {error === INCOMPLETE_SETUP_MESSAGE && (
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 Complete account setup before configuring kennels.
               </p>
             )}

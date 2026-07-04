@@ -49,18 +49,18 @@ export function ClientsListView() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading clients...</p>
+        <p className="text-sm text-muted-foreground">Loading clients...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+      <div className="rounded-2xl border border-danger/25 bg-danger/10 px-6 py-12 text-center">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -80,10 +80,10 @@ export function ClientsListView() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
             Clients
           </h2>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             {filtered.length} of {clients.length} client profiles
           </p>
         </div>
@@ -97,7 +97,7 @@ export function ClientsListView() {
 
       <div className="relative">
         <Search
-          className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+          className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
         />
         <Input
@@ -111,23 +111,23 @@ export function ClientsListView() {
       </div>
 
       {clients.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-stone-300 bg-white py-16 text-center">
-          <p className="text-stone-600">No client profiles yet.</p>
+        <div className="rounded-2xl border border-dashed border-border bg-surface py-16 text-center">
+          <p className="text-muted-foreground">No client profiles yet.</p>
           <Link
             href="/clients/new"
-            className="mt-3 inline-block text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+            className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
           >
             Add your first client
           </Link>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-stone-300 bg-white py-16 text-center">
-          <p className="text-stone-600">No clients match your search.</p>
+        <div className="rounded-2xl border border-dashed border-border bg-surface py-16 text-center">
+          <p className="text-muted-foreground">No clients match your search.</p>
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="mt-2 text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+              className="mt-2 text-sm font-medium text-primary hover:underline"
             >
               Clear search
             </button>

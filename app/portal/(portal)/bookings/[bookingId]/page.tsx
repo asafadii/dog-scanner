@@ -30,7 +30,7 @@ export default function PortalBookingDetailPage({
 
   if (!clientId || !facilityId) {
     return (
-      <p className="text-sm text-red-800" role="alert">
+      <p className="text-sm text-danger" role="alert">
         Missing booking context.
       </p>
     );
@@ -95,7 +95,8 @@ function PortalBookingDetailInner({
       const dataUrl = await QRCode.toDataURL(result.token, {
         margin: 2,
         width: 280,
-        color: { dark: "#5b21b6", light: "#ffffff" },
+        // Mint brand ink for the QR modules (documented brand literal #06342F); light stays white
+        color: { dark: "#06342F", light: "#ffffff" },
       });
       setQrDataUrl(dataUrl);
     } catch (err) {
@@ -141,8 +142,8 @@ function PortalBookingDetailInner({
   if (loading) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-600" aria-hidden />
-        <p className="text-sm text-stone-500">Loading booking...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+        <p className="text-sm text-muted-foreground">Loading booking...</p>
       </div>
     );
   }
@@ -150,7 +151,7 @@ function PortalBookingDetailInner({
   if (error || !booking) {
     return (
       <div className="space-y-4 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error ?? "Booking not found"}
         </p>
         <Link href="/portal">
@@ -168,14 +169,14 @@ function PortalBookingDetailInner({
       <div>
         <Link
           href="/portal"
-          className="text-sm font-medium text-violet-600 hover:underline"
+          className="text-sm font-medium text-primary hover:underline"
         >
           Back to Portal
         </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-stone-900">
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
           {booking.dogName}
         </h1>
-        <p className="mt-1 text-sm text-stone-500">{booking.dogBreed}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{booking.dogBreed}</p>
       </div>
 
       <Card>
@@ -185,20 +186,20 @@ function PortalBookingDetailInner({
             <BookingStatusBadge status={booking.status} />
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 pt-0 text-sm text-stone-600">
+        <CardContent className="space-y-3 pt-0 text-sm text-muted-foreground">
           <p className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-stone-400" aria-hidden />
+            <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden />
             {formatBookingDateRange(booking.startDate, booking.endDate)}
           </p>
           <p>
-            <span className="font-medium text-stone-700">Service:</span>{" "}
+            <span className="font-medium text-foreground">Service:</span>{" "}
             {booking.serviceType === "daycare" ? "Daycare" : "Boarding"}
           </p>
           {booking.transportRequired && (
-            <p className="text-stone-500">Transport required</p>
+            <p className="text-muted-foreground">Transport required</p>
           )}
           {booking.notes && (
-            <p className="whitespace-pre-wrap text-stone-700">{booking.notes}</p>
+            <p className="whitespace-pre-wrap text-foreground">{booking.notes}</p>
           )}
         </CardContent>
       </Card>
@@ -206,13 +207,13 @@ function PortalBookingDetailInner({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <QrCode className="h-5 w-5 text-violet-600" aria-hidden />
+            <QrCode className="h-5 w-5 text-primary" aria-hidden />
             Check In
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           {!checkInAvailable ? (
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-muted-foreground">
               {getCheckInUnavailableMessage(
                 booking.status,
                 booking.startDate,
@@ -221,20 +222,23 @@ function PortalBookingDetailInner({
             </p>
           ) : !token || tokenExpired ? (
             <div className="space-y-4">
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-muted-foreground">
                 Generate a one-time QR code for staff to scan when you arrive.
                 Codes expire after 5 minutes.
               </p>
               {tokenError && (
                 <p
-                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                  className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
                   role="alert"
                 >
                   {tokenError}
                 </p>
               )}
+              {/* Documented portal sticker exception (Plan 05): primary CTA only —
+                  border 2.5px + shadow 4px 4px 0 #06342F. Nowhere else, never in staff app. */}
               <Button
                 size="lg"
+                className="border-[2.5px] border-[#06342F] shadow-[4px_4px_0_#06342F] disabled:shadow-none"
                 disabled={tokenLoading}
                 onClick={() => void generateToken()}
               >
@@ -252,20 +256,20 @@ function PortalBookingDetailInner({
                 <img
                   src={qrDataUrl}
                   alt="Check-in QR code"
-                  className="rounded-2xl border border-violet-100 bg-white p-3"
+                  className="rounded-2xl border border-border bg-surface p-3"
                   width={280}
                   height={280}
                 />
               )}
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Manual entry code
                 </p>
-                <p className="mt-2 font-mono text-xl font-semibold tracking-widest text-stone-900">
+                <p className="mt-2 font-mono text-xl font-semibold tracking-widest text-foreground">
                   {formatCheckinTokenForDisplay(token)}
                 </p>
               </div>
-              <p className="text-sm font-medium text-violet-700">
+              <p className="text-sm font-medium text-primary">
                 Expires in {minutes}:{String(seconds).padStart(2, "0")}
               </p>
               <Button

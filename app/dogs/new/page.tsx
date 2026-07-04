@@ -22,17 +22,17 @@ export default function NewDogPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
           New Dog Profile
         </h2>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Create a profile when an owner drops off a new dog.
         </p>
       </div>
 
       {error && (
         <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
           role="alert"
         >
           {error}

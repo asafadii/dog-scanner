@@ -71,28 +71,28 @@ export function RequireClientAccount({ children }: RequireClientAccountProps) {
 
   if (authLoading || checking) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 bg-[#F5F3FF]">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 bg-background">
         <Loader2
-          className="h-8 w-8 animate-spin text-violet-600"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading...</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center bg-[#F5F3FF] px-4 py-12">
+      <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center p-8 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#EAF4F1] text-primary">
               <Heart className="h-6 w-6" aria-hidden />
             </span>
-            <h2 className="mt-4 text-xl font-semibold text-stone-900">
+            <h2 className="mt-4 text-xl font-semibold text-foreground">
               Please log in
             </h2>
-            <p className="mt-2 text-sm text-stone-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               Sign in to access your client portal.
             </p>
             <Link href="/login" className="mt-6 w-full">
@@ -108,13 +108,13 @@ export function RequireClientAccount({ children }: RequireClientAccountProps) {
 
   if (!allowed && errorCode === "incomplete_setup") {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center bg-[#F5F3FF] px-4 py-12">
+      <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center p-8 text-center">
-            <h2 className="text-xl font-semibold text-stone-900">
+            <h2 className="text-xl font-semibold text-foreground">
               Account not ready
             </h2>
-            <p className="mt-2 text-sm text-stone-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               {INCOMPLETE_CLIENT_SETUP_MESSAGE}
             </p>
             <Link href="/portal/signup" className="mt-6 w-full">
@@ -130,10 +130,10 @@ export function RequireClientAccount({ children }: RequireClientAccountProps) {
 
   if (!allowed) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center bg-[#F5F3FF] px-4 py-12">
+      <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center p-8 text-center">
-            <p className="text-sm text-red-800" role="alert">
+            <p className="text-sm text-danger" role="alert">
               Unable to verify your client account. Please try again.
             </p>
             <Link href="/login" className="mt-6 w-full">

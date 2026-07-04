@@ -70,6 +70,24 @@ const ALERT_DEFS: AlertDef[] = [
   },
 ];
 
+// SOLID safety treatment (PRIM-04 / D-11 / D-14): the 4 safety flags render
+// as the loudest element — solid fill + white text + leading icon.
+// KEY GOTCHA: the alert key is `escapeRisk` but the token is `safety-escape`.
+const SAFETY_SOLID: Record<
+  "allergy" | "aggression" | "escapeRisk" | "medication",
+  string
+> = {
+  allergy: "bg-safety-allergy text-white",
+  aggression: "bg-safety-aggression text-white",
+  escapeRisk: "bg-safety-escape text-white",
+  medication: "bg-safety-medication text-white",
+};
+
+// Governed off-scale radius/padding per UI-SPEC Spacing Exception
+// (rounded-[7px], py-[3px] — do NOT round to 8px/4px; px-2 is on-scale).
+const SOLID_CHIP =
+  "inline-flex items-center gap-1 rounded-[7px] px-2 py-[3px] text-[13px] font-extrabold";
+
 export function getActiveAlerts(alerts: DogAlerts): AlertDef[] {
   return ALERT_DEFS.filter((def) => alerts[def.key]).sort(
     (a, b) => a.priority - b.priority,
@@ -104,14 +122,28 @@ export function DogAlertBadges({
       aria-label="Care alerts"
     >
       <span className="sr-only">{summary}</span>
-      {activeAlerts.map(
-        ({ key, shortLabel, label, icon: Icon, variant }) => (
+      {activeAlerts.map(({ key, shortLabel, label, icon: Icon, variant }) => {
+        const solid = SAFETY_SOLID[key as keyof typeof SAFETY_SOLID];
+        if (solid) {
+          return (
+            <span
+              key={key}
+              className={cn(SOLID_CHIP, solid)}
+              role="listitem"
+              title={label}
+            >
+              <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} aria-hidden />
+              {compact ? shortLabel : label}
+            </span>
+          );
+        }
+        return (
           <Badge key={key} variant={variant} role="listitem" title={label}>
             <Icon className="h-3 w-3 shrink-0" aria-hidden />
             {compact ? shortLabel : label}
           </Badge>
-        ),
-      )}
+        );
+      })}
     </div>
   );
 }

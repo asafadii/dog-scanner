@@ -32,10 +32,10 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
           Settings
         </h2>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Facility preferences and account settings.
         </p>
       </div>
@@ -48,7 +48,7 @@ export default function SettingsPage() {
             <CardTitle className="text-base">Account</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            <p className="text-sm text-stone-600">{user.email}</p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
             <Button variant="outline" onClick={handleSignOut} className="w-full sm:w-auto">
               <LogOut className="h-4 w-4" aria-hidden />
               Sign Out
@@ -70,13 +70,13 @@ export default function SettingsPage() {
           <Card key={title} className="opacity-80">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Icon className="h-5 w-5 text-stone-400" aria-hidden />
+                <Icon className="h-5 w-5 text-muted-foreground" aria-hidden />
                 {title}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm text-stone-500">{description}</p>
-              <p className="mt-2 text-xs font-medium uppercase tracking-wider text-stone-400">
+              <p className="text-sm text-muted-foreground">{description}</p>
+              <p className="mt-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Placeholder
               </p>
             </CardContent>

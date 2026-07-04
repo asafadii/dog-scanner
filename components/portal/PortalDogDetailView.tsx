@@ -1,5 +1,6 @@
 "use client";
 
+import { DogAlertBadges } from "@/components/dogs/DogAlertBadges";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { getDogDocuments, getPortalDocumentUrl } from "@/lib/portal/documents";
@@ -12,7 +13,6 @@ import {
   CalendarPlus,
   FileText,
   Loader2,
-  Pill,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -87,8 +87,8 @@ export function PortalDogDetailView({
   if (loading) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-600" aria-hidden />
-        <p className="text-sm text-stone-500">Loading dog profile...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+        <p className="text-sm text-muted-foreground">Loading dog profile...</p>
       </div>
     );
   }
@@ -96,7 +96,7 @@ export function PortalDogDetailView({
   if (error || !dog) {
     return (
       <div className="space-y-4 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error ?? "Dog not found"}
         </p>
         <Link href="/portal">
@@ -112,7 +112,7 @@ export function PortalDogDetailView({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-violet-50">
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
             <Image
               src={getDogPhotoSrc(dog.photoUrl)}
               alt={`Photo of ${dog.name}`}
@@ -122,16 +122,18 @@ export function PortalDogDetailView({
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               {dog.name}
             </h1>
-            <p className="mt-1 text-sm text-stone-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               {dog.breed}
               <span aria-hidden> · </span>
               {dog.age}
               <span aria-hidden> · </span>
               <span className="capitalize">{dog.size}</span>
             </p>
+            {/* Solid safety flags surfaced on the portal via the shared component (internals untouched) */}
+            <DogAlertBadges alerts={dog.alerts} compact className="mt-2.5" />
           </div>
         </div>
         <Link href={bookingHref}>
@@ -148,20 +150,20 @@ export function PortalDogDetailView({
         </CardHeader>
         <CardContent className="space-y-3 pt-0 text-sm">
           <div>
-            <p className="font-medium text-stone-700">Feeding</p>
-            <p className="mt-1 text-stone-600">{dog.care.feeding}</p>
+            <p className="font-medium text-foreground">Feeding</p>
+            <p className="mt-1 text-muted-foreground">{dog.care.feeding}</p>
           </div>
           <div>
-            <p className="font-medium text-stone-700">Allergies</p>
-            <p className="mt-1 text-stone-600">{dog.care.allergies}</p>
+            <p className="font-medium text-foreground">Allergies</p>
+            <p className="mt-1 text-muted-foreground">{dog.care.allergies}</p>
           </div>
           <div>
-            <p className="font-medium text-stone-700">Medication</p>
-            <p className="mt-1 text-stone-600">{dog.care.medication}</p>
+            <p className="font-medium text-foreground">Medication</p>
+            <p className="mt-1 text-muted-foreground">{dog.care.medication}</p>
           </div>
           <div>
-            <p className="font-medium text-stone-700">Behavior notes</p>
-            <p className="mt-1 text-stone-600">{dog.care.behavior}</p>
+            <p className="font-medium text-foreground">Behavior notes</p>
+            <p className="mt-1 text-muted-foreground">{dog.care.behavior}</p>
           </div>
         </CardContent>
       </Card>
@@ -170,35 +172,16 @@ export function PortalDogDetailView({
         dog.alerts.allergy ||
         dog.alerts.aggression ||
         dog.alerts.escapeRisk) && (
-        <Card className="border-amber-200 bg-amber-50/50">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base text-amber-900">
-              <AlertTriangle className="h-5 w-5" aria-hidden />
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className="h-5 w-5 text-primary" aria-hidden />
               Important alerts
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-2 pt-0">
-            {dog.alerts.medication && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-800">
-                <Pill className="h-3.5 w-3.5" aria-hidden />
-                Medication
-              </span>
-            )}
-            {dog.alerts.allergy && (
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-800">
-                Allergy
-              </span>
-            )}
-            {dog.alerts.aggression && (
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-800">
-                Aggression caution
-              </span>
-            )}
-            {dog.alerts.escapeRisk && (
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-800">
-                Escape risk
-              </span>
-            )}
+          <CardContent className="pt-0">
+            {/* Solid safety flags rendered via the shared component (internals untouched) */}
+            <DogAlertBadges alerts={dog.alerts} />
           </CardContent>
         </Card>
       )}
@@ -206,13 +189,13 @@ export function PortalDogDetailView({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <FileText className="h-5 w-5 text-violet-600" aria-hidden />
+            <FileText className="h-5 w-5 text-primary" aria-hidden />
             Documents
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           {documents.length === 0 ? (
-            <p className="text-sm text-stone-500">No documents uploaded yet.</p>
+            <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
           ) : (
             <ul className="space-y-2">
               {documents.map((document) => (
@@ -222,20 +205,20 @@ export function PortalDogDetailView({
                     onClick={() => void handleOpenDocument(document.id)}
                     disabled={openingDocId === document.id}
                     className={cn(
-                      "flex w-full items-center justify-between gap-3 rounded-xl border border-violet-100 bg-violet-50/40 px-4 py-3 text-left text-sm transition-colors hover:bg-violet-50",
+                      "flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left text-sm transition-colors hover:border-primary/40",
                       openingDocId === document.id && "opacity-70",
                     )}
                   >
                     <span>
-                      <span className="font-medium text-stone-900">
+                      <span className="font-medium text-foreground">
                         {documentTypeLabel(document.documentType)}
                       </span>
-                      <span className="mt-0.5 block text-stone-500">
+                      <span className="mt-0.5 block text-muted-foreground">
                         Uploaded{" "}
                         {new Date(document.createdAt).toLocaleDateString()}
                       </span>
                     </span>
-                    <span className="text-violet-600">
+                    <span className="text-primary">
                       {openingDocId === document.id ? "Opening..." : "View"}
                     </span>
                   </button>
@@ -246,7 +229,7 @@ export function PortalDogDetailView({
         </CardContent>
       </Card>
 
-      <Link href="/portal" className="inline-block text-sm font-medium text-violet-600 hover:underline">
+      <Link href="/portal" className="inline-block text-sm font-medium text-primary hover:underline">
         Back to Portal
       </Link>
     </div>

@@ -19,11 +19,15 @@ import {
 } from "@/lib/checkins";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
 import {
+  getStaffDocumentUrl,
+  getStaffDogDocuments,
+} from "@/lib/documents";
+import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
 import { slideUp } from "@/lib/motion";
-import type { CareTask, Dog, KennelAssignment, Payment, TimelineEvent } from "@/lib/types";
+import type { CareTask, Dog, DogDocument, KennelAssignment, Payment, TimelineEvent } from "@/lib/types";
 import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -52,6 +56,14 @@ import { useCallback, useEffect, useState } from "react";
 
 function createId(): string {
   return `id-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function formatDocumentDate(value: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 }
 
 function TimelineIcon({ type }: { type: TimelineEvent["type"] }) {
@@ -89,6 +101,9 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [moveOpen, setMoveOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [documents, setDocuments] = useState<DogDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
+  const [documentError, setDocumentError] = useState<string | null>(null);
 
   const loadDog = useCallback(async () => {
     setLoading(true);
@@ -108,6 +123,41 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   useEffect(() => {
     void loadDog();
   }, [loadDog]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDocuments() {
+      setDocumentsLoading(true);
+      const result = await getStaffDogDocuments(dogId);
+      if (cancelled) return;
+
+      if (result.error) {
+        setDocumentError(result.error.message);
+        setDocuments([]);
+      } else {
+        setDocuments(result.data);
+        setDocumentError(null);
+      }
+
+      setDocumentsLoading(false);
+    }
+
+    void loadDocuments();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dogId]);
+
+  const handleOpenDocument = useCallback(async (documentId: string) => {
+    const result = await getStaffDocumentUrl(documentId);
+    if (result.error) {
+      setDocumentError(result.error.message);
+      return;
+    }
+    window.open(result.data, "_blank", "noopener,noreferrer");
+  }, []);
 
   const toggleCheckStatus = useCallback(async () => {
     if (!dog || checkActionLoading) return;
@@ -188,10 +238,10 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading profile...</p>
+        <p className="text-sm text-muted-foreground">Loading profile...</p>
       </div>
     );
   }
@@ -199,7 +249,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   if (error && error !== "Dog not found") {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-        <p className="text-lg font-medium text-red-800" role="alert">
+        <p className="text-lg font-medium text-danger" role="alert">
           {error}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -217,7 +267,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   if (!dog) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-        <p className="text-lg font-medium text-stone-700">Dog not found</p>
+        <p className="text-lg font-medium text-foreground">Dog not found</p>
         <Button variant="outline" onClick={() => router.push("/dogs")}>
           Back to Dogs
         </Button>
@@ -239,7 +289,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   return (
     <div className="-mx-4 -mt-6 md:mx-0 md:mt-0">
       {/* Hero */}
-      <div className="relative h-56 bg-gradient-to-br from-[oklch(0.828_0.050_180.2)] to-[oklch(0.531_0.092_185.0)] sm:h-64">
+      <div className="relative h-56 bg-gradient-to-br from-mint to-primary sm:h-64">
         <Image
           src={getDogPhotoSrc(dog.photoUrl)}
           alt={dog.name}
@@ -310,7 +360,8 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             <motion.div
               key="action-error"
               {...slideUp}
-              className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              // #FEF2F2 = documented Alert error tint (Alert.tsx precedent, D-04)
+              className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
               role="alert"
             >
               {actionError}
@@ -318,11 +369,11 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           )}
         </AnimatePresence>
 
-        {/* Critical alerts — always near top */}
+        {/* Critical alerts — always near top; #FEF2F2 = documented Alert error tint (D-04) */}
         {criticalOnly.length > 0 && (
-          <Card className="border-2 border-red-200 bg-red-50/60">
+          <Card className="border-2 border-danger/40 bg-[#FEF2F2]">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-red-900">
+              <CardTitle className="flex items-center gap-2 text-[22px] text-danger">
                 <AlertTriangle className="h-5 w-5" aria-hidden />
                 Critical Alerts
               </CardTitle>
@@ -331,12 +382,12 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               {criticalOnly.map((alert) => (
                 <div
                   key={alert.type}
-                  className="rounded-xl border border-red-200 bg-white p-3"
+                  className="rounded-xl border border-danger/30 bg-surface p-3"
                 >
-                  <p className="text-sm font-semibold text-red-900">
+                  <p className="text-sm font-semibold text-danger">
                     {alert.type}
                   </p>
-                  <p className="mt-0.5 text-sm text-red-800">{alert.message}</p>
+                  <p className="mt-0.5 text-sm text-danger">{alert.message}</p>
                 </div>
               ))}
             </CardContent>
@@ -356,10 +407,10 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   .filter((m) => !m.critical)
                   .map((alert) => (
                     <div key={alert.type} className="text-sm">
-                      <span className="font-medium text-stone-800">
+                      <span className="font-medium text-foreground">
                         {alert.type}:
                       </span>{" "}
-                      <span className="text-stone-600">{alert.message}</span>
+                      <span className="text-muted-foreground">{alert.message}</span>
                     </div>
                   ))}
               </CardContent>
@@ -380,7 +431,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   .map((alert) => (
                     <div
                       key={alert.type}
-                      className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm"
+                      className="rounded-xl border border-border bg-muted p-3 text-sm"
                     >
                       <span className="font-medium">{alert.type}:</span>{" "}
                       {alert.message}
@@ -394,7 +445,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+              <User className="h-5 w-5 text-primary" aria-hidden />
               {dog.client ? "Linked Client" : "Owner Information"}
             </CardTitle>
           </CardHeader>
@@ -403,11 +454,11 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               <>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-stone-900">{dog.client.name}</p>
+                    <p className="font-semibold text-foreground">{dog.client.name}</p>
                     {dog.client.phone && (
                       <a
                         href={`tel:${dog.client.phone}`}
-                        className="text-sm text-[oklch(0.531_0.092_185.0)] hover:underline"
+                        className="text-sm text-primary hover:underline"
                       >
                         {dog.client.phone}
                       </a>
@@ -415,7 +466,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     {dog.client.email && (
                       <a
                         href={`mailto:${dog.client.email}`}
-                        className="mt-1 block text-sm text-[oklch(0.531_0.092_185.0)] hover:underline"
+                        className="mt-1 block text-sm text-primary hover:underline"
                       >
                         {dog.client.email}
                       </a>
@@ -433,16 +484,16 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   )}
                 </div>
                 {dog.client.emergencyContact && (
-                  <div className="border-t border-stone-100 pt-3 text-sm">
-                    <span className="text-stone-500">Emergency: </span>
-                    <span className="font-medium text-stone-900">
+                  <div className="border-t border-border pt-3 text-sm">
+                    <span className="text-muted-foreground">Emergency: </span>
+                    <span className="font-medium text-foreground">
                       {dog.client.emergencyContact}
                     </span>
                   </div>
                 )}
                 <Link
                   href={`/clients/${dog.client.id}`}
-                  className="inline-flex text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                  className="inline-flex text-sm font-medium text-primary hover:underline"
                 >
                   View client profile
                 </Link>
@@ -451,10 +502,10 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               <>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-stone-900">{dog.owner.name}</p>
+                    <p className="font-semibold text-foreground">{dog.owner.name}</p>
                     <a
                       href={`tel:${dog.owner.phone}`}
-                      className="text-sm text-[oklch(0.531_0.092_185.0)] hover:underline"
+                      className="text-sm text-primary hover:underline"
                     >
                       {dog.owner.phone}
                     </a>
@@ -468,19 +519,19 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     <Phone className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid gap-2 border-t border-stone-100 pt-3 text-sm">
+                <div className="grid gap-2 border-t border-border pt-3 text-sm">
                   <div className="flex justify-between gap-4">
-                    <span className="text-stone-500">Emergency</span>
+                    <span className="text-muted-foreground">Emergency</span>
                     <a
                       href={`tel:${dog.owner.emergencyPhone}`}
-                      className="text-right font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+                      className="text-right font-medium text-primary hover:underline"
                     >
                       {dog.owner.emergencyContact} — {dog.owner.emergencyPhone}
                     </a>
                   </div>
                   {dog.owner.veterinarian && (
                     <div className="flex items-start justify-between gap-4">
-                      <span className="flex items-center gap-1 text-stone-500">
+                      <span className="flex items-center gap-1 text-muted-foreground">
                         <Stethoscope className="h-3.5 w-3.5" aria-hidden />
                         Vet
                       </span>
@@ -488,7 +539,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                         <p className="font-medium">{dog.owner.veterinarian}</p>
                         <a
                           href={`tel:${dog.owner.vetPhone}`}
-                          className="text-[oklch(0.531_0.092_185.0)] hover:underline"
+                          className="text-primary hover:underline"
                         >
                           {dog.owner.vetPhone}
                         </a>
@@ -505,7 +556,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+              <FileText className="h-5 w-5 text-primary" aria-hidden />
               Care Instructions
             </CardTitle>
           </CardHeader>
@@ -521,13 +572,59 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               { icon: Activity, label: "Behavior", text: dog.care.behavior },
             ].map(({ icon: Icon, label, text }) => (
               <div key={label}>
-                <div className="mb-1 flex items-center gap-2 font-semibold text-stone-800">
-                  <Icon className="h-4 w-4 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+                <div className="mb-1 flex items-center gap-2 font-semibold text-foreground">
+                  <Icon className="h-4 w-4 text-primary" aria-hidden />
                   {label}
                 </div>
-                <p className="pl-6 text-stone-600">{text}</p>
+                <p className="pl-6 text-muted-foreground">{text}</p>
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Documents (read-only) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" aria-hidden />
+              Documents
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            {documentError && (
+              <p className="text-sm text-danger" role="alert">
+                {documentError}
+              </p>
+            )}
+
+            {documentsLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                Loading documents...
+              </div>
+            ) : documents.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No documents yet</p>
+            ) : (
+              <ul className="space-y-2">
+                {documents.map((doc) => (
+                  <li key={doc.id}>
+                    <button
+                      type="button"
+                      onClick={() => void handleOpenDocument(doc.id)}
+                      className="flex w-full min-h-[44px] items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-left text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                    >
+                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                      <span className="min-w-0 flex-1 truncate">
+                        Vaccination stamp
+                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatDocumentDate(doc.createdAt)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
 
@@ -536,7 +633,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+                <Check className="h-5 w-5 text-primary" aria-hidden />
                 Today&apos;s Care
               </CardTitle>
             </CardHeader>
@@ -549,16 +646,17 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   className={cn(
                     "flex w-full min-h-[44px] items-center gap-3 rounded-xl border p-3 text-left transition-colors",
                     task.completed
-                      ? "border-emerald-200 bg-emerald-50"
-                      : "border-stone-200 bg-white hover:border-[oklch(0.900_0.035_185.0)]",
+                      ? // #ECFDF5 = documented Alert success tint (Alert.tsx precedent, D-04)
+                        "border-success/40 bg-[#ECFDF5]"
+                      : "border-border bg-surface hover:border-primary/40",
                   )}
                 >
                   <span
                     className={cn(
                       "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
                       task.completed
-                        ? "border-emerald-600 bg-emerald-600 text-white"
-                        : "border-stone-300",
+                        ? "border-success bg-success text-white"
+                        : "border-muted-foreground/40",
                     )}
                   >
                     {task.completed && (
@@ -569,13 +667,13 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     <p
                       className={cn(
                         "text-sm font-medium",
-                        task.completed ? "text-emerald-900" : "text-stone-800",
+                        task.completed ? "text-success" : "text-foreground",
                       )}
                     >
                       {task.task}
                     </p>
                     {task.time && (
-                      <p className="text-xs text-stone-500">{task.time}</p>
+                      <p className="text-xs text-muted-foreground">{task.time}</p>
                     )}
                   </div>
                 </button>
@@ -588,34 +686,35 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-[oklch(0.531_0.092_185.0)]" aria-hidden />
+              <Clock className="h-5 w-5 text-primary" aria-hidden />
               Activity Timeline
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             {dog.timeline.length === 0 ? (
-              <p className="text-sm text-stone-500">No activity yet today.</p>
+              <p className="text-sm text-muted-foreground">No activity yet today.</p>
             ) : (
               <div className="space-y-4">
                 {dog.timeline.map((event, index) => (
                   <div key={event.id} className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[oklch(0.950_0.020_185.0)] text-[oklch(0.480_0.085_185.0)]">
+                      {/* mint-wash #EAF4F1 = documented D-04 timeline-node tint (Wave-2 precedent) */}
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF4F1] text-primary">
                         <TimelineIcon type={event.type} />
                       </div>
                       {index < dog.timeline.length - 1 && (
-                        <div className="mt-2 w-0.5 flex-1 bg-stone-200" />
+                        <div className="mt-2 w-0.5 flex-1 bg-border" />
                       )}
                     </div>
                     <div className="flex-1 pb-2">
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-muted-foreground">
                         {formatTime(event.time)}
                       </p>
-                      <p className="text-sm font-medium text-stone-800">
+                      <p className="text-sm font-medium text-foreground">
                         {event.description}
                       </p>
                       {event.staff && (
-                        <p className="text-xs text-stone-500">
+                        <p className="text-xs text-muted-foreground">
                           by {event.staff}
                         </p>
                       )}
@@ -627,13 +726,13 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-stone-400">
+        <p className="text-center text-xs text-muted-foreground">
           Last check-in: {formatCheckInTime(dog.lastCheckIn)}
         </p>
       </div>
 
       {/* Sticky bottom actions */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur-sm md:bottom-0">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur-sm md:bottom-0">
         <div className="mx-auto max-w-5xl space-y-2 p-4 pb-[calc(1rem+env(safe-area-inset-bottom)+4rem)] md:pb-4">
           {checkoutOpen && isCheckedIn && dog.activeCheckinId ? (
             <CheckoutPicker
@@ -656,13 +755,13 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               onClose={() => setCheckoutOpen(false)}
             />
           ) : noteOpen ? (
-            <div className="space-y-2 rounded-2xl border border-stone-200 bg-white p-4 shadow-lg">
+            <div className="space-y-2 rounded-2xl border border-border bg-surface p-4 shadow-lg">
               <div className="flex items-center justify-between">
-                <p className="font-semibold text-stone-900">Add Note</p>
+                <p className="font-semibold text-foreground">Add Note</p>
                 <button
                   type="button"
                   onClick={() => setNoteOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-100"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
                   aria-label="Close note form"
                 >
                   <X className="h-5 w-5" />

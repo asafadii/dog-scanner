@@ -120,11 +120,8 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   if (loading) {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
-        <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
-          aria-hidden
-        />
-        <p className="text-sm text-stone-500">Loading booking...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+        <p className="text-sm text-muted-foreground">Loading booking...</p>
       </div>
     );
   }
@@ -132,7 +129,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   if (error || !booking) {
     return (
       <div className="space-y-4 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error ?? "Booking not found"}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -143,7 +140,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         <div>
           <Link
             href="/bookings"
-            className="text-sm font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+            className="text-sm font-medium text-primary hover:underline"
           >
             Back to Bookings
           </Link>
@@ -162,12 +159,12 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+            <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
               {booking.dogName}
             </h2>
             <BookingStatusBadge status={booking.status} />
           </div>
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             {formatServiceType(booking.serviceType)} booking
           </p>
         </div>
@@ -184,7 +181,8 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
           <motion.div
             key="action-error"
             {...slideUp}
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            // Alert error tint #FEF2F2 — documented D-04 exception (Alert.tsx precedent)
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
             role="alert"
           >
             {actionError}
@@ -198,57 +196,57 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         </CardHeader>
         <CardContent className="space-y-4 pt-0 text-sm">
           <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-stone-500">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <PawPrint className="h-4 w-4" aria-hidden />
               Dog
             </span>
             <Link
               href={`/dogs/${booking.dogId}`}
-              className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+              className="font-medium text-primary hover:underline"
             >
               {booking.dogName}
             </Link>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-stone-500">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <User className="h-4 w-4" aria-hidden />
               Client
             </span>
             <Link
               href={`/clients/${booking.clientId}`}
-              className="font-medium text-[oklch(0.531_0.092_185.0)] hover:underline"
+              className="font-medium text-primary hover:underline"
             >
               {booking.clientName}
             </Link>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-stone-500">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-4 w-4" aria-hidden />
               Dates
             </span>
-            <span className="font-medium text-stone-900">
+            <span className="font-medium text-foreground">
               {formatBookingDateRange(booking.startDate, booking.endDate)}
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-stone-500">Service</span>
-            <span className="font-medium capitalize text-stone-900">
+            <span className="text-muted-foreground">Service</span>
+            <span className="font-medium capitalize text-foreground">
               {booking.serviceType}
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-stone-500">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <Car className="h-4 w-4" aria-hidden />
               Transport
             </span>
-            <span className="font-medium text-stone-900">
+            <span className="font-medium text-foreground">
               {booking.transportRequired ? "Required" : "Not required"}
             </span>
           </div>
           {booking.notes && (
-            <div className="border-t border-stone-100 pt-3">
-              <p className="text-stone-500">Notes</p>
-              <p className="mt-1 whitespace-pre-wrap text-stone-800">
+            <div className="border-t border-border pt-3">
+              <p className="text-muted-foreground">Notes</p>
+              <p className="mt-1 whitespace-pre-wrap text-foreground">
                 {booking.notes}
               </p>
             </div>
@@ -262,7 +260,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
             <CardTitle>Check In</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-muted-foreground">
               This booking is approved. Check {booking.dogName} in for today&apos;s
               stay.
             </p>
@@ -284,7 +282,8 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
 
       {dogCheckedIn && booking.status === "approved" && (
         <div
-          className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+          // Alert success tint #ECFDF5 — documented D-04 exception (Alert.tsx precedent)
+          className="flex items-center gap-2 rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm font-medium text-success"
           role="status"
         >
           <Check className="h-4 w-4 shrink-0" aria-hidden />
@@ -302,8 +301,9 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
               <div
                 className={`rounded-xl border px-4 py-3 text-sm ${
                   capacityBlocked
-                    ? "border-amber-200 bg-amber-50 text-amber-900"
-                    : "border-stone-200 bg-stone-50 text-stone-700"
+                    ? // Alert warning tint #FFFBEB — documented D-04 exception (Alert.tsx precedent)
+                      "border-warning/25 bg-[#FFFBEB] text-warning"
+                    : "border-border bg-muted text-muted-foreground"
                 }`}
                 role="status"
               >
@@ -344,6 +344,64 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
           </CardContent>
         </Card>
       )}
+
+      <BookingStatusFlow status={booking.status} checkedIn={dogCheckedIn} />
+    </div>
+  );
+}
+
+const STATUS_FLOW: { key: string; label: string }[] = [
+  { key: "pending", label: "Pending" },
+  { key: "approved", label: "Approved" },
+  { key: "checked_in", label: "Checked in" },
+  { key: "completed", label: "Completed" },
+];
+
+// Maps a booking to the currently-active node in the linear status flow.
+function activeFlowIndex(status: Booking["status"], checkedIn: boolean): number {
+  if (status === "completed") return 3;
+  if (status === "approved") return checkedIn ? 2 : 1;
+  if (status === "rejected" || status === "pending") return 0;
+  return 0;
+}
+
+// Status-flow strip (design 787-838): dashed operational container + linear
+// status pills. The active node reuses the BookingStatusBadge palette (teal for
+// the reached step); upcoming nodes are neutral border pills.
+function BookingStatusFlow({
+  status,
+  checkedIn,
+}: {
+  status: Booking["status"];
+  checkedIn: boolean;
+}) {
+  const activeIdx = activeFlowIndex(status, checkedIn);
+
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-muted p-4">
+      <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        Status flow
+      </p>
+      <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+        {STATUS_FLOW.map((step, idx) => (
+          <div key={step.key} className="flex items-center gap-2">
+            <span
+              className={
+                idx <= activeIdx
+                  ? "rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-primary"
+                  : "rounded-full border border-border bg-surface px-2.5 py-1 text-muted-foreground"
+              }
+            >
+              {step.label}
+            </span>
+            {idx < STATUS_FLOW.length - 1 && (
+              <span aria-hidden className="text-muted-foreground">
+                →
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

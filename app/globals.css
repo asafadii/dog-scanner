@@ -1,35 +1,133 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   TIER 1 — Raw palette primitives (D-01). NEVER consume these directly in
+   components. They are the single re-theme lever: change a --dora-* value here
+   and every Tier 2 semantic role that maps to it updates in lockstep.
+   Hex values pinned from the favicon/design HTML (frequency-verified).
+   ========================================================================== */
 :root {
-  --background: #fafaf8;
-  --foreground: #1c1917;
-  --card: #ffffff;
-  --primary: #077D73;
-  --primary-foreground: #ffffff;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c;
-  --border: #e7e5e4;
-  --ring: #077D73;
+  --dora-primary: #077D73;
+  --dora-primary-deep: #045C54;
+  --dora-mint: #A4D2C8;
+  --dora-ink: #06342F;
+  --dora-ink-soft: #17211D;
+  --dora-cream: #FAFAF8;
+  --dora-cream-warm: #FBF9F4;
+  --dora-marker: #F2D98A;
+  --dora-danger: #DC2626;
+  --dora-border-warm: #EDEBE6;
+
+  /* status */
+  --dora-success: #10B981;
+  --dora-warning: #D97706;
+  --dora-info: #2563EB;
+
+  /* safety flags */
+  --dora-safety-allergy: #DC2626;
+  --dora-safety-aggression: #991B1B;
+  --dora-safety-escape: #E11D48;
+  --dora-safety-medication: #6D28D9;
+
+  /* service types */
+  --dora-service-daycare: #077D73;
+  --dora-service-boarding: #6E7A75;
 }
 
+/* ============================================================================
+   TIER 2 — Semantic role layer (@theme inline, D-01). Components consume ONLY
+   these, via Tailwind bg-*, text-*, border-*, ring-* utilities. Each maps to a
+   Tier 1 primitive through the var() passthrough — Tier 2 names are stable
+   (shadcn-compatible role names + DORA extras) even if Tier 1 hexes change.
+   ========================================================================== */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--dora-cream);
+  --color-foreground: var(--dora-ink-soft);
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --color-card-foreground: var(--dora-ink-soft);
+  --color-muted: #F5F5F4;
+  --color-muted-foreground: #6E7A75;
+  --color-primary: var(--dora-primary);
+  --color-primary-foreground: #ffffff;
+  --color-mint: var(--dora-mint);
+  --color-border: var(--dora-border-warm);
+  --color-ring: var(--dora-primary);
+  --color-marker: var(--dora-marker);
+  --color-danger: var(--dora-danger);
+
+  --color-success: var(--dora-success);
+  --color-warning: var(--dora-warning);
+  --color-info: var(--dora-info);
+
+  --color-safety-allergy: var(--dora-safety-allergy);
+  --color-safety-aggression: var(--dora-safety-aggression);
+  --color-safety-escape: var(--dora-safety-escape);
+  --color-safety-medication: var(--dora-safety-medication);
+
+  --color-service-daycare: var(--dora-service-daycare);
+  --color-service-boarding: var(--dora-service-boarding);
+
+  /* Font families — names MUST match the variable: names in app/layout.tsx
+     (--font-display = Baloo 2, --font-sans = Plus Jakarta Sans). A mismatch
+     silently falls back to the system font (RESEARCH Pitfall 3 / A6). */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: var(--dora-cream);
+  color: var(--dora-ink-soft);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* ============================================================================
+   REGISTER SCOPING (FOUND-05, D-05/D-06/D-07)
+   ----------------------------------------------------------------------------
+   DORA runs two visual registers: the LANDING is playful, the APP is
+   operational. Critically, playfulness is expressed ONLY through opt-in,
+   NON-COLOR, landing-scoped utilities (sticker shadows, tilts, oversized
+   display type) — it is NOT a second color palette. There is exactly ONE
+   color system (the Tier 1/Tier 2 layers above), shared by both registers.
+   Consequence by construction: a global color/token swap can NEVER
+   over-playful the operational app, because the app and landing draw from
+   the same semantic tokens and the only landing-specific flourishes are
+   these separate, explicitly opt-in utility classes. Apply them on landing
+   surfaces only; never reach for them inside operational app screens.
+   ========================================================================== */
+
+/* Landing-scoped: hard-offset (no-blur) "sticker" shadow. Referenced only on
+   landing surfaces (opt-in by convention; never used in operational app screens).
+   Defined as --shadow-* theme keys (NOT @utility) so Tailwind v4's core shadow-*
+   utility emits the whole scale consistently. A bare `@utility shadow-sticker`
+   silently shadows its own `shadow-sticker-{sm,lg,xl}` extensions — those never
+   compile (box-shadow resolves to none), so the seed rendered but the scale did
+   not. Theme keys route every `shadow-sticker*` class through core shadow-*.
+   Depth scale: sm = nav badge / pills, base (seed) = standard cards,
+   lg = feature cards, xl = hero / roster mockup cards. The 5px depth
+   (hero/CTA buttons) stays a one-off documented arbitrary literal
+   (shadow-[5px_5px_0_...]), NOT a named step. */
+@theme {
+  --shadow-sticker: 4px 4px 0 var(--dora-ink);
+  --shadow-sticker-sm: 3px 3px 0 var(--dora-ink);
+  --shadow-sticker-lg: 6px 6px 0 var(--dora-ink);
+  --shadow-sticker-xl: 8px 8px 0 var(--dora-ink);
+}
+
+/* Landing-scoped: gentle "floaty" bob folding the badge tilt into the keyframe.
+   Enables animate-floaty; freezes automatically under the reduced-motion guard
+   below (which zeroes animation-duration). */
+@theme {
+  --animate-floaty: floaty 6s ease-in-out infinite;
+}
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-6deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

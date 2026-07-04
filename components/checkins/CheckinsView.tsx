@@ -195,18 +195,18 @@ export function CheckinsView() {
     return (
       <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
         <Loader2
-          className="h-8 w-8 animate-spin text-[oklch(0.531_0.092_185.0)]"
+          className="h-8 w-8 animate-spin text-primary"
           aria-hidden
         />
-        <p className="text-sm text-stone-500">Loading check-ins...</p>
+        <p className="text-sm text-muted-foreground">Loading check-ins...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-        <p className="text-sm font-medium text-red-800" role="alert">
+      <div className="rounded-2xl border border-danger/25 bg-[#FEF2F2] px-6 py-12 text-center">
+        <p className="text-sm font-medium text-danger" role="alert">
           {error}
         </p>
         {error !== INCOMPLETE_SETUP_MESSAGE && (
@@ -226,21 +226,22 @@ export function CheckinsView() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+          {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF4F1] text-primary">
             <ClipboardCheck className="h-6 w-6" aria-hidden />
           </span>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-stone-900">
+            <h2 className="font-display text-2xl tracking-tight text-foreground">
               Check-ins
             </h2>
-            <p className="mt-1 text-stone-500">
+            <p className="mt-1 text-muted-foreground">
               {checkedIn.length} dog{checkedIn.length !== 1 ? "s" : ""} currently
               on site
             </p>
           </div>
         </div>
         <Link href="/checkins/scan">
-          <Button variant="outline" size="sm">
+          <Button size="sm">
             <ScanLine className="h-4 w-4" aria-hidden />
             Scan to Check In
           </Button>
@@ -252,7 +253,7 @@ export function CheckinsView() {
           <motion.div
             key="action-error"
             {...slideUp}
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
             role="alert"
           >
             {actionError}
@@ -263,10 +264,10 @@ export function CheckinsView() {
       {todaysBookings.length > 0 && (
         <section className="space-y-3">
           <div>
-            <h3 className="text-lg font-semibold text-stone-900">
+            <h3 className="font-display text-lg text-foreground">
               Today&apos;s bookings
             </h3>
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-muted-foreground">
               Approved bookings ready for check-in, plus any awaiting approval.
             </p>
           </div>
@@ -276,12 +277,12 @@ export function CheckinsView() {
                 <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-stone-900">
+                      <p className="font-semibold text-foreground">
                         {booking.dogName}
                       </p>
                       <BookingStatusBadge status={booking.status} />
                     </div>
-                    <p className="mt-0.5 text-sm text-stone-500">
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {booking.clientName} ·{" "}
                       {formatBookingDateRange(
                         booking.startDate,
@@ -315,12 +316,12 @@ export function CheckinsView() {
       )}
 
       <section className="space-y-3">
-        <h3 className="text-lg font-semibold text-stone-900">On site now</h3>
+        <h3 className="font-display text-lg text-foreground">On site now</h3>
 
         {checkedIn.length > 0 && (
           <div className="relative max-w-md">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
             <Input
@@ -337,15 +338,15 @@ export function CheckinsView() {
       {checkedIn.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <p className="text-stone-600">No dogs checked in right now.</p>
-            <p className="mt-1 text-sm text-stone-400">
+            <p className="text-foreground">No dogs checked in right now.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
               Scan a QR code or check in from today&apos;s bookings above.
             </p>
           </CardContent>
         </Card>
       ) : filteredCheckedIn.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-stone-500">
+          <CardContent className="py-10 text-center text-muted-foreground">
             No dogs match your search.
           </CardContent>
         </Card>

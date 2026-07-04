@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -166,7 +167,7 @@ export function BookingForm({
           <div>
             <label
               htmlFor="booking-client"
-              className="mb-2 block text-sm font-medium text-stone-700"
+              className="mb-2 block text-sm font-medium text-foreground"
             >
               Client
             </label>
@@ -177,8 +178,8 @@ export function BookingForm({
               onChange={(e) => handleClientChange(e.target.value)}
               disabled={isSubmitting || clientsLoading}
               className={cn(
-                "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
-                "focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20",
+                "min-h-[44px] w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-foreground",
+                "focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
                 (isSubmitting || clientsLoading) && "cursor-not-allowed opacity-60",
               )}
             >
@@ -194,7 +195,7 @@ export function BookingForm({
           <div>
             <label
               htmlFor="booking-dog"
-              className="mb-2 block text-sm font-medium text-stone-700"
+              className="mb-2 block text-sm font-medium text-foreground"
             >
               Dog
             </label>
@@ -207,8 +208,8 @@ export function BookingForm({
                 isSubmitting || !form.clientId || dogsLoading || dogs.length === 0
               }
               className={cn(
-                "min-h-[44px] w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900",
-                "focus:border-[oklch(0.531_0.092_185.0)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.531_0.092_185.0)]/20",
+                "min-h-[44px] w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-foreground",
+                "focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
                 (isSubmitting || !form.clientId || dogsLoading) &&
                   "cursor-not-allowed opacity-60",
               )}
@@ -231,9 +232,12 @@ export function BookingForm({
           </div>
 
           <div>
-            <span className="mb-2 block text-sm font-medium text-stone-700">
+            <span className="mb-2 block text-sm font-medium text-foreground">
               Service Type
             </span>
+            {/* Segmented control stays operational-flat (no sticker shadow — that
+                portal exception is Plan 05 only). Active = mint-wash #EAF4F1
+                (documented D-04 exception, Wave-2 precedent). */}
             <div className="flex gap-2">
               {SERVICE_TYPES.map((type) => (
                 <button
@@ -244,8 +248,8 @@ export function BookingForm({
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.serviceType === type
-                      ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9] text-[oklch(0.420_0.075_185.0)]"
-                      : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50",
+                      ? "border-primary bg-[#EAF4F1] text-primary"
+                      : "border-border bg-surface text-muted-foreground hover:bg-muted",
                     isSubmitting && "cursor-not-allowed opacity-60",
                   )}
                 >
@@ -275,7 +279,7 @@ export function BookingForm({
             />
           </div>
 
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-stone-200 px-4 py-3">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
             <input
               type="checkbox"
               checked={form.transportRequired}
@@ -283,9 +287,9 @@ export function BookingForm({
               onChange={(e) =>
                 updateField("transportRequired", e.target.checked)
               }
-              className="h-5 w-5 rounded border-stone-300 text-[oklch(0.531_0.092_185.0)] focus:ring-[oklch(0.531_0.092_185.0)]"
+              className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
             />
-            <span className="text-sm font-medium text-stone-700">
+            <span className="text-sm font-medium text-foreground">
               Transport required
             </span>
           </label>
@@ -302,12 +306,9 @@ export function BookingForm({
       </Card>
 
       {isCreateMode && capacityWarning && (
-        <div
-          className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
-          role="status"
-        >
-          {capacityWarning}
-        </div>
+        // Capacity-warning callout composed from the Alert component (warning
+        // variant); its pale #FFFBEB tint is a documented D-04 exception.
+        <Alert variant="warning">{capacityWarning}</Alert>
       )}
 
       <Button

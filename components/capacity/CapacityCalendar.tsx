@@ -90,19 +90,20 @@ export function CapacityCalendar() {
           aria-expanded={expanded}
         >
           <div className="flex items-center gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F0FAF9] text-[oklch(0.531_0.092_185.0)]">
+            {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF4F1] text-primary">
               <CalendarDays className="h-5 w-5" aria-hidden />
             </span>
             <div>
-              <h3 className="font-semibold text-stone-900">Capacity Calendar</h3>
-              <p className="text-xs text-stone-500">
+              <h3 className="font-semibold text-foreground">Capacity Calendar</h3>
+              <p className="text-xs text-muted-foreground">
                 Daycare and overnight counts per day
               </p>
             </div>
           </div>
           <ChevronDown
             className={cn(
-              "h-5 w-5 shrink-0 text-stone-400 transition-transform",
+              "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
               expanded && "rotate-180",
             )}
             aria-hidden
@@ -120,17 +121,17 @@ export function CapacityCalendar() {
               <button
                 type="button"
                 onClick={() => shiftMonth(-1)}
-                className="min-h-[44px] rounded-lg px-3 text-sm font-medium text-stone-600 hover:bg-stone-50"
+                className="min-h-[44px] rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted"
               >
                 Previous
               </button>
-              <p className="text-sm font-semibold text-stone-900">
+              <p className="text-sm font-semibold text-foreground">
                 {monthLabel(year, month)}
               </p>
               <button
                 type="button"
                 onClick={() => shiftMonth(1)}
-                className="min-h-[44px] rounded-lg px-3 text-sm font-medium text-stone-600 hover:bg-stone-50"
+                className="min-h-[44px] rounded-lg px-3 text-sm font-medium text-muted-foreground hover:bg-muted"
               >
                 Next
               </button>
@@ -139,12 +140,12 @@ export function CapacityCalendar() {
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2
-                  className="h-6 w-6 animate-spin text-[oklch(0.531_0.092_185.0)]"
+                  className="h-6 w-6 animate-spin text-primary"
                   aria-hidden
                 />
               </div>
             ) : error ? (
-              <p className="text-sm text-red-700" role="alert">
+              <p className="text-sm text-danger" role="alert">
                 {error}
               </p>
             ) : (
@@ -154,23 +155,24 @@ export function CapacityCalendar() {
                     key={day.date}
                     className={cn(
                       "rounded-xl border p-2.5 text-center",
+                      // "Today" cell: mint-wash #EAF4F1 — documented D-04 exception, no named token
                       isToday(day.date)
-                        ? "border-[oklch(0.531_0.092_185.0)] bg-[#F0FAF9]"
-                        : "border-stone-200 bg-white",
+                        ? "border-primary bg-[#EAF4F1]"
+                        : "border-border bg-surface",
                     )}
                   >
-                    <p className="text-xs font-medium text-stone-500">
+                    <p className="text-xs font-medium text-muted-foreground">
                       {formatDayLabel(day.date)}
                     </p>
                     <div className="mt-1.5 space-y-0.5 text-xs tabular-nums">
-                      <p className="text-stone-700">
-                        <span className="font-medium text-[oklch(0.531_0.092_185.0)]">
+                      <p className="text-foreground">
+                        <span className="font-medium text-primary">
                           {day.daycare}
                         </span>{" "}
                         daycare
                       </p>
-                      <p className="text-stone-700">
-                        <span className="font-medium text-amber-700">
+                      <p className="text-foreground">
+                        <span className="font-medium text-warning">
                           {day.overnight}
                         </span>{" "}
                         overnight
