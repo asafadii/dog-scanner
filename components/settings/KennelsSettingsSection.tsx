@@ -12,7 +12,7 @@ import {
 import type { Kennel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Home, Loader2, Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function KennelsSettingsSection() {
   const [kennels, setKennels] = useState<Kennel[]>([]);
@@ -26,6 +26,14 @@ export function KennelsSettingsSection() {
   const [drafts, setDrafts] = useState<
     Record<string, { name: string; capacity: number }>
   >({});
+  const newNameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!success) return;
+
+    const timer = setTimeout(() => setSuccess(null), 3000);
+    return () => clearTimeout(timer);
+  }, [success]);
 
   const loadKennels = useCallback(async () => {
     setLoading(true);
@@ -77,6 +85,7 @@ export function KennelsSettingsSection() {
       setNewName("");
       setNewCapacity(1);
       setSuccess(`Added kennel ${result.data.name}.`);
+      newNameInputRef.current?.focus();
     }
 
     setAdding(false);
@@ -270,6 +279,7 @@ export function KennelsSettingsSection() {
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Input
+                  ref={newNameInputRef}
                   label="Name"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}

@@ -3,13 +3,15 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { formatAmount } from "@/lib/currency";
+import { getFacilitySettings } from "@/lib/facility";
 import {
   getPricingRules,
   INCOMPLETE_SETUP_MESSAGE,
   updatePricingRules,
 } from "@/lib/pricing";
 import type { PricingRules } from "@/lib/types";
-import { Euro, Loader2 } from "lucide-react";
+import { Coins, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 type PricingFormState = Omit<
@@ -26,16 +28,27 @@ export function PricingSettingsSection() {
     seasonalSurchargeEnabled: false,
     seasonalSurchargePercent: 0,
   });
+  const [currency, setCurrency] = useState("EUR");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const formatPrice = (value: number) => formatAmount(value, currency);
+
   const loadPricing = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const result = await getPricingRules();
+    const [result, facilityResult] = await Promise.all([
+      getPricingRules(),
+      getFacilitySettings(),
+    ]);
+
+    if (!facilityResult.error) {
+      setCurrency(facilityResult.data.currency);
+    }
+
     if (result.error) {
       setError(result.error.message);
     } else {
@@ -83,7 +96,7 @@ export function PricingSettingsSection() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Euro className="h-5 w-5 text-primary" aria-hidden />
+          <Coins className="h-5 w-5 text-primary" aria-hidden />
           Pricing
         </CardTitle>
       </CardHeader>
@@ -121,66 +134,86 @@ export function PricingSettingsSection() {
             )}
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="Daycare Rate"
-                type="number"
-                min={0}
-                step={0.01}
-                required
-                value={form.daycareRate}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    daycareRate: Number(e.target.value),
-                  }))
-                }
-                disabled={saving}
-              />
-              <Input
-                label="Boarding Rate"
-                type="number"
-                min={0}
-                step={0.01}
-                required
-                value={form.boardingRate}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    boardingRate: Number(e.target.value),
-                  }))
-                }
-                disabled={saving}
-              />
-              <Input
-                label="Transport Fee"
-                type="number"
-                min={0}
-                step={0.01}
-                required
-                value={form.transportFee}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    transportFee: Number(e.target.value),
-                  }))
-                }
-                disabled={saving}
-              />
-              <Input
-                label="Food Fee"
-                type="number"
-                min={0}
-                step={0.01}
-                required
-                value={form.foodFee}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    foodFee: Number(e.target.value),
-                  }))
-                }
-                disabled={saving}
-              />
+              <div>
+                <Input
+                  label="Daycare Rate"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  required
+                  value={form.daycareRate}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      daycareRate: Number(e.target.value),
+                    }))
+                  }
+                  disabled={saving}
+                />
+                <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                  {formatPrice(form.daycareRate)}
+                </p>
+              </div>
+              <div>
+                <Input
+                  label="Boarding Rate"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  required
+                  value={form.boardingRate}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      boardingRate: Number(e.target.value),
+                    }))
+                  }
+                  disabled={saving}
+                />
+                <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                  {formatPrice(form.boardingRate)}
+                </p>
+              </div>
+              <div>
+                <Input
+                  label="Transport Fee"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  required
+                  value={form.transportFee}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      transportFee: Number(e.target.value),
+                    }))
+                  }
+                  disabled={saving}
+                />
+                <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                  {formatPrice(form.transportFee)}
+                </p>
+              </div>
+              <div>
+                <Input
+                  label="Food Fee"
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  required
+                  value={form.foodFee}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      foodFee: Number(e.target.value),
+                    }))
+                  }
+                  disabled={saving}
+                />
+                <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                  {formatPrice(form.foodFee)}
+                </p>
+              </div>
             </div>
 
             <div className="rounded-xl border border-border bg-muted p-4">
