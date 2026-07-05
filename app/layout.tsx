@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
+    icon: "/dora-favicon.svg",
     apple: "/icons/icon-192x192.png",
   },
 };
