@@ -7,11 +7,24 @@ import { claimClientAccount } from "@/lib/portal/claim";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 
-export default function PortalSignupPage() {
+function PortalSignupFallback() {
+  return (
+    <div className="flex min-h-full items-center justify-center bg-background px-4 py-12">
+      <p className="text-sm text-muted-foreground">Loading signup...</p>
+    </div>
+  );
+}
+
+function PortalSignupContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const emailParam = searchParams.get("email");
+  const codeParam = searchParams.get("code");
+  const hasInviteParams = Boolean(emailParam || codeParam);
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +32,15 @@ export default function PortalSignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (emailParam) {
+      setEmail(decodeURIComponent(emailParam));
+    }
+    if (codeParam) {
+      setInviteCode(codeParam.trim().toUpperCase());
+    }
+  }, [emailParam, codeParam]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -114,6 +136,15 @@ export default function PortalSignupPage() {
               Sign up to manage your dogs at your daycare
             </p>
 
+            {hasInviteParams && (
+              <p
+                className="mt-4 rounded-xl border border-[#D9EAE4] bg-[#EAF4F1] px-4 py-3 text-sm text-primary"
+                role="status"
+              >
+                Your details have been pre-filled from your invite link.
+              </p>
+            )}
+
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <Input
                 label="Full Name"
@@ -207,5 +238,13 @@ export default function PortalSignupPage() {
         </Card>
       </main>
     </div>
+  );
+}
+
+export default function PortalSignupPage() {
+  return (
+    <Suspense fallback={<PortalSignupFallback />}>
+      <PortalSignupContent />
+    </Suspense>
   );
 }

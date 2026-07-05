@@ -9,6 +9,7 @@ import {
   getClientDogs,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/clients";
+import { sendClientInvite } from "@/lib/invite";
 import type { Client, Dog } from "@/lib/types";
 import {
   Loader2,
@@ -34,6 +35,11 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSendLoading, setInviteSendLoading] = useState(false);
+  const [inviteSendError, setInviteSendError] = useState<string | null>(null);
+  const [inviteSendSuccess, setInviteSendSuccess] = useState<string | null>(
+    null,
+  );
 
   const loadClient = useCallback(async () => {
     setLoading(true);
@@ -60,6 +66,13 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
     void loadClient();
   }, [loadClient]);
 
+  useEffect(() => {
+    if (!inviteSendSuccess) return;
+
+    const timer = setTimeout(() => setInviteSendSuccess(null), 4000);
+    return () => clearTimeout(timer);
+  }, [inviteSendSuccess]);
+
   async function handleGenerateInviteCode() {
     setInviteLoading(true);
     setInviteError(null);
@@ -72,6 +85,24 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
     }
 
     setInviteLoading(false);
+  }
+
+  async function handleSendInvite() {
+    if (!client?.email?.trim()) return;
+
+    setInviteSendLoading(true);
+    setInviteSendError(null);
+    setInviteSendSuccess(null);
+
+    const result = await sendClientInvite(clientId);
+    if (result.ok) {
+      setInviteSendSuccess(`Invite sent to ${client.email}!`);
+      await loadClient();
+    } else {
+      setInviteSendError(result.error);
+    }
+
+    setInviteSendLoading(false);
   }
 
   if (loading) {
@@ -126,6 +157,22 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            disabled={!client.email?.trim() || inviteSendLoading}
+            title={
+              !client.email?.trim() ? "Add an email address first" : undefined
+            }
+            onClick={() => void handleSendInvite()}
+          >
+            {inviteSendLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Mail className="h-4 w-4" aria-hidden />
+            )}
+            {inviteSendLoading ? "Sending..." : "Invite Owner"}
+          </Button>
           <Link href={`/clients/${clientId}/edit`}>
             <Button variant="outline" className="w-full sm:w-auto">
               <Pencil className="h-4 w-4" aria-hidden />
@@ -140,6 +187,21 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           </Link>
         </div>
       </div>
+
+      {inviteSendSuccess && (
+        <p
+          className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm text-success"
+          role="status"
+        >
+          {inviteSendSuccess}
+        </p>
+      )}
+
+      {inviteSendError && (
+        <p className="text-sm text-danger" role="alert">
+          {inviteSendError}
+        </p>
+      )}
 
       <Card>
         <CardHeader className="pb-2">
