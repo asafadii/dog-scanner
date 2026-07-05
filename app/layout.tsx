@@ -1,5 +1,5 @@
 import { Providers } from "@/components/app/Providers";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -16,9 +16,28 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "DORA",
-  description:
-    "Mobile-first dog daycare and boarding management for trainers and staff.",
+  title: "hello DORA",
+  description: "The operating system for dog daycares.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "hello DORA",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    apple: "/icons/icon-192x192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#077D73",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

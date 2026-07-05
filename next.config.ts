@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// @ts-expect-error next-pwa has no type declarations
+import withPWA from "next-pwa";
 
 const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
@@ -24,4 +26,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const pwaConfig = withPWA({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+  buildExcludes: [/middleware-manifest\.json$/],
+});
+
+export default pwaConfig(nextConfig);
