@@ -4,6 +4,7 @@ import { DogForm, type DogFormSubmitPhase } from "@/components/dogs/DogForm";
 import { Button } from "@/components/ui/Button";
 import {
   createDog,
+  ensureClientForDogForm,
   getCurrentUserProfile,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
@@ -67,7 +68,8 @@ export default function NewDogPage() {
             }
 
             setSubmitPhase("saving");
-            const result = await createDog(data, photoUrl);
+            const formData = await ensureClientForDogForm(data);
+            const result = await createDog(formData, photoUrl);
             if (result.error) {
               setError(result.error.message);
               setSubmitPhase("idle");

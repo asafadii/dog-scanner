@@ -20,10 +20,15 @@ export interface DogOwner {
   vetPhone: string;
 }
 
+export type FeedingSource = "own" | "facility";
+
 export interface DogCare {
   medication: string;
-  feeding: string;
   allergies: string;
+  dietaryNotes: string;
+  feedingSource: FeedingSource | null;
+  feedingMealsPerDay: number | null;
+  feedingNotes: string;
   behavior: string;
 }
 
@@ -49,6 +54,7 @@ export interface Client {
   phone: string | null;
   address: string | null;
   emergencyContact: string | null;
+  emergencyPhone: string | null;
   notes: string | null;
   inviteCode: string | null;
   dogCount?: number;
@@ -62,6 +68,7 @@ export interface ClientFormData {
   phone: string;
   address: string;
   emergencyContact: string;
+  emergencyPhone: string;
   notes: string;
 }
 
@@ -71,6 +78,7 @@ export interface DogClientLink {
   email: string | null;
   phone: string | null;
   emergencyContact: string | null;
+  emergencyPhone: string | null;
   address: string | null;
   notes: string | null;
 }
@@ -93,11 +101,19 @@ export interface Dog {
   healthCertificateNumber: string | null;
   aggressionTowardsPeople: boolean | null;
   aggressionTowardsDogs: boolean | null;
-  separationAnxiety: string | null;
-  kennelTrained: string | null;
-  chewingRisk: string | null;
+  separationAnxiety: boolean | null;
+  kennelTrained: boolean | null;
+  chewingRisk: boolean | null;
+  aggressionPeopleNotes: string;
+  aggressionDogsNotes: string;
+  separationAnxietyNotes: string;
+  chewingRiskNotes: string;
+  medicationNotes: string;
+  allergyNotes: string;
+  dietaryNotes: string;
+  feedingSource: FeedingSource | null;
+  feedingMealsPerDay: number | null;
   isReturning: boolean;
-  overnight: boolean;
   lastCheckIn: string | null;
   lastCheckOut: string | null;
   activeCheckinId: string | null;
@@ -117,20 +133,31 @@ export interface NewDogFormData {
   ownerName: string;
   ownerPhone: string;
   ownerEmail: string;
+  ownerAddress: string;
+  ownerEmergencyContact: string;
+  ownerEmergencyPhone: string;
+  ownerNotes: string;
   microchipNumber: string;
   isNeutered: boolean | null;
   healthCertificateNumber: string;
   aggressionTowardsPeople: boolean | null;
   aggressionTowardsDogs: boolean | null;
-  separationAnxiety: string;
-  kennelTrained: string;
-  chewingRisk: string;
-  medication: string;
-  feeding: string;
-  allergies: string;
+  separationAnxiety: boolean | null;
+  kennelTrained: boolean | null;
+  chewingRisk: boolean | null;
+  separationAnxietyNotes: string;
+  kennelTrainedNotes: string;
+  chewingRiskNotes: string;
+  aggressionPeopleNotes: string;
+  aggressionDogsNotes: string;
+  medicationNotes: string;
+  allergyNotes: string;
+  dietaryNotes: string;
+  feedingSource: FeedingSource | null;
+  feedingMealsPerDay: 1 | 2 | 3;
+  feedingNotes: string;
   behavior: string;
   alerts: DogAlerts;
-  overnight: boolean;
 }
 
 export type BookingServiceType = "daycare" | "boarding";

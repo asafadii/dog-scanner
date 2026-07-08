@@ -35,11 +35,108 @@ type DogsResult<T> =
   | { data: T; error: null }
   | { data: null; error: DogsError };
 
+interface StoredBehaviorNotes {
+  v: number;
+  behavior?: string;
+  aggressionPeopleNotes?: string;
+  aggressionDogsNotes?: string;
+  separationAnxietyNotes?: string;
+  chewingRiskNotes?: string;
+  kennelTrainedNotes?: string;
+}
+
 function toError(
   message: string,
   code: DogsErrorCode = "unknown",
 ): DogsError {
   return { message, code };
+}
+
+function parseTriStateText(value: string | null | undefined): boolean | null {
+  if (value === null || value === undefined) return null;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || normalized === "unknown") return null;
+  if (normalized === "true" || normalized === "yes") return true;
+  if (normalized === "false" || normalized === "no") return false;
+  return true;
+}
+
+function triStateToText(value: boolean | null): string | null {
+  if (value === null) return null;
+  return value ? "true" : "false";
+}
+
+function parseBehaviorNotes(raw: string | null | undefined): {
+  behavior: string;
+  aggressionPeopleNotes: string;
+  aggressionDogsNotes: string;
+  separationAnxietyNotes: string;
+  chewingRiskNotes: string;
+  kennelTrainedNotes: string;
+} {
+  const empty = {
+    behavior: "",
+    aggressionPeopleNotes: "",
+    aggressionDogsNotes: "",
+    separationAnxietyNotes: "",
+    chewingRiskNotes: "",
+    kennelTrainedNotes: "",
+  };
+
+  if (!raw?.trim()) return empty;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<StoredBehaviorNotes>;
+    if (parsed && typeof parsed === "object" && parsed.v === 1) {
+      return {
+        behavior: parsed.behavior?.trim() ?? "",
+        aggressionPeopleNotes: parsed.aggressionPeopleNotes?.trim() ?? "",
+        aggressionDogsNotes: parsed.aggressionDogsNotes?.trim() ?? "",
+        separationAnxietyNotes: parsed.separationAnxietyNotes?.trim() ?? "",
+        chewingRiskNotes: parsed.chewingRiskNotes?.trim() ?? "",
+        kennelTrainedNotes: parsed.kennelTrainedNotes?.trim() ?? "",
+      };
+    }
+  } catch {
+    // fall through to legacy plain-text behavior notes
+  }
+
+  return { ...empty, behavior: raw.trim() };
+}
+
+function serializeBehaviorNotes(
+  input: Pick<
+    NewDogFormData,
+    | "behavior"
+    | "aggressionPeopleNotes"
+    | "aggressionDogsNotes"
+    | "separationAnxietyNotes"
+    | "chewingRiskNotes"
+    | "kennelTrainedNotes"
+  >,
+): string | null {
+  const payload: StoredBehaviorNotes = {
+    v: 1,
+    behavior: input.behavior.trim() || undefined,
+    aggressionPeopleNotes: input.aggressionPeopleNotes.trim() || undefined,
+    aggressionDogsNotes: input.aggressionDogsNotes.trim() || undefined,
+    separationAnxietyNotes: input.separationAnxietyNotes.trim() || undefined,
+    chewingRiskNotes: input.chewingRiskNotes.trim() || undefined,
+    kennelTrainedNotes: input.kennelTrainedNotes.trim() || undefined,
+  };
+
+  const hasContent = Object.entries(payload).some(
+    ([key, value]) => key !== "v" && typeof value === "string" && value.length > 0,
+  );
+
+  return hasContent ? JSON.stringify(payload) : null;
+}
+
+function deriveAggressionAlert(input: Pick<
+  NewDogFormData,
+  "aggressionTowardsPeople" | "aggressionTowardsDogs"
+>): boolean {
+  return input.aggressionTowardsPeople === true || input.aggressionTowardsDogs === true;
 }
 
 function mapClientRowToDogClientLink(row: ClientRow): DogClientLink {
@@ -49,6 +146,7 @@ function mapClientRowToDogClientLink(row: ClientRow): DogClientLink {
     email: row.email,
     phone: row.phone,
     emergencyContact: row.emergency_contact,
+    emergencyPhone: row.emergency_phone,
     address: row.address,
     notes: row.notes,
   };
@@ -58,9 +156,10 @@ export function mapDogRowToDog(row: DogRow): Dog {
   const allergyText = row.allergies?.trim() ?? "";
   const dietNotes = row.diet_notes?.trim() ?? "";
   const medicationNotes = row.medication_notes?.trim() ?? "";
-  const behaviorNotes = row.behavior_notes?.trim() ?? "";
+  const behaviorPayload = parseBehaviorNotes(row.behavior_notes);
   const vetContact = row.vet_contact?.trim() ?? "";
   const emergencyContact = row.emergency_contact?.trim() ?? "";
+  const feedingNotes = row.feeding_notes?.trim() ?? "";
 
   return {
     id: row.id,
@@ -77,9 +176,18 @@ export function mapDogRowToDog(row: DogRow): Dog {
     healthCertificateNumber: row.health_certificate_number,
     aggressionTowardsPeople: row.aggression_towards_people,
     aggressionTowardsDogs: row.aggression_towards_dogs,
-    separationAnxiety: row.separation_anxiety,
-    kennelTrained: row.kennel_trained,
-    chewingRisk: row.chewing_risk,
+    separationAnxiety: parseTriStateText(row.separation_anxiety),
+    kennelTrained: parseTriStateText(row.kennel_trained),
+    chewingRisk: parseTriStateText(row.chewing_risk),
+    aggressionPeopleNotes: behaviorPayload.aggressionPeopleNotes,
+    aggressionDogsNotes: behaviorPayload.aggressionDogsNotes,
+    separationAnxietyNotes: behaviorPayload.separationAnxietyNotes,
+    chewingRiskNotes: behaviorPayload.chewingRiskNotes,
+    medicationNotes,
+    allergyNotes: allergyText,
+    dietaryNotes: dietNotes,
+    feedingSource: row.feeding_source,
+    feedingMealsPerDay: row.feeding_meals_per_day,
     isReturning: false,
     alerts: {
       medication: row.medication_required,
@@ -99,11 +207,13 @@ export function mapDogRowToDog(row: DogRow): Dog {
     },
     care: {
       medication: medicationNotes || "None",
-      feeding: dietNotes || "Standard diet",
       allergies: allergyText || "None known",
-      behavior: behaviorNotes || "No notes",
+      dietaryNotes: dietNotes || "None",
+      feedingSource: row.feeding_source,
+      feedingMealsPerDay: row.feeding_meals_per_day,
+      feedingNotes: feedingNotes || "None",
+      behavior: behaviorPayload.behavior || "No notes",
     },
-    overnight: false,
     lastCheckIn: null,
     lastCheckOut: null,
     activeCheckinId: null,
@@ -122,26 +232,34 @@ export function dogToFormData(dog: Dog): NewDogFormData {
     age: dog.age,
     size: dog.size,
     clientId: dog.clientId,
-    ownerName: dog.owner.name,
-    ownerPhone: dog.owner.phone,
-    ownerEmail: dog.owner.email,
+    ownerName: dog.client?.name ?? dog.owner.name,
+    ownerPhone: dog.client?.phone ?? dog.owner.phone,
+    ownerEmail: dog.client?.email ?? dog.owner.email,
+    ownerAddress: dog.client?.address ?? "",
+    ownerEmergencyContact: dog.client?.emergencyContact ?? dog.owner.emergencyContact,
+    ownerEmergencyPhone: dog.client?.emergencyPhone ?? dog.owner.emergencyPhone,
+    ownerNotes: dog.client?.notes ?? "",
     microchipNumber: dog.microchipNumber ?? "",
     isNeutered: dog.isNeutered,
     healthCertificateNumber: dog.healthCertificateNumber ?? "",
     aggressionTowardsPeople: dog.aggressionTowardsPeople,
     aggressionTowardsDogs: dog.aggressionTowardsDogs,
-    separationAnxiety: dog.separationAnxiety ?? "",
-    kennelTrained: dog.kennelTrained ?? "",
-    chewingRisk: dog.chewingRisk ?? "",
-    medication: dog.care.medication === "None" ? "" : dog.care.medication,
-    feeding:
-      dog.care.feeding === "Standard diet" ? "" : dog.care.feeding,
-    allergies:
-      dog.care.allergies === "None known" ? "" : dog.care.allergies,
-    behavior:
-      dog.care.behavior === "No notes" ? "" : dog.care.behavior,
+    separationAnxiety: dog.separationAnxiety,
+    kennelTrained: dog.kennelTrained,
+    chewingRisk: dog.chewingRisk,
+    separationAnxietyNotes: dog.separationAnxietyNotes,
+    kennelTrainedNotes: "",
+    chewingRiskNotes: dog.chewingRiskNotes,
+    aggressionPeopleNotes: dog.aggressionPeopleNotes,
+    aggressionDogsNotes: dog.aggressionDogsNotes,
+    medicationNotes: dog.medicationNotes,
+    allergyNotes: dog.allergyNotes === "None known" ? "" : dog.allergyNotes,
+    dietaryNotes: dog.dietaryNotes === "None" ? "" : dog.dietaryNotes,
+    feedingSource: dog.feedingSource,
+    feedingMealsPerDay: (dog.feedingMealsPerDay ?? 2) as 1 | 2 | 3,
+    feedingNotes: dog.care.feedingNotes === "None" ? "" : dog.care.feedingNotes,
+    behavior: dog.care.behavior === "No notes" ? "" : dog.care.behavior,
     alerts: { ...dog.alerts },
-    overnight: dog.overnight,
   };
 }
 
@@ -151,7 +269,10 @@ export function toDogInsert(
   photoUrl?: string | null,
 ): DogInsert {
   const emergencyContact =
-    input.ownerPhone.trim() || input.ownerName.trim();
+    input.ownerEmergencyContact.trim() ||
+    input.ownerEmergencyPhone.trim() ||
+    input.ownerPhone.trim() ||
+    input.ownerName.trim();
 
   return {
     facility_id: facilityId,
@@ -166,21 +287,24 @@ export function toDogInsert(
     owner_phone: input.ownerPhone.trim(),
     emergency_contact: emergencyContact,
     vet_contact: "",
-    behavior_notes: input.behavior.trim(),
+    behavior_notes: serializeBehaviorNotes(input),
     medication_required: input.alerts.medication,
-    medication_notes: input.medication.trim(),
-    diet_notes: input.feeding.trim(),
-    allergies: input.allergies.trim(),
-    aggression_risk: input.alerts.aggression,
+    medication_notes: input.medicationNotes.trim() || null,
+    diet_notes: input.dietaryNotes.trim() || null,
+    allergies: input.allergyNotes.trim() || null,
+    aggression_risk: deriveAggressionAlert(input),
     escape_risk: input.alerts.escapeRisk,
     microchip_number: input.microchipNumber.trim() || null,
     is_neutered: input.isNeutered,
     aggression_towards_people: input.aggressionTowardsPeople,
     aggression_towards_dogs: input.aggressionTowardsDogs,
-    separation_anxiety: input.separationAnxiety.trim() || null,
-    kennel_trained: input.kennelTrained.trim() || null,
-    chewing_risk: input.chewingRisk.trim() || null,
+    separation_anxiety: triStateToText(input.separationAnxiety),
+    kennel_trained: triStateToText(input.kennelTrained),
+    chewing_risk: triStateToText(input.chewingRisk),
     health_certificate_number: input.healthCertificateNumber.trim() || null,
+    feeding_source: input.feedingSource,
+    feeding_meals_per_day: input.feedingSource ? input.feedingMealsPerDay : null,
+    feeding_notes: input.feedingNotes.trim() || null,
     is_active: true,
   };
 }
@@ -196,15 +320,48 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
   if (input.ownerName !== undefined) update.owner_name = input.ownerName.trim();
   if (input.ownerPhone !== undefined) {
     update.owner_phone = input.ownerPhone.trim();
-    update.emergency_contact = input.ownerPhone.trim();
   }
-  if (input.medication !== undefined) {
-    update.medication_notes = input.medication.trim();
+  if (
+    input.ownerEmergencyContact !== undefined ||
+    input.ownerEmergencyPhone !== undefined ||
+    input.ownerPhone !== undefined ||
+    input.ownerName !== undefined
+  ) {
+    const emergencyContact =
+      input.ownerEmergencyContact?.trim() ||
+      input.ownerEmergencyPhone?.trim() ||
+      input.ownerPhone?.trim() ||
+      input.ownerName?.trim() ||
+      null;
+    if (emergencyContact) {
+      update.emergency_contact = emergencyContact;
+    }
   }
-  if (input.feeding !== undefined) update.diet_notes = input.feeding.trim();
-  if (input.allergies !== undefined) update.allergies = input.allergies.trim();
-  if (input.behavior !== undefined) {
-    update.behavior_notes = input.behavior.trim();
+  if (input.medicationNotes !== undefined) {
+    update.medication_notes = input.medicationNotes.trim() || null;
+  }
+  if (input.dietaryNotes !== undefined) {
+    update.diet_notes = input.dietaryNotes.trim() || null;
+  }
+  if (input.allergyNotes !== undefined) {
+    update.allergies = input.allergyNotes.trim() || null;
+  }
+  if (
+    input.behavior !== undefined ||
+    input.aggressionPeopleNotes !== undefined ||
+    input.aggressionDogsNotes !== undefined ||
+    input.separationAnxietyNotes !== undefined ||
+    input.chewingRiskNotes !== undefined ||
+    input.kennelTrainedNotes !== undefined
+  ) {
+    update.behavior_notes = serializeBehaviorNotes({
+      behavior: input.behavior ?? "",
+      aggressionPeopleNotes: input.aggressionPeopleNotes ?? "",
+      aggressionDogsNotes: input.aggressionDogsNotes ?? "",
+      separationAnxietyNotes: input.separationAnxietyNotes ?? "",
+      chewingRiskNotes: input.chewingRiskNotes ?? "",
+      kennelTrainedNotes: input.kennelTrainedNotes ?? "",
+    });
   }
   if (input.microchipNumber !== undefined) {
     update.microchip_number = input.microchipNumber.trim() || null;
@@ -223,23 +380,41 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
     update.aggression_towards_dogs = input.aggressionTowardsDogs;
   }
   if (input.separationAnxiety !== undefined) {
-    update.separation_anxiety = input.separationAnxiety.trim() || null;
+    update.separation_anxiety = triStateToText(input.separationAnxiety);
   }
   if (input.kennelTrained !== undefined) {
-    update.kennel_trained = input.kennelTrained.trim() || null;
+    update.kennel_trained = triStateToText(input.kennelTrained);
   }
   if (input.chewingRisk !== undefined) {
-    update.chewing_risk = input.chewingRisk.trim() || null;
+    update.chewing_risk = triStateToText(input.chewingRisk);
+  }
+  if (input.feedingSource !== undefined) {
+    update.feeding_source = input.feedingSource;
+    update.feeding_meals_per_day = input.feedingSource
+      ? (input.feedingMealsPerDay ?? null)
+      : null;
+  } else if (input.feedingMealsPerDay !== undefined) {
+    update.feeding_meals_per_day = input.feedingMealsPerDay;
+  }
+  if (input.feedingNotes !== undefined) {
+    update.feeding_notes = input.feedingNotes.trim() || null;
   }
 
   if (input.alerts?.medication !== undefined) {
     update.medication_required = input.alerts.medication;
   }
-  if (input.alerts?.aggression !== undefined) {
-    update.aggression_risk = input.alerts.aggression;
-  }
   if (input.alerts?.escapeRisk !== undefined) {
     update.escape_risk = input.alerts.escapeRisk;
+  }
+  if (
+    input.aggressionTowardsPeople !== undefined ||
+    input.aggressionTowardsDogs !== undefined
+  ) {
+    update.aggression_risk = deriveAggressionAlert({
+      aggressionTowardsPeople:
+        input.aggressionTowardsPeople ?? null,
+      aggressionTowardsDogs: input.aggressionTowardsDogs ?? null,
+    });
   }
   if (input.photoUrl !== undefined) {
     update.photo_url = input.photoUrl;
@@ -261,18 +436,24 @@ async function resolveClientBackedFields(
   const supabase = createSupabaseBrowserClient();
   const { data } = await supabase
     .from("clients")
-    .select("name, phone, emergency_contact")
+    .select("name, phone, emergency_contact, emergency_phone")
     .eq("id", input.clientId)
     .eq("facility_id", facilityId)
     .maybeSingle();
 
   if (!data) return null;
 
-  const row = data as Pick<ClientRow, "name" | "phone" | "emergency_contact">;
+  const row = data as Pick<
+    ClientRow,
+    "name" | "phone" | "emergency_contact" | "emergency_phone"
+  >;
   const ownerName = row.name.trim() || input.ownerName.trim();
   const ownerPhone = row.phone?.trim() || input.ownerPhone.trim();
   const emergencyContact =
-    row.emergency_contact?.trim() || ownerPhone || ownerName;
+    row.emergency_contact?.trim() ||
+    row.emergency_phone?.trim() ||
+    ownerPhone ||
+    ownerName;
 
   return {
     owner_name: ownerName,
@@ -376,7 +557,10 @@ async function attachClientToDog(
       emergencyContact:
         dog.owner.emergencyContact || client.emergencyContact || client.name,
       emergencyPhone:
-        dog.owner.emergencyPhone || client.phone || dog.owner.phone,
+        client.emergencyPhone ||
+        dog.owner.emergencyPhone ||
+        client.phone ||
+        dog.owner.phone,
     },
   };
 }
@@ -567,4 +751,30 @@ export async function updateDog(
   }
 
   return { data: mapDogRowToDog(data as DogRow), error: null };
+}
+
+export async function ensureClientForDogForm(
+  form: NewDogFormData,
+): Promise<NewDogFormData> {
+  if (form.clientId || !form.ownerName.trim()) {
+    return form;
+  }
+
+  const { createClient } = await import("@/lib/clients");
+  const result = await createClient({
+    name: form.ownerName.trim(),
+    phone: form.ownerPhone.trim(),
+    email: form.ownerEmail.trim(),
+    address: form.ownerAddress.trim(),
+    emergencyContact: form.ownerEmergencyContact.trim(),
+    emergencyPhone: form.ownerEmergencyPhone.trim(),
+    notes: form.ownerNotes.trim(),
+  });
+
+  if (result.error) {
+    console.error("Auto-create client failed:", result.error.message);
+    return form;
+  }
+
+  return { ...form, clientId: result.data.id };
 }

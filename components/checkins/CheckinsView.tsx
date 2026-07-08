@@ -16,7 +16,7 @@ import { slideUp } from "@/lib/motion";
 import type { Booking, Dog, KennelAssignment, Payment } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { ClipboardCheck, Loader2, ScanLine, Search } from "lucide-react";
+import { ClipboardCheck, Dog as DogIcon, Loader2, ScanLine, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
@@ -227,7 +227,7 @@ export function CheckinsView() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF4F1] text-primary">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-wash text-primary">
             <ClipboardCheck className="h-6 w-6" aria-hidden />
           </span>
           <div>
@@ -336,8 +336,11 @@ export function CheckinsView() {
         )}
 
       {checkedIn.length === 0 ? (
-        <Card>
+        <Card className="border-t-4 border-t-marker">
           <CardContent className="py-16 text-center">
+            <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+              <DogIcon className="h-6 w-6" aria-hidden />
+            </div>
             <p className="text-foreground">No dogs checked in right now.</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Scan a QR code or check in from today&apos;s bookings above.
@@ -345,13 +348,16 @@ export function CheckinsView() {
           </CardContent>
         </Card>
       ) : filteredCheckedIn.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            No dogs match your search.
+        <Card className="border-t-4 border-t-marker">
+          <CardContent className="py-10 text-center">
+            <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+              <Search className="h-6 w-6" aria-hidden />
+            </div>
+            <p className="text-muted-foreground">No dogs match your search.</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 items-start">
           {filteredCheckedIn.map((dog) => (
             <DogCard
               key={dog.id}

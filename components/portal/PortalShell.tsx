@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { LogOut } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -32,24 +32,14 @@ export function PortalShell({
   return (
     <div className="flex min-h-full flex-col bg-background">
       {/* Mint operational top bar (documented mint-wash literals #EAF4F1 / #D9EAE4) */}
-      <header className="border-b border-[#D9EAE4] bg-[#EAF4F1] backdrop-blur-sm">
+      <header className="border-b border-[#D9EAE4] bg-mint-wash backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
           <Link
             href="/portal"
             className="flex items-center gap-2 transition-opacity hover:opacity-90"
             aria-label="DORA home"
           >
-            <Image
-              src="/dora-icon.svg"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8"
-              aria-hidden
-            />
-            <span className="font-display text-lg font-bold text-primary">
-              hello DORA
-            </span>
+            <Logo size={32} />
           </Link>
           <div className="flex items-center gap-3">
             <span

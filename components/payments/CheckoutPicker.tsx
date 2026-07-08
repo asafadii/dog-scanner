@@ -8,7 +8,7 @@ import {
 } from "@/lib/pricing";
 import { formatAmount } from "@/lib/currency";
 import { getFacilitySettings } from "@/lib/facility";
-import type { Payment, PaymentMethod } from "@/lib/types";
+import type { FeedingSource, Payment, PaymentMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Banknote, CreditCard, Landmark, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -25,6 +25,7 @@ const PAYMENT_METHODS: {
 
 interface CheckoutPickerProps {
   checkinId: string;
+  feedingSource?: FeedingSource | null;
   onComplete: (payment: Payment) => void;
   onClose: () => void;
   className?: string;
@@ -39,12 +40,14 @@ function unitLabel(serviceType: StayPriceResult["serviceType"], units: number) {
 
 export function CheckoutPicker({
   checkinId,
+  feedingSource = null,
   onComplete,
   onClose,
   className,
 }: CheckoutPickerProps) {
   const [breakdown, setBreakdown] = useState<StayPriceResult | null>(null);
   const [foodAddon, setFoodAddon] = useState(false);
+  const [foodPrefilled, setFoodPrefilled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
     null,
   );
@@ -52,6 +55,13 @@ export function CheckoutPicker({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currency, setCurrency] = useState("EUR");
+
+  useEffect(() => {
+    if (feedingSource === "facility") {
+      setFoodAddon(true);
+      setFoodPrefilled(true);
+    }
+  }, [feedingSource]);
 
   useEffect(() => {
     void (async () => {
@@ -105,10 +115,18 @@ export function CheckoutPicker({
     setSubmitting(false);
   }
 
+  function handleFoodAddonChange(checked: boolean) {
+    setFoodAddon(checked);
+    setFoodPrefilled(false);
+  }
+
   const showFoodCheckbox =
     breakdown &&
     breakdown.serviceType === "daycare" &&
     !breakdown.foodAddonOnBooking;
+
+  const showFoodPrefillHint =
+    foodAddon && feedingSource === "facility" && foodPrefilled;
 
   return (
     <div
@@ -190,18 +208,26 @@ export function CheckoutPicker({
           </div>
 
           {showFoodCheckbox && (
-            <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 text-sm">
-              <input
-                type="checkbox"
-                checked={foodAddon}
-                onChange={(e) => setFoodAddon(e.target.checked)}
-                disabled={submitting}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-              />
-              <span className="text-foreground">
-                Add daycare food (+{formatPrice(breakdown.configuredFoodFee)})
-              </span>
-            </label>
+            <div className="space-y-1">
+              <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={foodAddon}
+                  onChange={(e) => handleFoodAddonChange(e.target.checked)}
+                  disabled={submitting}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                />
+                <span className="text-foreground">
+                  Add daycare food (+{formatPrice(breakdown.configuredFoodFee)})
+                </span>
+              </label>
+              {showFoodPrefillHint && (
+                <p className="px-1 text-xs text-muted-foreground">
+                  Pre-filled from dog&apos;s feeding preference. Uncheck to
+                  override.
+                </p>
+              )}
+            </div>
           )}
 
           <div>
@@ -218,8 +244,7 @@ export function CheckoutPicker({
                   className={cn(
                     "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
                     paymentMethod === value
-                      ? // mint-wash #EAF4F1 = documented D-04 selected tint (Wave-2 precedent)
-                        "border-primary bg-[#EAF4F1] text-primary"
+                      ? "border-primary bg-mint-wash text-primary"
                       : "border-border bg-surface text-foreground hover:border-primary/40",
                   )}
                   aria-pressed={paymentMethod === value}

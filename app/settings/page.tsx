@@ -1,15 +1,12 @@
 "use client";
 
-import { useAuth } from "@/components/auth/AuthProvider";
 import { FacilitySettingsSection } from "@/components/settings/FacilitySettingsSection";
 import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
 import { StaffAccountsSection } from "@/components/settings/StaffAccountsSection";
-import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Bell, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Bell } from "lucide-react";
 
 const PLACEHOLDER_SECTIONS = [
   {
@@ -20,15 +17,6 @@ const PLACEHOLDER_SECTIONS = [
 ];
 
 export default function SettingsPage() {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
-
-  async function handleSignOut() {
-    await signOut();
-    router.push("/");
-    router.refresh();
-  }
-
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
@@ -41,21 +29,6 @@ export default function SettingsPage() {
       </div>
 
       <FacilitySettingsSection />
-
-      {user && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Account</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-0">
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-            <Button variant="outline" onClick={handleSignOut} className="w-full sm:w-auto">
-              <LogOut className="h-4 w-4" aria-hidden />
-              Sign Out
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       <CapacitySettingsSection />
 

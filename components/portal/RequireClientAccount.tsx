@@ -86,7 +86,7 @@ export function RequireClientAccount({ children }: RequireClientAccountProps) {
       <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center p-8 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#EAF4F1] text-primary">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-mint-wash text-primary">
               <Heart className="h-6 w-6" aria-hidden />
             </span>
             <h2 className="mt-4 text-xl font-semibold text-foreground">

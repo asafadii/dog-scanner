@@ -32,6 +32,9 @@ export interface DogRow {
   kennel_trained: string | null;
   chewing_risk: string | null;
   health_certificate_number: string | null;
+  feeding_source: "own" | "facility" | null;
+  feeding_meals_per_day: number | null;
+  feeding_notes: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -66,6 +69,9 @@ export type DogInsert = {
   kennel_trained?: string | null;
   chewing_risk?: string | null;
   health_certificate_number?: string | null;
+  feeding_source?: "own" | "facility" | null;
+  feeding_meals_per_day?: number | null;
+  feeding_notes?: string | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -100,6 +106,9 @@ export type DogUpdate = {
   kennel_trained?: string | null;
   chewing_risk?: string | null;
   health_certificate_number?: string | null;
+  feeding_source?: "own" | "facility" | null;
+  feeding_meals_per_day?: number | null;
+  feeding_notes?: string | null;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -112,6 +121,7 @@ export interface ClientRow {
   phone: string | null;
   address: string | null;
   emergency_contact: string | null;
+  emergency_phone: string | null;
   notes: string | null;
   invite_code: string | null;
   created_at: string;
@@ -126,6 +136,7 @@ export type ClientInsert = {
   phone?: string | null;
   address?: string | null;
   emergency_contact?: string | null;
+  emergency_phone?: string | null;
   notes?: string | null;
   invite_code?: string | null;
   created_at?: string;
@@ -140,6 +151,7 @@ export type ClientUpdate = {
   phone?: string | null;
   address?: string | null;
   emergency_contact?: string | null;
+  emergency_phone?: string | null;
   notes?: string | null;
   invite_code?: string | null;
   created_at?: string;

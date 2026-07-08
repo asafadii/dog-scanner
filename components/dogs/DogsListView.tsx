@@ -14,7 +14,7 @@ import {
 import { slideUp } from "@/lib/motion";
 import type { Dog, Payment } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Dog as DogIcon, Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -184,7 +184,10 @@ export function DogsListView() {
       </div>
 
       {dogs.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-border border-t-4 border-t-marker bg-surface py-16 text-center">
+          <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+            <DogIcon className="h-6 w-6" aria-hidden />
+          </div>
           <p className="text-muted-foreground">No dog profiles yet.</p>
           <Link
             href="/dogs/new"
@@ -194,7 +197,10 @@ export function DogsListView() {
           </Link>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-border border-t-4 border-t-marker bg-surface py-16 text-center">
+          <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+            <Search className="h-6 w-6" aria-hidden />
+          </div>
           <p className="text-muted-foreground">No dogs match your search.</p>
           {query && (
             <button

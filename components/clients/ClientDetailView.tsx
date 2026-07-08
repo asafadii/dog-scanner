@@ -15,6 +15,7 @@ import {
   Loader2,
   Mail,
   MapPin,
+  PawPrint,
   Pencil,
   Phone,
   Plus,
@@ -271,7 +272,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           </p>
           {client.inviteCode ? (
             // mint-wash #EAF4F1 tint = documented D-04 exception (Wave-2 precedent)
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/25 bg-[#EAF4F1]/50 px-4 py-3">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/25 bg-mint-wash/50 px-4 py-3">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Invite code
@@ -321,7 +322,10 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground">Dogs</h3>
         {dogs.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-surface py-12 text-center">
+          <div className="rounded-2xl border border-dashed border-border border-t-4 border-t-marker bg-surface py-12 text-center">
+            <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+              <PawPrint className="h-6 w-6" aria-hidden />
+            </div>
             <p className="text-muted-foreground">No dogs linked to this client yet.</p>
             <Link href={`/dogs/new?clientId=${clientId}`}>
               <Button variant="outline" className="mt-4">

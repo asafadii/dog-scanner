@@ -55,20 +55,31 @@ export default function PortalNewDogPage() {
     ownerName: "",
     ownerPhone: "",
     ownerEmail: "",
-    medication: "",
-    feeding: "",
-    allergies: "",
+    ownerAddress: "",
+    ownerEmergencyContact: "",
+    ownerEmergencyPhone: "",
+    ownerNotes: "",
+    medicationNotes: "",
+    feedingNotes: "",
+    allergyNotes: "",
     behavior: "",
     alerts: { ...defaultAlerts },
-    overnight: false,
     microchipNumber: "",
     isNeutered: null,
     healthCertificateNumber: "",
     aggressionTowardsPeople: null,
     aggressionTowardsDogs: null,
-    separationAnxiety: "",
-    kennelTrained: "",
-    chewingRisk: "",
+    separationAnxiety: null,
+    kennelTrained: null,
+    chewingRisk: null,
+    separationAnxietyNotes: "",
+    kennelTrainedNotes: "",
+    chewingRiskNotes: "",
+    aggressionPeopleNotes: "",
+    aggressionDogsNotes: "",
+    dietaryNotes: "",
+    feedingSource: null,
+    feedingMealsPerDay: 2,
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [vaccinationFile, setVaccinationFile] = useState<File | null>(null);
@@ -289,18 +300,18 @@ export default function PortalNewDogPage() {
           <CardContent className="space-y-4 pt-0">
             <Textarea
               label="Medication"
-              value={form.medication}
-              onChange={(e) => setForm({ ...form, medication: e.target.value })}
+              value={form.medicationNotes}
+              onChange={(e) => setForm({ ...form, medicationNotes: e.target.value })}
             />
             <Textarea
               label="Feeding instructions"
-              value={form.feeding}
-              onChange={(e) => setForm({ ...form, feeding: e.target.value })}
+              value={form.feedingNotes}
+              onChange={(e) => setForm({ ...form, feedingNotes: e.target.value })}
             />
             <Textarea
               label="Allergies"
-              value={form.allergies}
-              onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+              value={form.allergyNotes}
+              onChange={(e) => setForm({ ...form, allergyNotes: e.target.value })}
             />
             <Textarea
               label="Behavior notes"

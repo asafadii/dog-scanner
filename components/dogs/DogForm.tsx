@@ -13,23 +13,22 @@ import {
   getStaffDocumentUrl,
   uploadStaffDogDocument,
 } from "@/lib/documents";
-import type { Client, DogAlerts, DogDocument, DogSize, NewDogFormData } from "@/lib/types";
+import type {
+  Client,
+  DogAlerts,
+  DogDocument,
+  DogSize,
+  FeedingSource,
+  NewDogFormData,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { FileText, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 const SIZES: DogSize[] = ["small", "medium", "large"];
-
-const ALERT_FIELDS: {
-  key: keyof DogAlerts;
-  label: string;
-  description: string;
-}[] = [
-  { key: "medication", label: "Medication", description: "Requires medication during stay" },
-  { key: "allergy", label: "Allergy", description: "Has known allergies" },
-  { key: "dietary", label: "Dietary Restriction", description: "Special feeding requirements" },
-  { key: "aggression", label: "Aggression Caution", description: "May be reactive to dogs or people" },
-  { key: "escapeRisk", label: "Escape Risk", description: "Known to jump fences or bolt" },
+const FEEDING_SOURCES: { value: FeedingSource; label: string }[] = [
+  { value: "own", label: "Own" },
+  { value: "facility", label: "Facility" },
 ];
 
 const defaultAlerts: DogAlerts = {
@@ -49,20 +48,31 @@ const defaultForm: NewDogFormData = {
   ownerName: "",
   ownerPhone: "",
   ownerEmail: "",
+  ownerAddress: "",
+  ownerEmergencyContact: "",
+  ownerEmergencyPhone: "",
+  ownerNotes: "",
   microchipNumber: "",
   isNeutered: null,
   healthCertificateNumber: "",
   aggressionTowardsPeople: null,
   aggressionTowardsDogs: null,
-  separationAnxiety: "",
-  kennelTrained: "",
-  chewingRisk: "",
-  medication: "",
-  feeding: "",
-  allergies: "",
+  separationAnxiety: null,
+  kennelTrained: null,
+  chewingRisk: null,
+  separationAnxietyNotes: "",
+  kennelTrainedNotes: "",
+  chewingRiskNotes: "",
+  aggressionPeopleNotes: "",
+  aggressionDogsNotes: "",
+  medicationNotes: "",
+  allergyNotes: "",
+  dietaryNotes: "",
+  feedingSource: null,
+  feedingMealsPerDay: 2,
+  feedingNotes: "",
   behavior: "",
   alerts: { ...defaultAlerts },
-  overnight: false,
 };
 
 export type DogFormSubmitPhase = "idle" | "uploading" | "saving";
@@ -91,6 +101,10 @@ function applyClientToOwnerFields(
     ownerName: client.name,
     ownerPhone: client.phone ?? "",
     ownerEmail: client.email ?? "",
+    ownerAddress: client.address ?? "",
+    ownerEmergencyContact: client.emergencyContact ?? "",
+    ownerEmergencyPhone: client.emergencyPhone ?? "",
+    ownerNotes: client.notes ?? "",
   };
 }
 
@@ -100,6 +114,71 @@ function formatDocumentDate(value: string): string {
     day: "numeric",
     year: "numeric",
   }).format(new Date(value));
+}
+
+interface TriStateControlProps {
+  label: string;
+  value: boolean | null;
+  onChange: (value: boolean | null) => void;
+  disabled?: boolean;
+  notes?: string;
+  onNotesChange?: (value: string) => void;
+  notesPlaceholder?: string;
+  showNotesWhen?: "yes" | "never";
+}
+
+function TriStateControl({
+  label,
+  value,
+  onChange,
+  disabled = false,
+  notes,
+  onNotesChange,
+  notesPlaceholder = "Additional notes",
+  showNotesWhen = "yes",
+}: TriStateControlProps) {
+  const options: { key: "yes" | "no" | "unknown"; label: string; next: boolean | null }[] = [
+    { key: "yes", label: "Yes", next: true },
+    { key: "no", label: "No", next: false },
+    { key: "unknown", label: "Unknown", next: null },
+  ];
+
+  return (
+    <div className="space-y-3">
+      <span className="block text-sm font-medium text-foreground">{label}</span>
+      <div className="flex gap-2">
+        {options.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(option.next)}
+            className={cn(
+              "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+              value === option.next
+                ? "border-primary bg-primary text-white"
+                : "border-border bg-surface text-muted-foreground hover:bg-muted",
+              disabled && "cursor-not-allowed opacity-60",
+            )}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+      {showNotesWhen === "yes" &&
+        value === true &&
+        onNotesChange !== undefined && (
+          <Textarea
+            label="Additional notes"
+            value={notes ?? ""}
+            onChange={(e) => onNotesChange(e.target.value)}
+            placeholder={notesPlaceholder}
+            rows={3}
+            disabled={disabled}
+          />
+        )}
+    </div>
+  );
 }
 
 export function DogForm({
@@ -257,6 +336,7 @@ export function DogForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Section 1 — Photo */}
       <Card>
         <CardHeader>
           <CardTitle>Photo</CardTitle>
@@ -273,9 +353,10 @@ export function DogForm({
         </CardContent>
       </Card>
 
+      {/* Section 2 — Dog Details */}
       <Card>
         <CardHeader>
-          <CardTitle>Dog Information</CardTitle>
+          <CardTitle>Dog Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
@@ -308,9 +389,6 @@ export function DogForm({
             <span className="mb-2 block text-sm font-medium text-foreground">
               Size
             </span>
-            {/* Segmented control stays operational-flat (no sticker shadow — that
-                portal exception is Plan 05 only). Active = mint-wash #EAF4F1
-                (documented D-04 exception, Wave-2 precedent). */}
             <div className="flex gap-2">
               {SIZES.map((size) => (
                 <button
@@ -321,7 +399,7 @@ export function DogForm({
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.size === size
-                      ? "border-primary bg-[#EAF4F1] text-primary"
+                      ? "border-primary bg-mint-wash text-primary"
                       : "border-border bg-surface text-muted-foreground hover:bg-muted",
                     isSubmitting && "cursor-not-allowed opacity-60",
                   )}
@@ -331,21 +409,10 @@ export function DogForm({
               ))}
             </div>
           </div>
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
-            <input
-              type="checkbox"
-              checked={form.overnight}
-              disabled={isSubmitting}
-              onChange={(e) => updateField("overnight", e.target.checked)}
-              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
-            />
-            <span className="text-sm font-medium text-foreground">
-              Overnight boarding stay
-            </span>
-          </label>
         </CardContent>
       </Card>
 
+      {/* Section 3 — Identification */}
       <Card>
         <CardHeader>
           <CardTitle>Identification</CardTitle>
@@ -380,6 +447,7 @@ export function DogForm({
         </CardContent>
       </Card>
 
+      {/* Section 4 — Owner Information */}
       <Card>
         <CardHeader>
           <CardTitle>Owner Information</CardTitle>
@@ -431,143 +499,294 @@ export function DogForm({
               disabled={isSubmitting}
             />
           </div>
+          <Input
+            label="Address"
+            value={form.ownerAddress}
+            onChange={(e) => updateField("ownerAddress", e.target.value)}
+            placeholder="Street, city, state"
+            disabled={isSubmitting}
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="Emergency Contact"
+              value={form.ownerEmergencyContact}
+              onChange={(e) => updateField("ownerEmergencyContact", e.target.value)}
+              placeholder="Name and relationship"
+              disabled={isSubmitting}
+            />
+            <Input
+              label="Emergency Contact Phone"
+              type="tel"
+              value={form.ownerEmergencyPhone}
+              onChange={(e) => updateField("ownerEmergencyPhone", e.target.value)}
+              placeholder="(555) 987-6543"
+              disabled={isSubmitting}
+            />
+          </div>
+          <Textarea
+            label="Notes"
+            value={form.ownerNotes}
+            onChange={(e) => updateField("ownerNotes", e.target.value)}
+            placeholder="Pickup instructions, preferences..."
+            rows={3}
+            disabled={isSubmitting}
+          />
         </CardContent>
       </Card>
 
+      {/* Section 5 — Health & Safety */}
       <Card>
         <CardHeader>
-          <CardTitle>Care Alerts</CardTitle>
+          <CardTitle>Health &amp; Safety</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {ALERT_FIELDS.map(({ key, label, description }) => (
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
             <label
-              key={key}
               className={cn(
                 "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
-                form.alerts[key]
-                  ? "border-primary/40 bg-[#EAF4F1]/50"
+                form.alerts.medication
+                  ? "border-primary/40 bg-mint-wash/50"
                   : "border-border hover:bg-muted",
                 isSubmitting && "cursor-not-allowed opacity-60",
               )}
             >
               <input
                 type="checkbox"
-                checked={form.alerts[key]}
+                checked={form.alerts.medication}
                 disabled={isSubmitting}
-                onChange={() => toggleAlert(key)}
+                onChange={() => toggleAlert("medication")}
                 className="mt-0.5 h-5 w-5 rounded border-border text-primary focus:ring-ring"
               />
-              <div>
-                <span className="text-sm font-medium text-foreground">
-                  {label}
-                </span>
-                <p className="text-xs text-muted-foreground">{description}</p>
-              </div>
+              <span className="text-sm font-medium text-foreground">Medication</span>
             </label>
-          ))}
-        </CardContent>
-      </Card>
+            {form.alerts.medication && (
+              <Textarea
+                label="What do they take and how is it given?"
+                value={form.medicationNotes}
+                onChange={(e) => updateField("medicationNotes", e.target.value)}
+                rows={3}
+                disabled={isSubmitting}
+              />
+            )}
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Behaviour &amp; Safety</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
+          <div className="space-y-3">
+            <label
+              className={cn(
+                "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
+                form.alerts.allergy
+                  ? "border-primary/40 bg-mint-wash/50"
+                  : "border-border hover:bg-muted",
+                isSubmitting && "cursor-not-allowed opacity-60",
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={form.alerts.allergy}
+                disabled={isSubmitting}
+                onChange={() => toggleAlert("allergy")}
+                className="mt-0.5 h-5 w-5 rounded border-border text-primary focus:ring-ring"
+              />
+              <span className="text-sm font-medium text-foreground">Allergy</span>
+            </label>
+            {form.alerts.allergy && (
+              <Textarea
+                label="What are they allergic to?"
+                value={form.allergyNotes}
+                onChange={(e) => updateField("allergyNotes", e.target.value)}
+                rows={3}
+                disabled={isSubmitting}
+              />
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <label
+              className={cn(
+                "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
+                form.alerts.dietary
+                  ? "border-primary/40 bg-mint-wash/50"
+                  : "border-border hover:bg-muted",
+                isSubmitting && "cursor-not-allowed opacity-60",
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={form.alerts.dietary}
+                disabled={isSubmitting}
+                onChange={() => toggleAlert("dietary")}
+                className="mt-0.5 h-5 w-5 rounded border-border text-primary focus:ring-ring"
+              />
+              <span className="text-sm font-medium text-foreground">
+                Dietary Restriction
+              </span>
+            </label>
+            {form.alerts.dietary && (
+              <Textarea
+                label="What's the restriction?"
+                value={form.dietaryNotes}
+                onChange={(e) => updateField("dietaryNotes", e.target.value)}
+                rows={3}
+                disabled={isSubmitting}
+              />
+            )}
+          </div>
+
+          <TriStateControl
+            label="Aggressive towards people?"
+            value={form.aggressionTowardsPeople}
+            onChange={(value) => updateField("aggressionTowardsPeople", value)}
+            disabled={isSubmitting}
+            notes={form.aggressionPeopleNotes}
+            onNotesChange={(value) => updateField("aggressionPeopleNotes", value)}
+          />
+
+          <TriStateControl
+            label="Aggressive towards other dogs?"
+            value={form.aggressionTowardsDogs}
+            onChange={(value) => updateField("aggressionTowardsDogs", value)}
+            disabled={isSubmitting}
+            notes={form.aggressionDogsNotes}
+            onNotesChange={(value) => updateField("aggressionDogsNotes", value)}
+          />
+
+          <label
+            className={cn(
+              "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
+              form.alerts.escapeRisk
+                ? "border-primary/40 bg-mint-wash/50"
+                : "border-border hover:bg-muted",
+              isSubmitting && "cursor-not-allowed opacity-60",
+            )}
+          >
             <input
               type="checkbox"
-              checked={form.aggressionTowardsPeople === true}
+              checked={form.alerts.escapeRisk}
               disabled={isSubmitting}
-              onChange={(e) =>
-                updateField("aggressionTowardsPeople", e.target.checked)
-              }
-              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
+              onChange={() => toggleAlert("escapeRisk")}
+              className="mt-0.5 h-5 w-5 rounded border-border text-primary focus:ring-ring"
             />
-            <span className="text-sm font-medium text-foreground">
-              Aggressive towards people?
-            </span>
+            <span className="text-sm font-medium text-foreground">Escape Risk</span>
           </label>
-          <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
-            <input
-              type="checkbox"
-              checked={form.aggressionTowardsDogs === true}
-              disabled={isSubmitting}
-              onChange={(e) =>
-                updateField("aggressionTowardsDogs", e.target.checked)
-              }
-              className="h-5 w-5 rounded border-border text-primary focus:ring-ring"
-            />
-            <span className="text-sm font-medium text-foreground">
-              Aggressive towards other dogs?
-            </span>
-          </label>
-          <Textarea
-            label="Separation anxiety"
+
+          <TriStateControl
+            label="Separation Anxiety"
             value={form.separationAnxiety}
-            onChange={(e) => updateField("separationAnxiety", e.target.value)}
-            placeholder="Triggers, coping strategies..."
-            rows={3}
+            onChange={(value) => updateField("separationAnxiety", value)}
             disabled={isSubmitting}
+            notes={form.separationAnxietyNotes}
+            onNotesChange={(value) => updateField("separationAnxietyNotes", value)}
+            notesPlaceholder="Triggers, coping strategies..."
           />
-          <Textarea
-            label="Kennel trained"
-            value={form.kennelTrained}
-            onChange={(e) => updateField("kennelTrained", e.target.value)}
-            placeholder="Comfort in crates or kennels..."
-            rows={3}
-            disabled={isSubmitting}
-          />
-          <Textarea
+
+          <TriStateControl
             label="Chewing / self-harm risk"
             value={form.chewingRisk}
-            onChange={(e) => updateField("chewingRisk", e.target.value)}
-            placeholder="e.g. chews bedding and may choke"
+            onChange={(value) => updateField("chewingRisk", value)}
+            disabled={isSubmitting}
+            notes={form.chewingRiskNotes}
+            onNotesChange={(value) => updateField("chewingRiskNotes", value)}
+            notesPlaceholder="e.g. chews bedding and may choke"
+          />
+
+          <TriStateControl
+            label="Kennel trained"
+            value={form.kennelTrained}
+            onChange={(value) => updateField("kennelTrained", value)}
+            disabled={isSubmitting}
+            showNotesWhen="never"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Section 6 — Feeding */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Feeding</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <span className="mb-2 block text-sm font-medium text-foreground">
+              Own food or facility food?
+            </span>
+            <div className="flex gap-2">
+              {FEEDING_SOURCES.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => updateField("feedingSource", value)}
+                  className={cn(
+                    "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                    form.feedingSource === value
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-surface text-muted-foreground hover:bg-muted",
+                    isSubmitting && "cursor-not-allowed opacity-60",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="meals-per-day"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              Meals per day: {form.feedingMealsPerDay}
+            </label>
+            <input
+              id="meals-per-day"
+              type="range"
+              min={1}
+              max={3}
+              step={1}
+              value={form.feedingMealsPerDay}
+              disabled={isSubmitting}
+              onChange={(e) =>
+                updateField(
+                  "feedingMealsPerDay",
+                  Number(e.target.value) as 1 | 2 | 3,
+                )
+              }
+              className="w-full accent-primary"
+            />
+            <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+              <span>1</span>
+              <span>2</span>
+              <span>3</span>
+            </div>
+          </div>
+          <Textarea
+            label="Additional details"
+            value={form.feedingNotes}
+            onChange={(e) => updateField("feedingNotes", e.target.value)}
+            placeholder="Feeding schedule, brand, portion sizes..."
             rows={3}
             disabled={isSubmitting}
           />
         </CardContent>
       </Card>
 
+      {/* Section 7 — Other Behavioural Notes */}
       <Card>
         <CardHeader>
-          <CardTitle>Care Instructions</CardTitle>
+          <CardTitle>Other Behavioural Notes</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <Textarea
-            label="Medication"
-            value={form.medication}
-            onChange={(e) => updateField("medication", e.target.value)}
-            placeholder="Medication schedule and dosage..."
-            rows={3}
-            disabled={isSubmitting}
-          />
-          <Textarea
-            label="Feeding"
-            value={form.feeding}
-            onChange={(e) => updateField("feeding", e.target.value)}
-            placeholder="Feeding schedule and dietary notes..."
-            rows={3}
-            disabled={isSubmitting}
-          />
-          <Textarea
-            label="Allergies"
-            value={form.allergies}
-            onChange={(e) => updateField("allergies", e.target.value)}
-            placeholder="Known allergies..."
-            rows={2}
-            disabled={isSubmitting}
-          />
-          <Textarea
-            label="Behavior Notes"
+            label="Other Behavioural Notes"
             value={form.behavior}
             onChange={(e) => updateField("behavior", e.target.value)}
             placeholder="Temperament, triggers, play preferences..."
-            rows={3}
+            rows={4}
             disabled={isSubmitting}
           />
         </CardContent>
       </Card>
 
+      {/* Section 8 — Documents */}
       <Card>
         <CardHeader>
           <CardTitle>Documents</CardTitle>
@@ -658,7 +877,7 @@ export function DogForm({
                   }
                   e.target.value = "";
                 }}
-                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-mint-wash file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
             </div>
           )}
@@ -678,7 +897,7 @@ export function DogForm({
                 multiple
                 disabled={isSubmitting}
                 onChange={(e) => handleVaccinationFileChange(e.target.files)}
-                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF4F1] file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-mint-wash file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
               />
               {vaccinationFiles.length > 0 && (
                 <ul className="mt-3 space-y-2">

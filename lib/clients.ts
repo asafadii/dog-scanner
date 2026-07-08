@@ -42,6 +42,7 @@ export function mapClientRowToClient(
     phone: row.phone,
     address: row.address,
     emergencyContact: row.emergency_contact,
+    emergencyPhone: row.emergency_phone,
     notes: row.notes,
     inviteCode: row.invite_code,
     dogCount,
@@ -57,6 +58,7 @@ export function clientToFormData(client: Client): ClientFormData {
     phone: client.phone ?? "",
     address: client.address ?? "",
     emergencyContact: client.emergencyContact ?? "",
+    emergencyPhone: client.emergencyPhone ?? "",
     notes: client.notes ?? "",
   };
 }
@@ -72,6 +74,7 @@ function toClientInsert(
     phone: input.phone.trim() || null,
     address: input.address.trim() || null,
     emergency_contact: input.emergencyContact.trim() || null,
+    emergency_phone: input.emergencyPhone.trim() || null,
     notes: input.notes.trim() || null,
   };
 }
@@ -85,6 +88,9 @@ function toClientUpdate(input: Partial<ClientFormData>): ClientUpdate {
   if (input.address !== undefined) update.address = input.address.trim() || null;
   if (input.emergencyContact !== undefined) {
     update.emergency_contact = input.emergencyContact.trim() || null;
+  }
+  if (input.emergencyPhone !== undefined) {
+    update.emergency_phone = input.emergencyPhone.trim() || null;
   }
   if (input.notes !== undefined) update.notes = input.notes.trim() || null;
 

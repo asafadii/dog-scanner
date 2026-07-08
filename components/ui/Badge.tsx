@@ -17,7 +17,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: "bg-muted text-muted-foreground border-border",
-  teal: "bg-success/10 text-success border-success/25",
+  teal: "bg-white text-success border-success/60",
   red: "bg-danger/10 text-danger border-danger/25",
   amber: "bg-warning/10 text-warning border-warning/25",
   orange: "bg-warning/10 text-warning border-warning/25",

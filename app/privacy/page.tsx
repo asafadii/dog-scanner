@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { Logo } from "@/components/ui/Logo";
 
 export const metadata = {
   title: "Privacy Policy — hello DORA",
@@ -11,13 +11,7 @@ export default function PrivacyPage() {
       <header className="border-b border-[oklch(0.885_0.000_89.9)]">
         <div className="mx-auto flex max-w-3xl items-center px-4 py-4 sm:px-6">
           <Link href="/">
-            <Image
-              src="/dora-logo.svg"
-              alt="hello DORA"
-              width={120}
-              height={32}
-              className="h-7 w-auto"
-            />
+            <Logo size={28} />
           </Link>
         </div>
       </header>
@@ -28,6 +22,10 @@ export default function PrivacyPage() {
         </h1>
         <p className="mt-2 text-sm text-[oklch(0.556_0.000_89.9)]">
           Effective date: 3 July 2026 · Version 1.0
+        </p>
+        <p className="mt-4 text-sm text-[oklch(0.556_0.000_89.9)]">
+          Operated by: Safadi Abdulsalam MWN E.V., 1095 Budapest, Lechner Ödön
+          fasor 2. em. 1, ajtó 6., Hungary
         </p>
 
         <div className="mt-8 space-y-8 text-[oklch(0.371_0.000_89.9)] [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-[oklch(0.269_0.000_89.9)] [&_h3]:font-semibold [&_h3]:text-[oklch(0.269_0.000_89.9)] [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-6">
@@ -163,7 +161,7 @@ export default function PrivacyPage() {
                 <strong>Stripe</strong>{" "}— subscription payments and invoicing.
               </li>
               <li>
-                <strong>[Hosting provider]</strong>{" "}— application hosting.
+                <strong>Netlify, Inc., 512 2nd Street, Suite 200, San Francisco, CA 94107, USA</strong>{" "}— application hosting.
               </li>
             </ul>
             <p>

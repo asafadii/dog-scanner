@@ -258,6 +258,7 @@ export function DogCard({
         <div className="mt-3 pl-2">
           <CheckoutPicker
             checkinId={dog.activeCheckinId}
+            feedingSource={dog.feedingSource}
             onComplete={(payment) => {
               onCheckoutComplete?.(dog.id, payment);
               setCheckoutOpen(false);

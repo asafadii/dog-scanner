@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Logo } from "@/components/ui/Logo";
 import { claimClientAccount } from "@/lib/portal/claim";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
@@ -111,17 +111,7 @@ function PortalSignupContent() {
             className="flex items-center gap-2 transition-opacity hover:opacity-90"
             aria-label="DORA home"
           >
-            <Image
-              src="/dora-icon.svg"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8"
-              aria-hidden
-            />
-            <span className="font-display text-lg font-bold text-primary">
-              hello DORA
-            </span>
+            <Logo size={32} />
           </Link>
         </div>
       </header>

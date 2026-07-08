@@ -8,7 +8,7 @@ import { getBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
 import { fadeIn } from "@/lib/motion";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { motion } from "framer-motion";
-import { Loader2, Plus, Search } from "lucide-react";
+import { CalendarDays, Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -179,7 +179,10 @@ export function BookingsListView() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-border border-t-4 border-t-marker bg-surface py-16 text-center">
+          <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+            <CalendarDays className="h-6 w-6" aria-hidden />
+          </div>
           <p className="text-muted-foreground">No bookings yet.</p>
           <Link
             href="/bookings/new"
@@ -189,7 +192,10 @@ export function BookingsListView() {
           </Link>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-border border-t-4 border-t-marker bg-surface py-16 text-center">
+          <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+            <Search className="h-6 w-6" aria-hidden />
+          </div>
           <p className="text-muted-foreground">No bookings match this filter.</p>
           <button
             type="button"

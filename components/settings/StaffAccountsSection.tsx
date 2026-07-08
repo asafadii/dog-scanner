@@ -139,7 +139,7 @@ export function StaffAccountsSection() {
                       className={cn(
                         "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
                         member.role === "admin"
-                          ? "bg-[#EAF4F1] text-primary" // #EAF4F1 documented mint-wash (D-04)
+                          ? "bg-mint-wash text-primary" // #EAF4F1 documented mint-wash (D-04)
                           : "bg-muted text-muted-foreground",
                       )}
                     >

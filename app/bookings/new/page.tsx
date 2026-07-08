@@ -5,7 +5,9 @@ import {
   type BookingFormSubmitPhase,
 } from "@/components/bookings/BookingForm";
 import { Button } from "@/components/ui/Button";
-import { createBooking, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { BookingFormData } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -50,9 +52,33 @@ export default function NewBookingPage() {
           setError(null);
           setSubmitPhase("saving");
 
-          const result = await createBooking(data);
-          if (result.error) {
-            setError(result.error.message);
+          const supabase = createSupabaseBrowserClient();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          const accessToken = session?.access_token;
+          if (!accessToken) {
+            setError("Not signed in");
+            setSubmitPhase("idle");
+            return;
+          }
+
+          const response = await fetch("/api/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(data satisfies BookingFormData),
+          });
+
+          const result = (await response.json()) as
+            | { ok: true; data: { id: string } }
+            | { ok: false; error: string };
+
+          if (!response.ok || !result.ok) {
+            setError(!result.ok ? result.error : "Failed to create booking");
             setSubmitPhase("idle");
             return;
           }

@@ -313,7 +313,7 @@ export function SubscriptionView() {
                 className={cn(
                   "relative rounded-2xl border-2 p-6",
                   isCurrent
-                    ? "border-primary bg-[#EAF4F1]" // #EAF4F1 documented mint-wash (D-04)
+                    ? "border-primary bg-mint-wash" // #EAF4F1 documented mint-wash (D-04)
                     : "border-border bg-surface",
                 )}
               >

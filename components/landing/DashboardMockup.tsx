@@ -1,5 +1,5 @@
 const STATS = [
-  { label: "Checked in", value: "24", tile: "bg-[#EAF4F1]", num: "text-[#06342F]", lab: "text-[#045C54]" },
+  { label: "Checked in", value: "24", tile: "bg-mint-wash", num: "text-[#06342F]", lab: "text-[#045C54]" },
   { label: "Arrivals", value: "9", tile: "bg-[#F7E9C4]", num: "text-[#5a4a1e]", lab: "text-[#5a4a1e]" },
   { label: "Boarding", value: "6", tile: "bg-primary", num: "text-white", lab: "text-[#bfe9e1]" },
 ];
@@ -54,7 +54,7 @@ export function DashboardMockup() {
             key={dog.name}
             className="flex items-center gap-[11px] rounded-[13px] border-2 border-[#06342F] p-2.5"
           >
-            <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-[#EAF4F1]">
+            <span className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-mint-wash">
               <PawIcon />
             </span>
             <span className="flex-1">

@@ -114,7 +114,7 @@ export function ReportsView() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EAF4F1] text-primary">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-wash text-primary">
           {/* #EAF4F1 documented mint-wash (D-04) — no named token */}
           <BarChart3 className="h-6 w-6" aria-hidden />
         </span>
@@ -264,7 +264,7 @@ export function ReportsView() {
             </CardHeader>
             <CardContent className="pt-0">
               {isAdvancedGated && (
-                <div className="mb-4 rounded-xl border border-primary/20 bg-[#EAF4F1] px-4 py-3 text-sm text-foreground">
+                <div className="mb-4 rounded-xl border border-primary/20 bg-mint-wash px-4 py-3 text-sm text-foreground">
                   {/* #EAF4F1 documented mint-wash (D-04) — no named token */}
                   Upgrade to DORA Unlimited for advanced analytics and Excel
                   export.{" "}

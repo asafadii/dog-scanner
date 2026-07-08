@@ -30,6 +30,7 @@ export function ClientForm({
       phone: "",
       address: "",
       emergencyContact: "",
+      emergencyPhone: "",
       notes: "",
     },
   );
@@ -102,6 +103,14 @@ export function ClientForm({
             value={form.emergencyContact}
             onChange={(e) => updateField("emergencyContact", e.target.value)}
             placeholder="Name and relationship"
+            disabled={isSubmitting}
+          />
+          <Input
+            label="Emergency Contact Phone"
+            type="tel"
+            value={form.emergencyPhone}
+            onChange={(e) => updateField("emergencyPhone", e.target.value)}
+            placeholder="(555) 987-6543"
             disabled={isSubmitting}
           />
           <Textarea

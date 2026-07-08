@@ -151,7 +151,20 @@ export function PortalDogDetailView({
         <CardContent className="space-y-3 pt-0 text-sm">
           <div>
             <p className="font-medium text-foreground">Feeding</p>
-            <p className="mt-1 text-muted-foreground">{dog.care.feeding}</p>
+            <p className="mt-1 text-muted-foreground">
+              {dog.feedingSource
+                ? `${dog.feedingSource === "own" ? "Own food" : "Facility food"}${
+                    dog.feedingMealsPerDay
+                      ? ` · ${dog.feedingMealsPerDay} meal${dog.feedingMealsPerDay === 1 ? "" : "s"} per day`
+                      : ""
+                  }`
+                : dog.care.feedingNotes !== "None"
+                  ? dog.care.feedingNotes
+                  : "Not recorded"}
+            </p>
+            {dog.care.feedingNotes !== "None" && dog.feedingSource && (
+              <p className="mt-1 text-muted-foreground">{dog.care.feedingNotes}</p>
+            )}
           </div>
           <div>
             <p className="font-medium text-foreground">Allergies</p>

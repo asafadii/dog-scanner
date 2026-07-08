@@ -1,5 +1,17 @@
 import type { Dog } from "./types";
 
+const emptyProfileFields = {
+  aggressionPeopleNotes: "",
+  aggressionDogsNotes: "",
+  separationAnxietyNotes: "",
+  chewingRiskNotes: "",
+  medicationNotes: "",
+  allergyNotes: "",
+  dietaryNotes: "",
+  feedingSource: null as Dog["feedingSource"],
+  feedingMealsPerDay: null as number | null,
+};
+
 export const MOCK_DOGS: Dog[] = [
   {
     id: "max-001",
@@ -19,6 +31,7 @@ export const MOCK_DOGS: Dog[] = [
     separationAnxiety: null,
     kennelTrained: null,
     chewingRisk: null,
+    ...emptyProfileFields,
     isReturning: false,
     status: "checked_in",
     alerts: {
@@ -40,14 +53,15 @@ export const MOCK_DOGS: Dog[] = [
     care: {
       medication:
         "Carprofen 75mg twice daily with food. Give at 8 AM and 8 PM.",
-      feeding:
-        "2 cups grain-free kibble twice daily. No chicken-based treats.",
       allergies:
         "Chicken protein — causes skin irritation and digestive issues.",
+      dietaryNotes: "Grain-free diet only. No chicken-based treats.",
+      feedingSource: "own",
+      feedingMealsPerDay: 2,
+      feedingNotes: "2 cups grain-free kibble twice daily.",
       behavior:
         "Friendly and social. Anxious during thunderstorms. Loves fetch.",
     },
-    overnight: false,
     lastCheckIn: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     lastCheckOut: null,
     activeCheckinId: "checkin-max-001",
@@ -110,6 +124,7 @@ export const MOCK_DOGS: Dog[] = [
     separationAnxiety: null,
     kennelTrained: null,
     chewingRisk: null,
+    ...emptyProfileFields,
     isReturning: false,
     status: "checked_in",
     alerts: {
@@ -130,17 +145,19 @@ export const MOCK_DOGS: Dog[] = [
     },
     care: {
       medication: "None",
-      feeding: "1.5 cups kibble twice daily. High-energy formula.",
       allergies: "None known",
+      dietaryNotes: "None",
+      feedingSource: "own",
+      feedingMealsPerDay: 2,
+      feedingNotes: "1.5 cups kibble twice daily. High-energy formula.",
       behavior:
         "Very active, needs mental stimulation. Jumps fences — use double-gate protocol.",
     },
-    overnight: true,
     lastCheckIn: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
     lastCheckOut: null,
     activeCheckinId: "checkin-luna-002",
     activeBookingId: null,
-    serviceType: "daycare",
+    serviceType: "boarding",
     currentAssignment: null,
     todaysCare: [
       { id: "tc1", task: "Morning feeding", completed: true, time: "7:00 AM" },
@@ -178,11 +195,20 @@ export const MOCK_DOGS: Dog[] = [
     microchipNumber: null,
     isNeutered: null,
     healthCertificateNumber: null,
-    aggressionTowardsPeople: null,
-    aggressionTowardsDogs: null,
+    aggressionTowardsPeople: true,
+    aggressionTowardsDogs: true,
     separationAnxiety: null,
     kennelTrained: null,
     chewingRisk: null,
+    aggressionPeopleNotes: "",
+    aggressionDogsNotes: "Reactive to unfamiliar male dogs.",
+    separationAnxietyNotes: "",
+    chewingRiskNotes: "",
+    medicationNotes: "",
+    allergyNotes: "",
+    dietaryNotes: "",
+    feedingSource: "own",
+    feedingMealsPerDay: 2,
     isReturning: false,
     status: "checked_in",
     alerts: {
@@ -203,12 +229,14 @@ export const MOCK_DOGS: Dog[] = [
     },
     care: {
       medication: "Gabapentin 100mg once daily for anxiety. Give with breakfast.",
-      feeding: "2 cups standard kibble, morning and evening.",
       allergies: "None known",
+      dietaryNotes: "None",
+      feedingSource: "own",
+      feedingMealsPerDay: 2,
+      feedingNotes: "2 cups standard kibble, morning and evening.",
       behavior:
         "Reactive to unfamiliar male dogs. Keep separate during group play. Sweet with people.",
     },
-    overnight: false,
     lastCheckIn: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     lastCheckOut: null,
     activeCheckinId: "checkin-rocky-003",
@@ -248,6 +276,7 @@ export const MOCK_DOGS: Dog[] = [
     separationAnxiety: null,
     kennelTrained: null,
     chewingRisk: null,
+    ...emptyProfileFields,
     isReturning: false,
     status: "checked_out",
     alerts: {
@@ -268,11 +297,13 @@ export const MOCK_DOGS: Dog[] = [
     },
     care: {
       medication: "None",
-      feeding: "Limited ingredient diet — salmon formula only.",
       allergies: "Beef and dairy — severe digestive reaction.",
+      dietaryNotes: "Limited ingredient diet — salmon formula only.",
+      feedingSource: "own",
+      feedingMealsPerDay: 2,
+      feedingNotes: "Limited ingredient diet — salmon formula only.",
       behavior: "Calm, prefers quiet areas. Heat-sensitive — limit outdoor time.",
     },
-    overnight: false,
     lastCheckIn: null,
     lastCheckOut: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     activeCheckinId: null,
@@ -308,6 +339,7 @@ export const MOCK_DOGS: Dog[] = [
     separationAnxiety: null,
     kennelTrained: null,
     chewingRisk: null,
+    ...emptyProfileFields,
     isReturning: false,
     status: "checked_out",
     alerts: {
@@ -328,11 +360,13 @@ export const MOCK_DOGS: Dog[] = [
     },
     care: {
       medication: "None",
-      feeding: "Puppy formula kibble, 3x daily.",
       allergies: "None known",
+      dietaryNotes: "None",
+      feedingSource: "facility",
+      feedingMealsPerDay: 3,
+      feedingNotes: "Puppy formula kibble, 3x daily.",
       behavior: "Energetic puppy. Still learning recall. Very friendly.",
     },
-    overnight: false,
     lastCheckIn: null,
     lastCheckOut: null,
     activeCheckinId: null,
@@ -350,8 +384,9 @@ export function getDashboardStats(dogs: Dog[]) {
     needMedication: dogs.filter(
       (d) => d.status === "checked_in" && d.alerts.medication,
     ).length,
-    overnight: dogs.filter((d) => d.overnight && d.status === "checked_in")
-      .length,
+    overnight: dogs.filter(
+      (d) => d.status === "checked_in" && d.serviceType === "boarding",
+    ).length,
     total: dogs.length,
   };
 }

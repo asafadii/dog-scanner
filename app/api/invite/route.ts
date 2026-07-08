@@ -169,7 +169,7 @@ export async function POST(request: Request) {
   const resend = new Resend(resendApiKey);
 
   const { error: emailError } = await resend.emails.send({
-    from: "hello DORA <hello@hellodora.app>",
+    from: "hello DORA <info@hellodora.app>",
     to: clientRow.email,
     subject: "You've been invited to hello DORA",
     html: buildInviteEmailHtml({

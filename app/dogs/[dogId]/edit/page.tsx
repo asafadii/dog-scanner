@@ -4,6 +4,7 @@ import { DogForm, type DogFormSubmitPhase } from "@/components/dogs/DogForm";
 import { Button } from "@/components/ui/Button";
 import {
   dogToFormData,
+  ensureClientForDogForm,
   getCurrentUserProfile,
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
@@ -134,8 +135,9 @@ export default function EditDogPage() {
             }
 
             setSubmitPhase("saving");
+            const formData = await ensureClientForDogForm(data);
             const result = await updateDog(dogId, {
-              ...data,
+              ...formData,
               ...(photoUrl !== undefined ? { photoUrl } : {}),
             });
 

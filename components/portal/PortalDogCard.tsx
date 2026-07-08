@@ -34,7 +34,7 @@ export function PortalDogCard({
     >
       <div className="flex gap-3">
         {/* mint-wash photo placeholder (documented literal #EAF4F1) */}
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#EAF4F1]">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-mint-wash">
           <Image
             src={getDogPhotoSrc(dog.photoUrl)}
             alt={`Photo of ${dog.name}`}

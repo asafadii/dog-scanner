@@ -225,11 +225,11 @@ export function portalCreateDogInputFromForm(
     ownerName: form.ownerName,
     ownerPhone: form.ownerPhone,
     ownerEmail: form.ownerEmail,
-    medication: form.medication,
-    feeding: form.feeding,
-    allergies: form.allergies,
+    medication: form.medicationNotes,
+    feeding: form.feedingNotes,
+    allergies: form.allergyNotes,
     behavior: form.behavior,
     alerts: form.alerts,
-    overnight: form.overnight,
+    overnight: false,
   };
 }

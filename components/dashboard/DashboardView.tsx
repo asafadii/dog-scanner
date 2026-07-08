@@ -5,7 +5,7 @@ import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { CapacityCalendar } from "@/components/capacity/CapacityCalendar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-import { StatCard } from "@/components/ui/StatCard";
+import { StatCard, type StatCardAccent } from "@/components/ui/StatCard";
 import {
   checkInDog,
   enrichDogWithCheckin,
@@ -19,6 +19,7 @@ import { formatBookingDateRange, getTimeBasedGreeting } from "@/lib/utils";
 import {
   CalendarDays,
   ClipboardCheck,
+  Dog as DogIcon,
   Loader2,
   LogIn,
   Moon,
@@ -55,6 +56,8 @@ const STAT_CONFIG = [
     href: "/checkins",
   },
 ];
+
+const STAT_ACCENTS: StatCardAccent[] = ["ink", "mint", "default", "default"];
 
 export function DashboardView() {
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -254,6 +257,7 @@ export function DashboardView() {
             <Link href={href}>
               <StatCard
                 className="tabular-nums transition-shadow hover:shadow-md"
+                accent={STAT_ACCENTS[index]}
                 value={stats[key]}
                 label={label}
                 icon={<Icon className="h-5 w-5" aria-hidden />}
@@ -290,7 +294,7 @@ export function DashboardView() {
                 <Card className="transition-shadow hover:shadow-md">
                   <CardContent className="flex items-center gap-4 p-4">
                     {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EAF4F1] text-primary">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mint-wash text-primary">
                       <CalendarDays className="h-5 w-5" aria-hidden />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -329,13 +333,16 @@ export function DashboardView() {
           </Link>
         </div>
         {checkedInDogs.length === 0 ? (
-          <Card>
-            <CardContent className="py-10 text-center text-muted-foreground">
-              No dogs checked in right now.
+          <Card className="border-t-4 border-t-marker">
+            <CardContent className="py-10 text-center">
+              <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
+                <DogIcon className="h-6 w-6" aria-hidden />
+              </div>
+              <p className="text-muted-foreground">No dogs checked in right now.</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
             {checkedInDogs.map((dog) => (
               <DogCard
                 key={dog.id}

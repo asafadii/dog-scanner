@@ -248,7 +248,7 @@ export function BookingForm({
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.serviceType === type
-                      ? "border-primary bg-[#EAF4F1] text-primary"
+                      ? "border-primary bg-mint-wash text-primary"
                       : "border-border bg-surface text-muted-foreground hover:bg-muted",
                     isSubmitting && "cursor-not-allowed opacity-60",
                   )}

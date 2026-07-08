@@ -150,7 +150,12 @@ export function DogAlertBadges({
 
 export function getCriticalAlertMessages(
   alerts: DogAlerts,
-  care: { medication: string; allergies: string; feeding: string; behavior: string },
+  care: {
+    medication: string;
+    allergies: string;
+    dietaryNotes: string;
+    behavior: string;
+  },
 ): { type: string; message: string; critical: boolean }[] {
   const messages: { type: string; message: string; critical: boolean }[] = [];
 
@@ -185,7 +190,7 @@ export function getCriticalAlertMessages(
   if (alerts.dietary) {
     messages.push({
       type: "Dietary Restriction",
-      message: care.feeding,
+      message: care.dietaryNotes,
       critical: false,
     });
   }

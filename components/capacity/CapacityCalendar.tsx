@@ -11,12 +11,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, ChevronDown, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-function formatDayLabel(date: string): string {
-  const [year, month, day] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    day: "numeric",
-  }).format(new Date(year, month - 1, day));
+const WEEKDAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function dayNumber(date: string): number {
+  const [, , day] = date.split("-").map(Number);
+  return day;
+}
+
+function mondayBasedWeekday(year: number, month: number): number {
+  const weekday = new Date(year, month - 1, 1).getDay();
+  return weekday === 0 ? 6 : weekday - 1;
 }
 
 function isToday(date: string): boolean {
@@ -91,7 +95,7 @@ export function CapacityCalendar() {
         >
           <div className="flex items-center gap-2">
             {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF4F1] text-primary">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-mint-wash text-primary">
               <CalendarDays className="h-5 w-5" aria-hidden />
             </span>
             <div>
@@ -149,37 +153,57 @@ export function CapacityCalendar() {
                 {error}
               </p>
             ) : (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-                {days.map((day) => (
-                  <div
-                    key={day.date}
-                    className={cn(
-                      "rounded-xl border p-2.5 text-center",
-                      // "Today" cell: mint-wash #EAF4F1 — documented D-04 exception, no named token
-                      isToday(day.date)
-                        ? "border-primary bg-[#EAF4F1]"
-                        : "border-border bg-surface",
-                    )}
-                  >
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {formatDayLabel(day.date)}
-                    </p>
-                    <div className="mt-1.5 space-y-0.5 text-xs tabular-nums">
-                      <p className="text-foreground">
-                        <span className="font-medium text-primary">
-                          {day.daycare}
-                        </span>{" "}
-                        daycare
-                      </p>
-                      <p className="text-foreground">
-                        <span className="font-medium text-warning">
-                          {day.overnight}
-                        </span>{" "}
-                        overnight
-                      </p>
+              <div className="space-y-2">
+                <div className="grid grid-cols-7 gap-2">
+                  {WEEKDAY_HEADERS.map((label) => (
+                    <div
+                      key={label}
+                      className="rounded-lg bg-[#F2D98A] px-1 py-2 text-center text-xs font-bold text-[#06342F]"
+                    >
+                      {label}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-2">
+                  {Array.from({ length: mondayBasedWeekday(year, month) }).map(
+                    (_, index) => (
+                      <div
+                        key={`blank-${index}`}
+                        className="min-h-[88px] rounded-xl border border-transparent p-2.5"
+                        aria-hidden
+                      />
+                    ),
+                  )}
+                  {days.map((day) => (
+                    <div
+                      key={day.date}
+                      className={cn(
+                        "min-h-[88px] rounded-xl border p-2.5 text-center",
+                        isToday(day.date)
+                          ? "border-primary bg-mint-wash"
+                          : "border-border bg-surface",
+                      )}
+                    >
+                      <p className="text-sm font-semibold text-foreground">
+                        {dayNumber(day.date)}
+                      </p>
+                      <div className="mt-1.5 space-y-0.5 text-xs tabular-nums">
+                        <p className="text-foreground">
+                          <span className="font-medium text-primary">
+                            {day.daycare}
+                          </span>{" "}
+                          daycare
+                        </p>
+                        <p className="text-foreground">
+                          <span className="font-medium text-warning">
+                            {day.overnight}
+                          </span>{" "}
+                          overnight
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             </motion.div>

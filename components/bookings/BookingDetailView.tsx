@@ -1,16 +1,17 @@
 "use client";
 
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
+import { DogSnapshotCard } from "@/components/dogs/DogSnapshotCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
   getBookingById,
   INCOMPLETE_SETUP_MESSAGE,
-  updateBooking,
 } from "@/lib/bookings";
 import { canApproveBooking } from "@/lib/capacity";
 import { checkInDog, getDogActiveCheckin } from "@/lib/checkins";
 import { slideUp } from "@/lib/motion";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Booking } from "@/lib/types";
 import { formatBookingDateRange } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -91,9 +92,33 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
     setUpdating(true);
     setActionError(null);
 
-    const result = await updateBooking(bookingId, { status });
-    if (result.error) {
-      setActionError(result.error.message);
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const accessToken = session?.access_token;
+    if (!accessToken) {
+      setActionError("Not signed in");
+      setUpdating(false);
+      return;
+    }
+
+    const response = await fetch(`/api/bookings/${bookingId}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    const result = (await response.json()) as
+      | { ok: true; data: Booking }
+      | { ok: false; error: string };
+
+    if (!response.ok || !result.ok) {
+      setActionError(!result.ok ? result.error : "Failed to update booking");
     } else {
       setBooking(result.data);
     }
@@ -189,6 +214,13 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <DogSnapshotCard
+        dogName={booking.dogName}
+        dogBreed={booking.dogBreed}
+        dogPhotoUrl={booking.dogPhotoUrl}
+        viewProfileUrl={`/dogs/${booking.dogId}`}
+      />
 
       <Card>
         <CardHeader className="pb-2">
