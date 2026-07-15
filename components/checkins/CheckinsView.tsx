@@ -224,7 +224,7 @@ export function CheckinsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex items-start gap-4">
           {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-wash text-primary">
@@ -241,7 +241,7 @@ export function CheckinsView() {
           </div>
         </div>
         <Link href="/checkins/scan">
-          <Button size="sm">
+          <Button size="md">
             <ScanLine className="h-4 w-4" aria-hidden />
             Scan to Check In
           </Button>

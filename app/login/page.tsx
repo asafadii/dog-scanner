@@ -69,7 +69,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-full flex-col bg-background">
       <header className="border-b border-border bg-surface/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-16 max-w-lg items-center px-4">
+        <div className="mx-auto flex h-16 max-w-lg items-center justify-center px-4">
           <Link
             href="/"
             className="flex items-center gap-2 transition-opacity hover:opacity-90"
@@ -109,6 +109,15 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
               />
+
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               {error && (
                 <p

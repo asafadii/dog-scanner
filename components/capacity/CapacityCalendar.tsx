@@ -8,7 +8,7 @@ import {
 import { appearScale } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, ChevronDown, Loader2 } from "lucide-react";
+import { CalendarDays, ChevronDown, Loader2, Moon, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 const WEEKDAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -169,7 +169,7 @@ export function CapacityCalendar() {
                     (_, index) => (
                       <div
                         key={`blank-${index}`}
-                        className="min-h-[88px] rounded-xl border border-transparent p-2.5"
+                        className="min-h-[72px] rounded-xl border border-transparent p-1.5 sm:min-h-[88px] sm:p-2.5"
                         aria-hidden
                       />
                     ),
@@ -178,7 +178,7 @@ export function CapacityCalendar() {
                     <div
                       key={day.date}
                       className={cn(
-                        "min-h-[88px] rounded-xl border p-2.5 text-center",
+                        "min-h-[72px] rounded-xl border p-1.5 text-center sm:min-h-[88px] sm:p-2.5",
                         isToday(day.date)
                           ? "border-primary bg-mint-wash"
                           : "border-border bg-surface",
@@ -187,18 +187,16 @@ export function CapacityCalendar() {
                       <p className="text-sm font-semibold text-foreground">
                         {dayNumber(day.date)}
                       </p>
-                      <div className="mt-1.5 space-y-0.5 text-xs tabular-nums">
-                        <p className="text-foreground">
-                          <span className="font-medium text-primary">
-                            {day.daycare}
-                          </span>{" "}
-                          daycare
+                      <div className="mt-1.5 flex items-center justify-center gap-2 text-xs tabular-nums sm:block sm:space-y-0.5">
+                        <p className="flex items-center gap-0.5 text-foreground sm:block">
+                          <Sun className="h-3 w-3 text-primary sm:hidden" aria-hidden />
+                          <span className="font-medium text-primary">{day.daycare}</span>
+                          <span className="hidden sm:inline"> daycare</span>
                         </p>
-                        <p className="text-foreground">
-                          <span className="font-medium text-warning">
-                            {day.overnight}
-                          </span>{" "}
-                          overnight
+                        <p className="flex items-center gap-0.5 text-foreground sm:block">
+                          <Moon className="h-3 w-3 text-warning sm:hidden" aria-hidden />
+                          <span className="font-medium text-warning">{day.overnight}</span>
+                          <span className="hidden sm:inline"> overnight</span>
                         </p>
                       </div>
                     </div>

@@ -19,10 +19,11 @@ export function Logo({ size = 32, className }: LogoProps) {
         priority
       />
       <span
-        className="font-display font-bold leading-none text-primary"
-        style={{ fontSize: size * 0.625 }}
+        className="font-display leading-none text-primary tracking-tight"
+        style={{ fontSize: size * 0.5 }}
       >
-        hello DORA
+        <span className="font-medium opacity-80">hello</span>{" "}
+        <span className="font-bold">DORA</span>
       </span>
     </div>
   );
