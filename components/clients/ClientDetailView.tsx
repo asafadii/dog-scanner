@@ -1,9 +1,11 @@
 "use client";
 
 import { DogCard } from "@/components/dogs/DogCard";
+import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
+  archiveClient,
   generateClientInviteCode,
   getClientById,
   getClientDogs,
@@ -23,6 +25,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 interface ClientDetailViewProps {
@@ -30,6 +33,7 @@ interface ClientDetailViewProps {
 }
 
 export function ClientDetailView({ clientId }: ClientDetailViewProps) {
+  const router = useRouter();
   const [client, setClient] = useState<Client | null>(null);
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -342,6 +346,18 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           </div>
         )}
       </div>
+
+      <ArchiveConfirmCard
+        entityName={client.name}
+        onConfirm={async () => {
+          const result = await archiveClient(clientId);
+          return { error: result.error };
+        }}
+        onSuccess={() => {
+          router.push("/clients");
+          router.refresh();
+        }}
+      />
     </div>
   );
 }

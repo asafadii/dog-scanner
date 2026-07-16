@@ -6,6 +6,7 @@ import type {
   ClaimAccountErrorResponse,
   ClaimAccountSuccessResponse,
 } from "@/lib/portal/claim";
+import type { ClientRow, FacilityRow } from "@/lib/supabase/types";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
@@ -103,6 +104,107 @@ async function isRateLimited(
   return (userFailedCount ?? 0) >= USER_FAILED_LIMIT;
 }
 
+async function resolveClientFromCode(
+  db: SupabaseClient,
+  inviteCode: string,
+  accountEmail: string,
+  accountFullName: string,
+): Promise<
+  | {
+      ok: true;
+      clientId: string;
+      facilityId: string;
+      clientCreated: boolean;
+    }
+  | { ok: false; error: string; status: number }
+> {
+  // 1) Existing staff-invite path: clients.invite_code exact match
+  const { data: invitedClient, error: clientError } = await db
+    .from("clients")
+    .select("id, facility_id")
+    .eq("invite_code", inviteCode)
+    .maybeSingle();
+
+  if (clientError) {
+    return { ok: false, error: clientError.message, status: 500 };
+  }
+
+  if (invitedClient) {
+    return {
+      ok: true,
+      clientId: invitedClient.id,
+      facilityId: invitedClient.facility_id,
+      clientCreated: false,
+    };
+  }
+
+  // 2) Facility code path: find-or-create client at that facility
+  const { data: facility, error: facilityError } = await db
+    .from("facilities")
+    .select("id")
+    .ilike("facility_code", inviteCode)
+    .maybeSingle();
+
+  if (facilityError) {
+    return { ok: false, error: facilityError.message, status: 500 };
+  }
+
+  if (!facility) {
+    return { ok: false, error: "Invalid invite code", status: 404 };
+  }
+
+  const facilityId = (facility as Pick<FacilityRow, "id">).id;
+
+  const { data: existingClient, error: existingClientError } = await db
+    .from("clients")
+    .select("id, facility_id")
+    .eq("facility_id", facilityId)
+    .ilike("email", accountEmail)
+    .is("archived_at", null)
+    .maybeSingle();
+
+  if (existingClientError) {
+    return { ok: false, error: existingClientError.message, status: 500 };
+  }
+
+  if (existingClient) {
+    const row = existingClient as Pick<ClientRow, "id" | "facility_id">;
+    return {
+      ok: true,
+      clientId: row.id,
+      facilityId: row.facility_id,
+      clientCreated: false,
+    };
+  }
+
+  const { data: createdClient, error: createError } = await db
+    .from("clients")
+    .insert({
+      facility_id: facilityId,
+      name: accountFullName,
+      email: accountEmail,
+      phone: "",
+    })
+    .select("id, facility_id")
+    .single();
+
+  if (createError || !createdClient) {
+    return {
+      ok: false,
+      error: createError?.message ?? "Failed to create client record",
+      status: 500,
+    };
+  }
+
+  const created = createdClient as Pick<ClientRow, "id" | "facility_id">;
+  return {
+    ok: true,
+    clientId: created.id,
+    facilityId: created.facility_id,
+    clientCreated: true,
+  };
+}
+
 export async function POST(request: Request) {
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
@@ -181,6 +283,15 @@ export async function POST(request: Request) {
     );
   }
 
+  const accountFields = resolveClientAccountFields(user);
+  if (!accountFields) {
+    await logClaimAttempt(db, ipAddress, user.id, false);
+    return NextResponse.json(
+      { ok: false, error: "Authenticated user email is required" } satisfies ClaimAccountErrorResponse,
+      { status: 400 },
+    );
+  }
+
   const { data: existingAccount } = await db
     .from("client_accounts")
     .select("id")
@@ -188,19 +299,10 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (!existingAccount) {
-    const fields = resolveClientAccountFields(user);
-    if (!fields) {
-      await logClaimAttempt(db, ipAddress, user.id, false);
-      return NextResponse.json(
-        { ok: false, error: "Authenticated user email is required" } satisfies ClaimAccountErrorResponse,
-        { status: 400 },
-      );
-    }
-
     const { error: createAccountError } = await db.from("client_accounts").insert({
       id: user.id,
-      email: fields.email,
-      full_name: fields.fullName,
+      email: accountFields.email,
+      full_name: accountFields.fullName,
     });
 
     if (createAccountError && createAccountError.code !== "23505") {
@@ -212,33 +314,28 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data: client, error: clientError } = await db
-    .from("clients")
-    .select("id, facility_id")
-    .eq("invite_code", inviteCode)
-    .maybeSingle();
+  const resolved = await resolveClientFromCode(
+    db,
+    inviteCode,
+    accountFields.email,
+    accountFields.fullName,
+  );
 
-  if (clientError) {
+  if (!resolved.ok) {
     await logClaimAttempt(db, ipAddress, user.id, false);
     return NextResponse.json(
-      { ok: false, error: clientError.message } satisfies ClaimAccountErrorResponse,
-      { status: 500 },
+      { ok: false, error: resolved.error } satisfies ClaimAccountErrorResponse,
+      { status: resolved.status },
     );
   }
 
-  if (!client) {
-    await logClaimAttempt(db, ipAddress, user.id, false);
-    return NextResponse.json(
-      { ok: false, error: "Invalid invite code" } satisfies ClaimAccountErrorResponse,
-      { status: 404 },
-    );
-  }
+  const { clientId, facilityId, clientCreated } = resolved;
 
   const { data: existingLink } = await db
     .from("client_account_links")
     .select("id")
     .eq("client_account_id", user.id)
-    .eq("client_id", client.id)
+    .eq("client_id", clientId)
     .maybeSingle();
 
   if (existingLink) {
@@ -246,16 +343,17 @@ export async function POST(request: Request) {
     const response: ClaimAccountSuccessResponse = {
       ok: true,
       alreadyLinked: true,
-      clientId: client.id,
-      facilityId: client.facility_id,
+      clientId,
+      facilityId,
+      clientCreated: false,
     };
     return NextResponse.json(response);
   }
 
   const { error: linkError } = await db.from("client_account_links").insert({
     client_account_id: user.id,
-    client_id: client.id,
-    facility_id: client.facility_id,
+    client_id: clientId,
+    facility_id: facilityId,
   });
 
   if (linkError) {
@@ -269,8 +367,9 @@ export async function POST(request: Request) {
   await logClaimAttempt(db, ipAddress, user.id, true);
   const response: ClaimAccountSuccessResponse = {
     ok: true,
-    clientId: client.id,
-    facilityId: client.facility_id,
+    clientId,
+    facilityId,
+    clientCreated,
   };
   return NextResponse.json(response, { status: 201 });
 }

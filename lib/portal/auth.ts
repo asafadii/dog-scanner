@@ -119,7 +119,7 @@ export async function getLinkedClients(): Promise<PortalResult<LinkedClient[]>> 
   const linked: LinkedClient[] = [];
   for (const link of links) {
     const clientRow = clientById.get(link.client_id);
-    if (!clientRow) continue;
+    if (!clientRow || clientRow.archived_at) continue;
 
     linked.push({
       ...mapClientRowToClient(clientRow),

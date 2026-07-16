@@ -19,6 +19,7 @@ type FacilityResult<T> =
 export interface FacilitySettings {
   name: string | null;
   currency: string;
+  facilityCode: string | null;
 }
 
 export const CURRENCY_OPTIONS = [
@@ -35,11 +36,24 @@ export const CURRENCY_OPTIONS = [
   { code: "DKK", label: "DKK — Danish Krone (kr)" },
 ] as const;
 
+const FACILITY_CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const FACILITY_CODE_LENGTH = 6;
+
 function toError(
   message: string,
   code: FacilityErrorCode = "unknown",
 ): FacilityError {
   return { message, code };
+}
+
+function generateFacilityCodeValue(): string {
+  let code = "";
+  for (let i = 0; i < FACILITY_CODE_LENGTH; i += 1) {
+    code += FACILITY_CODE_CHARS[
+      Math.floor(Math.random() * FACILITY_CODE_CHARS.length)
+    ];
+  }
+  return code;
 }
 
 async function requireProfile(): Promise<FacilityResult<ProfileRow>> {
@@ -73,6 +87,16 @@ async function requireProfile(): Promise<FacilityResult<ProfileRow>> {
   return { data: profile as ProfileRow, error: null };
 }
 
+function mapFacilitySettings(
+  row: Pick<FacilityRow, "name" | "currency" | "facility_code">,
+): FacilitySettings {
+  return {
+    name: row.name,
+    currency: row.currency ?? "EUR",
+    facilityCode: row.facility_code ?? null,
+  };
+}
+
 export async function getFacilitySettings(): Promise<
   FacilityResult<FacilitySettings>
 > {
@@ -84,7 +108,7 @@ export async function getFacilitySettings(): Promise<
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
     .from("facilities")
-    .select("name, currency")
+    .select("name, currency, facility_code")
     .eq("id", profileResult.data.facility_id)
     .maybeSingle();
 
@@ -96,12 +120,10 @@ export async function getFacilitySettings(): Promise<
     return { data: null, error: toError("Facility not found") };
   }
 
-  const row = data as Pick<FacilityRow, "name" | "currency">;
   return {
-    data: {
-      name: row.name,
-      currency: row.currency ?? "EUR",
-    },
+    data: mapFacilitySettings(
+      data as Pick<FacilityRow, "name" | "currency" | "facility_code">,
+    ),
     error: null,
   };
 }
@@ -123,7 +145,7 @@ export async function updateFacilitySettings(
       currency,
     })
     .eq("id", profileResult.data.facility_id)
-    .select("name, currency")
+    .select("name, currency, facility_code")
     .maybeSingle();
 
   if (error) {
@@ -134,12 +156,67 @@ export async function updateFacilitySettings(
     return { data: null, error: toError("Facility not found") };
   }
 
-  const row = data as Pick<FacilityRow, "name" | "currency">;
   return {
-    data: {
-      name: row.name,
-      currency: row.currency ?? "EUR",
-    },
+    data: mapFacilitySettings(
+      data as Pick<FacilityRow, "name" | "currency" | "facility_code">,
+    ),
     error: null,
+  };
+}
+
+export async function generateFacilityCode(): Promise<
+  FacilityResult<FacilitySettings>
+> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const facilityId = profileResult.data.facility_id;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const code = generateFacilityCodeValue();
+
+    const { data: taken } = await supabase
+      .from("facilities")
+      .select("id")
+      .ilike("facility_code", code)
+      .neq("id", facilityId)
+      .maybeSingle();
+
+    if (taken) {
+      continue;
+    }
+
+    const { data, error } = await supabase
+      .from("facilities")
+      .update({ facility_code: code })
+      .eq("id", facilityId)
+      .select("name, currency, facility_code")
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === "23505") {
+        continue;
+      }
+      return { data: null, error: toError(error.message) };
+    }
+
+    if (!data) {
+      return { data: null, error: toError("Facility not found") };
+    }
+
+    return {
+      data: mapFacilitySettings(
+        data as Pick<FacilityRow, "name" | "currency" | "facility_code">,
+      ),
+      error: null,
+    };
+  }
+
+  return {
+    data: null,
+    error: toError("Could not generate a unique facility code. Please try again."),
   };
 }

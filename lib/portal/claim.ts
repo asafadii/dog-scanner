@@ -7,6 +7,7 @@ export interface ClaimAccountSuccessResponse {
   alreadyLinked?: boolean;
   clientId: string;
   facilityId: string;
+  clientCreated?: boolean;
 }
 
 export interface ClaimAccountErrorResponse {

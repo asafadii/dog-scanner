@@ -188,6 +188,14 @@ export default function PrivacyPage() {
                 then deleted or anonymised within 90 days of account closure.
               </li>
               <li>
+                <strong>Individual dog or client profiles:</strong> when a
+                Facility removes a dog or client profile while the Facility
+                account remains active, that profile is immediately removed from
+                active use. The underlying data is permanently deleted or
+                anonymised within 90 days, consistent with our standard
+                retention window.
+              </li>
+              <li>
                 <strong>Billing records:</strong>{" "}8 years, as required by
                 Hungarian accounting law.
               </li>

@@ -167,11 +167,11 @@ export default function PortalPage() {
           </CardHeader>
           <CardContent className="pt-0">
             <p className="mb-4 text-sm text-muted-foreground">
-              Enter the invite code your daycare gave you to link your profile.
+              Enter the facility code your daycare gave you to link your profile.
             </p>
             <form onSubmit={handleClaim} className="space-y-4">
               <Input
-                label="Invite code"
+                label="Facility code"
                 type="text"
                 required
                 value={claimCode}
@@ -308,12 +308,12 @@ export default function PortalPage() {
             <CardContent className="pt-0">
               <form onSubmit={handleClaim} className="space-y-4">
                 <Input
-                  label="Invite code"
+                  label="Facility code"
                   type="text"
                   required
                   value={claimCode}
                   onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
-                  placeholder="Enter another invite code"
+                  placeholder="Enter another facility code"
                   autoComplete="off"
                 />
 

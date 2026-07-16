@@ -128,6 +128,7 @@ export async function POST(request: Request) {
     .eq("facility_id", facilityId)
     .eq("client_id", clientId)
     .eq("is_active", true)
+    .is("archived_at", null)
     .maybeSingle();
 
   if (dogError) {

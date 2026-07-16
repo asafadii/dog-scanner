@@ -52,12 +52,6 @@ function PortalSignupContent() {
     const trimmedFullName = fullName.trim();
     const trimmedInviteCode = inviteCode.trim().toUpperCase();
 
-    if (!trimmedInviteCode) {
-      setError("Invite code is required.");
-      setLoading(false);
-      return;
-    }
-
     try {
       const supabase = createSupabaseBrowserClient();
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -83,12 +77,16 @@ function PortalSignupContent() {
 
       if (!data.session?.access_token) {
         setInfo(
-          "Check your email to confirm your account. After you confirm and sign in, enter your invite code on the portal to link your profile.",
+          trimmedInviteCode
+            ? "Check your email to confirm your account. After you confirm and sign in, enter your facility code on the portal to link your profile."
+            : "Check your email to confirm your account. After you confirm and sign in, you can link a facility from your portal home page.",
         );
         return;
       }
 
-      await claimClientAccount(data.session.access_token, trimmedInviteCode);
+      if (trimmedInviteCode) {
+        await claimClientAccount(data.session.access_token, trimmedInviteCode);
+      }
 
       router.push("/portal");
       router.refresh();
@@ -164,15 +162,19 @@ function PortalSignupContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
               />
-              <Input
-                label="Invite Code"
-                type="text"
-                required
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                placeholder="From your daycare"
-                autoComplete="off"
-              />
+              <div className="space-y-1">
+                <Input
+                  label="Facility code (optional)"
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  placeholder="From your daycare"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Have a code from your daycare? Enter it here, or add it later from your portal home page.
+                </p>
+              </div>
 
               {error && (
                 <p

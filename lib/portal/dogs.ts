@@ -120,6 +120,7 @@ export async function getPortalDogs(
     .eq("facility_id", facilityId)
     .eq("client_id", clientId)
     .eq("is_active", true)
+    .is("archived_at", null)
     .order("name", { ascending: true });
 
   if (error) {
@@ -155,6 +156,7 @@ export async function getPortalDogById(
     .eq("facility_id", facilityId)
     .eq("client_id", clientId)
     .eq("is_active", true)
+    .is("archived_at", null)
     .maybeSingle();
 
   if (error) {

@@ -259,6 +259,7 @@ export async function checkInDog(
     .eq("id", dogId)
     .eq("facility_id", contextResult.data.facilityId)
     .eq("is_active", true)
+    .is("archived_at", null)
     .maybeSingle();
 
   if (dogError) {

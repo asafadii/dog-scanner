@@ -189,6 +189,7 @@ async function getDogCountsByClientId(
     .select("client_id")
     .eq("facility_id", facilityId)
     .eq("is_active", true)
+    .is("archived_at", null)
     .not("client_id", "is", null);
 
   const counts = new Map<string, number>();
@@ -217,6 +218,7 @@ export async function getClients(): Promise<ClientsResult<Client[]>> {
       .from("clients")
       .select("*")
       .eq("facility_id", facilityId)
+      .is("archived_at", null)
       .order("name", { ascending: true }),
     getDogCountsByClientId(facilityId),
   ]);
@@ -248,6 +250,7 @@ export async function getClientById(
     .select("*")
     .eq("id", id)
     .eq("facility_id", facilityId)
+    .is("archived_at", null)
     .maybeSingle();
 
   if (error) {
@@ -327,6 +330,38 @@ export async function updateClient(
   };
 }
 
+export async function archiveClient(
+  clientId: string,
+): Promise<ClientsResult<true>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("clients")
+    .update({
+      archived_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", clientId)
+    .eq("facility_id", profileResult.data.facility_id)
+    .is("archived_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  if (!data) {
+    return { data: null, error: toError("Client not found", "not_found") };
+  }
+
+  return { data: true, error: null };
+}
+
 export async function getClientDogs(
   clientId: string,
 ): Promise<ClientsResult<Dog[]>> {
@@ -342,6 +377,7 @@ export async function getClientDogs(
     .eq("facility_id", profileResult.data.facility_id)
     .eq("client_id", clientId)
     .eq("is_active", true)
+    .is("archived_at", null)
     .order("name", { ascending: true });
 
   if (error) {

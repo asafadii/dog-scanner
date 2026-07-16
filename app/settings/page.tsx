@@ -1,6 +1,7 @@
 "use client";
 
 import { FacilitySettingsSection } from "@/components/settings/FacilitySettingsSection";
+import { FacilityCodeSection } from "@/components/settings/FacilityCodeSection";
 import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
@@ -29,6 +30,8 @@ export default function SettingsPage() {
       </div>
 
       <FacilitySettingsSection />
+
+      <FacilityCodeSection />
 
       <CapacitySettingsSection />
 

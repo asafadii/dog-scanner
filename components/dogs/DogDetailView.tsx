@@ -10,6 +10,7 @@ import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
+import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -23,6 +24,7 @@ import {
   getStaffDogDocuments,
 } from "@/lib/documents";
 import {
+  archiveDog,
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
@@ -759,6 +761,18 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             )}
           </CardContent>
         </Card>
+
+        <ArchiveConfirmCard
+          entityName={dog.name}
+          onConfirm={async () => {
+            const result = await archiveDog(dogId);
+            return { error: result.error };
+          }}
+          onSuccess={() => {
+            router.push("/dogs");
+            router.refresh();
+          }}
+        />
 
         {/* Today's care */}
         {isCheckedIn && dog.todaysCare.length > 0 && (

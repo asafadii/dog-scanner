@@ -439,6 +439,7 @@ async function resolveClientBackedFields(
     .select("name, phone, emergency_contact, emergency_phone")
     .eq("id", input.clientId)
     .eq("facility_id", facilityId)
+    .is("archived_at", null)
     .maybeSingle();
 
   if (!data) return null;
@@ -583,6 +584,7 @@ export async function getDogs(): Promise<DogsResult<Dog[]>> {
     .select("*")
     .eq("facility_id", profileResult.data.facility_id)
     .eq("is_active", true)
+    .is("archived_at", null)
     .order("name", { ascending: true });
 
   if (error) {
@@ -624,6 +626,7 @@ export async function getDogById(id: string): Promise<DogsResult<Dog>> {
     .eq("id", id)
     .eq("facility_id", profileResult.data.facility_id)
     .eq("is_active", true)
+    .is("archived_at", null)
     .maybeSingle();
 
   if (error) {
@@ -751,6 +754,38 @@ export async function updateDog(
   }
 
   return { data: mapDogRowToDog(data as DogRow), error: null };
+}
+
+export async function archiveDog(
+  dogId: string,
+): Promise<DogsResult<true>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("dogs")
+    .update({
+      archived_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", dogId)
+    .eq("facility_id", profileResult.data.facility_id)
+    .is("archived_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  if (!data) {
+    return { data: null, error: toError("Dog not found", "not_found") };
+  }
+
+  return { data: true, error: null };
 }
 
 export async function ensureClientForDogForm(

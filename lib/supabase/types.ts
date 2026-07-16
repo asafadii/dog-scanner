@@ -36,6 +36,7 @@ export interface DogRow {
   feeding_meals_per_day: number | null;
   feeding_notes: string | null;
   is_active: boolean;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -73,6 +74,7 @@ export type DogInsert = {
   feeding_meals_per_day?: number | null;
   feeding_notes?: string | null;
   is_active?: boolean;
+  archived_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -110,6 +112,7 @@ export type DogUpdate = {
   feeding_meals_per_day?: number | null;
   feeding_notes?: string | null;
   is_active?: boolean;
+  archived_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -124,6 +127,7 @@ export interface ClientRow {
   emergency_phone: string | null;
   notes: string | null;
   invite_code: string | null;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -139,6 +143,7 @@ export type ClientInsert = {
   emergency_phone?: string | null;
   notes?: string | null;
   invite_code?: string | null;
+  archived_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -154,6 +159,7 @@ export type ClientUpdate = {
   emergency_phone?: string | null;
   notes?: string | null;
   invite_code?: string | null;
+  archived_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -266,6 +272,7 @@ export interface FacilityRow {
   id: string;
   name: string | null;
   currency: string;
+  facility_code: string | null;
   subscription_plan: "dora" | "dora_unlimited";
   subscription_status: "trialing" | "active" | "past_due" | "canceled";
   trial_ends_at: string | null;
@@ -578,6 +585,7 @@ export type Database = {
           id?: string;
           name?: string | null;
           currency?: string;
+          facility_code?: string | null;
           subscription_plan?: "dora" | "dora_unlimited";
           subscription_status?: "trialing" | "active" | "past_due" | "canceled";
           trial_ends_at?: string | null;
@@ -591,6 +599,7 @@ export type Database = {
           id?: string;
           name?: string | null;
           currency?: string;
+          facility_code?: string | null;
           subscription_plan?: "dora" | "dora_unlimited";
           subscription_status?: "trialing" | "active" | "past_due" | "canceled";
           trial_ends_at?: string | null;
