@@ -18,6 +18,13 @@ export async function POST(request: Request) {
 
   const { profile, db } = authResult.data;
 
+  if (profile.role !== "admin") {
+    return NextResponse.json(
+      { error: "Only facility admins can manage billing." },
+      { status: 403 },
+    );
+  }
+
   let body: CheckoutBody = {};
   try {
     body = (await request.json()) as CheckoutBody;

@@ -285,6 +285,28 @@ export interface ProfileRow {
   created_at: string;
 }
 
+export interface StaffInviteRow {
+  id: string;
+  facility_id: string;
+  email: string;
+  token: string;
+  invited_by: string;
+  accepted_at: string | null;
+  created_at: string;
+}
+
+export type StaffInviteInsert = {
+  id?: string;
+  facility_id: string;
+  email: string;
+  token: string;
+  invited_by: string;
+  accepted_at?: string | null;
+  created_at?: string;
+};
+
+export type StaffInviteUpdate = Partial<StaffInviteInsert>;
+
 export interface DogCheckinRow {
   id: string;
   dog_id: string;
@@ -604,6 +626,27 @@ export type Database = {
             columns: ["facility_id"];
             isOneToOne: false;
             referencedRelation: "facilities";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_invites: {
+        Row: StaffInviteRow;
+        Insert: StaffInviteInsert;
+        Update: StaffInviteUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "staff_invites_facility_id_fkey";
+            columns: ["facility_id"];
+            isOneToOne: false;
+            referencedRelation: "facilities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_invites_invited_by_fkey";
+            columns: ["invited_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];

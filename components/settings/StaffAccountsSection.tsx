@@ -2,16 +2,23 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 import { getCurrentUserProfile } from "@/lib/dogs";
+import {
+  formatStaffRoleLabel,
+  promoteToAdmin,
+  sendStaffInvite,
+} from "@/lib/staff/manage";
 import {
   formatStaffLimit,
   getFacilityStaff,
   getStaffCount,
   getSubscriptionInfo,
 } from "@/lib/subscription";
+import type { UserRole } from "@/lib/supabase/types";
 import type { StaffMember, SubscriptionInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Loader2, User, UserPlus } from "lucide-react";
+import { Loader2, User, UserPlus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export function StaffAccountsSection() {
@@ -21,15 +28,29 @@ export function StaffAccountsSection() {
   const [showLimitUi, setShowLimitUi] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
+  const [promotingId, setPromotingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   const loadStaffSection = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const [staffResult, subscriptionResult] = await Promise.all([
+    const [staffResult, subscriptionResult, profileResult] = await Promise.all([
       getFacilityStaff(),
       getSubscriptionInfo(),
+      getCurrentUserProfile(),
     ]);
+
+    if (profileResult.data) {
+      setCurrentRole(profileResult.data.role);
+    }
 
     if (staffResult.error) {
       setError(staffResult.error.message);
@@ -48,7 +69,6 @@ export function StaffAccountsSection() {
       setSubscription(subscriptionResult.data);
       setShowLimitUi(true);
 
-      const profileResult = await getCurrentUserProfile();
       if (profileResult.data) {
         const countResult = await getStaffCount(profileResult.data.facility_id);
         setStaffCount(
@@ -66,14 +86,78 @@ export function StaffAccountsSection() {
     void loadStaffSection();
   }, [loadStaffSection]);
 
+  useEffect(() => {
+    if (!inviteSuccess) return;
+    const timer = setTimeout(() => setInviteSuccess(null), 4000);
+    return () => clearTimeout(timer);
+  }, [inviteSuccess]);
+
   const staffLimitLabel = subscription
     ? formatStaffLimit(subscription.staffLimit)
     : null;
+
+  const atStaffLimit = Boolean(
+    subscription && staffCount >= subscription.staffLimit,
+  );
 
   const usagePercent =
     subscription && subscription.staffLimit <= 100
       ? Math.min(100, (staffCount / subscription.staffLimit) * 100)
       : 0;
+
+  const isAdmin = currentRole === "admin";
+
+  function openInviteModal() {
+    setInviteOpen(true);
+    setInviteEmail("");
+    setInviteError(null);
+    setInviteSuccess(null);
+  }
+
+  function closeInviteModal() {
+    setInviteOpen(false);
+    setInviteEmail("");
+    setInviteError(null);
+    setInviteSending(false);
+  }
+
+  async function handleSendInvite() {
+    const trimmed = inviteEmail.trim().toLowerCase();
+    if (!trimmed) return;
+
+    setInviteSending(true);
+    setInviteError(null);
+    setInviteSuccess(null);
+
+    const result = await sendStaffInvite(trimmed);
+    if (result.error) {
+      setInviteError(result.error.message);
+    } else {
+      setInviteSuccess(`Invite sent to ${trimmed}`);
+      setInviteEmail("");
+    }
+
+    setInviteSending(false);
+  }
+
+  async function handleMakeAdmin(member: StaffMember) {
+    const confirmed = window.confirm(
+      `Make ${member.fullName} an admin? They will be able to manage billing.`,
+    );
+    if (!confirmed) return;
+
+    setPromotingId(member.id);
+    setActionError(null);
+
+    const result = await promoteToAdmin(member.id);
+    if (result.error) {
+      setActionError(result.error.message);
+    } else {
+      await loadStaffSection();
+    }
+
+    setPromotingId(null);
+  }
 
   return (
     <Card>
@@ -116,6 +200,12 @@ export function StaffAccountsSection() {
               </div>
             )}
 
+            {actionError && (
+              <p className="text-sm text-danger" role="alert">
+                {actionError}
+              </p>
+            )}
+
             <ul className="divide-y divide-border rounded-xl border border-border">
               {staff.length === 0 ? (
                 <li className="px-4 py-6 text-center text-sm text-muted-foreground">
@@ -135,25 +225,118 @@ export function StaffAccountsSection() {
                         {member.email}
                       </p>
                     </div>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-                        member.role === "admin"
-                          ? "bg-mint-wash text-primary" // #EAF4F1 documented mint-wash (D-04)
-                          : "bg-muted text-muted-foreground",
+                    <div className="flex shrink-0 items-center gap-2">
+                      {isAdmin && member.role === "staff" && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={promotingId === member.id}
+                          onClick={() => void handleMakeAdmin(member)}
+                        >
+                          {promotingId === member.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : null}
+                          Make Admin
+                        </Button>
                       )}
-                    >
-                      {member.role}
-                    </span>
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-xs font-medium",
+                          member.role === "admin"
+                            ? "bg-mint-wash text-primary"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {formatStaffRoleLabel(member.role)}
+                      </span>
+                    </div>
                   </li>
                 ))
               )}
             </ul>
 
-            <Button disabled className="w-full sm:w-auto">
-              <UserPlus className="h-4 w-4" aria-hidden />
-              Invite Staff — Coming soon
-            </Button>
+            {isAdmin && (
+              <>
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={openInviteModal}
+                  disabled={atStaffLimit}
+                  title={
+                    atStaffLimit
+                      ? "Staff limit reached — upgrade to invite more."
+                      : undefined
+                  }
+                >
+                  <UserPlus className="h-4 w-4" aria-hidden />
+                  Invite Staff
+                </Button>
+
+                {inviteOpen && (
+                  <div className="rounded-xl border border-border bg-muted/40 p-4">
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        Invite Staff
+                      </p>
+                      <button
+                        type="button"
+                        onClick={closeInviteModal}
+                        className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        aria-label="Close invite panel"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      <Input
+                        label="Email"
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="colleague@facility.com"
+                        disabled={inviteSending}
+                      />
+                      {inviteError && (
+                        <p className="text-sm text-danger" role="alert">
+                          {inviteError}
+                        </p>
+                      )}
+                      {inviteSuccess && (
+                        <p className="text-sm text-primary" role="status">
+                          {inviteSuccess}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={closeInviteModal}
+                          disabled={inviteSending}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => void handleSendInvite()}
+                          disabled={
+                            inviteSending ||
+                            !inviteEmail.trim() ||
+                            atStaffLimit
+                          }
+                        >
+                          {inviteSending && (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          )}
+                          {inviteSending ? "Sending..." : "Send"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
       </CardContent>

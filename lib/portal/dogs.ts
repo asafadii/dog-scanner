@@ -10,7 +10,7 @@ import {
   getDogPhotoValidationMessage,
   validateDogPhotoFile,
 } from "@/lib/storage";
-import type { Dog, DogAlerts, DogSize, NewDogFormData } from "@/lib/types";
+import type { Dog, DogAlerts, DogSize, FeedingSource, NewDogFormData } from "@/lib/types";
 
 export type PortalDogsErrorCode =
   | "incomplete_setup"
@@ -44,12 +44,31 @@ export interface PortalCreateDogInput {
   ownerName: string;
   ownerPhone: string;
   ownerEmail: string;
-  medication: string;
-  feeding: string;
-  allergies: string;
+  ownerAddress: string;
+  ownerEmergencyContact: string;
+  ownerEmergencyPhone: string;
+  ownerNotes: string;
+  microchipNumber: string;
+  isNeutered: boolean | null;
+  healthCertificateNumber: string;
+  aggressionTowardsPeople: boolean | null;
+  aggressionTowardsDogs: boolean | null;
+  separationAnxiety: boolean | null;
+  kennelTrained: boolean | null;
+  chewingRisk: boolean | null;
+  separationAnxietyNotes: string;
+  kennelTrainedNotes: string;
+  chewingRiskNotes: string;
+  aggressionPeopleNotes: string;
+  aggressionDogsNotes: string;
+  medicationNotes: string;
+  allergyNotes: string;
+  dietaryNotes: string;
+  feedingSource: FeedingSource | null;
+  feedingMealsPerDay: 1 | 2 | 3;
+  feedingNotes: string;
   behavior: string;
   alerts: DogAlerts;
-  overnight: boolean;
 }
 
 export interface CreatePortalDogSuccessResponse {
@@ -225,11 +244,30 @@ export function portalCreateDogInputFromForm(
     ownerName: form.ownerName,
     ownerPhone: form.ownerPhone,
     ownerEmail: form.ownerEmail,
-    medication: form.medicationNotes,
-    feeding: form.feedingNotes,
-    allergies: form.allergyNotes,
+    ownerAddress: form.ownerAddress,
+    ownerEmergencyContact: form.ownerEmergencyContact,
+    ownerEmergencyPhone: form.ownerEmergencyPhone,
+    ownerNotes: form.ownerNotes,
+    microchipNumber: form.microchipNumber,
+    isNeutered: form.isNeutered,
+    healthCertificateNumber: form.healthCertificateNumber,
+    aggressionTowardsPeople: form.aggressionTowardsPeople,
+    aggressionTowardsDogs: form.aggressionTowardsDogs,
+    separationAnxiety: form.separationAnxiety,
+    kennelTrained: form.kennelTrained,
+    chewingRisk: form.chewingRisk,
+    separationAnxietyNotes: form.separationAnxietyNotes,
+    kennelTrainedNotes: form.kennelTrainedNotes,
+    chewingRiskNotes: form.chewingRiskNotes,
+    aggressionPeopleNotes: form.aggressionPeopleNotes,
+    aggressionDogsNotes: form.aggressionDogsNotes,
+    medicationNotes: form.medicationNotes,
+    allergyNotes: form.allergyNotes,
+    dietaryNotes: form.dietaryNotes,
+    feedingSource: form.feedingSource,
+    feedingMealsPerDay: form.feedingMealsPerDay,
+    feedingNotes: form.feedingNotes,
     behavior: form.behavior,
     alerts: form.alerts,
-    overnight: false,
   };
 }

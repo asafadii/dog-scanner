@@ -178,3 +178,24 @@ export function buildBookingReminderHtml({
 
   return emailShell("Visit reminder", body);
 }
+
+export function buildStaffInviteHtml({
+  facilityName,
+  signupUrl,
+}: {
+  facilityName: string;
+  signupUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      You&apos;ve been invited to join the team at <strong>${facilityName}</strong>
+      on hello DORA. Click below to create your staff account.
+    </p>
+    ${emailButton(signupUrl, "Accept invite →")}
+    ${emailFooter(
+      "This link is personal. If you didn't expect this email, you can safely ignore it.",
+    )}
+  `;
+
+  return emailShell(`You're invited to join ${facilityName}`, body);
+}

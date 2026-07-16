@@ -76,6 +76,13 @@
   --font-sans: var(--font-sans);
 }
 
+/* Portal-scoped purple primary — does not change staff app tokens */
+.portal-theme {
+  --color-primary: #7C3AED;
+  --color-primary-foreground: #FFFFFF;
+  --color-ring: #7C3AED;
+}
+
 body {
   background: var(--dora-cream);
   color: var(--dora-ink-soft);

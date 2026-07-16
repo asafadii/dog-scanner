@@ -14,6 +14,13 @@ export async function POST(request: Request) {
 
   const { profile, db } = authResult.data;
 
+  if (profile.role !== "admin") {
+    return NextResponse.json(
+      { error: "Only facility admins can manage billing." },
+      { status: 403 },
+    );
+  }
+
   const { data: facility, error: facilityError } = await db
     .from("facilities")
     .select("stripe_customer_id")
