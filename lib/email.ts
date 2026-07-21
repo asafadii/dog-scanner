@@ -60,12 +60,25 @@ export function buildInviteEmailHtml({
   const body = `
     <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
       Hi ${clientName},<br><br>
-      <strong>${facilityName}</strong> has invited you to manage
-      your dog's bookings and profile on hello DORA.
+      Big news — <strong>${facilityName}</strong> just added you to
+      their pack on hello DORA, which means you're one click away
+      from never digging through old text threads to remember when
+      your dog's next stay is.<br><br>
+      Here's what you'll be able to do once you're in:
+      <ul style="margin:12px 0;padding-left:20px;">
+        <li>See every upcoming booking for your dog, at a glance</li>
+        <li>Update their profile — allergies, quirks, favourite
+        snacks, the important stuff</li>
+        <li>Get a heads-up the day before every stay</li>
+      </ul>
+      No paperwork, no phone tag — just tap below and you'll be in.
     </p>
     ${emailButton(signupUrl, "Create your account →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Wags & wiggles,<br>The hello DORA Pack 🐾
+    </p>
     ${emailFooter(
-      "This link is personal and pre-fills your signup details. If you didn't expect this email, you can safely ignore it.",
+      "This link is personal and already knows who you are — no forms to fill in twice. If this landed in your inbox by mistake, feel free to ignore it, no hard feelings (or paws).",
     )}
   `;
 
@@ -91,17 +104,22 @@ export function buildBookingConfirmationHtml({
 }): string {
   const body = `
     <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
-      Hi ${clientName}, your booking for <strong>${dogName}</strong> at
-      <strong>${facilityName}</strong> has been received and is pending approval.
-      We'll notify you once it's reviewed.
+      Hi ${clientName},<br><br>
+      Consider this your official "message received" bark —
+      <strong>${dogName}</strong>'s booking at
+      <strong>${facilityName}</strong> has landed safely in our inbox
+      and is waiting for a paws-up from the team.<br><br>
+      <strong>Service:</strong> ${serviceType}<br>
+      <strong>Dates:</strong> ${startDate} – ${endDate}<br><br>
+      We'll email you the moment it's reviewed.
     </p>
     ${emailButton(portalUrl, "View your booking →")}
-    ${emailFooter(
-      `Service: ${serviceType} · ${startDate} – ${endDate}`,
-    )}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Talk soon,<br>The hello DORA Pack 🐾
+    </p>
   `;
 
-  return emailShell("Booking received", body);
+  return emailShell("Booking received!", body);
 }
 
 export function buildBookingApprovedHtml({
@@ -121,14 +139,21 @@ export function buildBookingApprovedHtml({
 }): string {
   const body = `
     <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
-      Hi ${clientName}, great news! <strong>${dogName}</strong>'s booking at
-      <strong>${facilityName}</strong> has been approved.
+      Hi ${clientName},<br><br>
+      Great news travels fast: <strong>${dogName}</strong>'s booking
+      at <strong>${facilityName}</strong> is officially
+      <strong>confirmed</strong>. Pawsitively locked in.<br><br>
+      📅 ${startDate} – ${endDate}<br><br>
+      Nothing left for you to do — just count down the sleeps until
+      drop-off.
     </p>
     ${emailButton(portalUrl, "View booking →")}
-    ${emailFooter(`${startDate} – ${endDate}`)}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      See you both soon,<br>The hello DORA Pack 🐾
+    </p>
   `;
 
-  return emailShell("Booking confirmed!", body);
+  return emailShell("You're all set! 🎉", body);
 }
 
 export function buildBookingRejectedHtml({
@@ -144,15 +169,23 @@ export function buildBookingRejectedHtml({
 }): string {
   const body = `
     <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
-      Hi ${clientName}, unfortunately <strong>${dogName}</strong>'s booking request
-      at <strong>${facilityName}</strong> could not be approved at this time.
-      Please contact the facility directly for more information or to discuss
-      alternatives.
+      Hi ${clientName},<br><br>
+      Thanks for booking with <strong>${facilityName}</strong> —
+      unfortunately, they're not able to confirm
+      <strong>${dogName}</strong>'s booking request at this time.
+      <br><br>
+      This is usually about timing or availability rather than
+      anything to do with your pup. The best next step is to reach
+      out to ${facilityName} directly — they'll be able to explain
+      and help find a time that works.
     </p>
     ${emailButton(portalUrl, "View portal →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      We're still glad you're here,<br>The hello DORA Pack 🐾
+    </p>
   `;
 
-  return emailShell("Booking update", body);
+  return emailShell("Update on your booking", body);
 }
 
 export function buildBookingReminderHtml({
@@ -170,13 +203,20 @@ export function buildBookingReminderHtml({
 }): string {
   const body = `
     <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
-      Hi ${clientName}, just a reminder that <strong>${dogName}</strong> is booked
-      in at <strong>${facilityName}</strong> tomorrow, ${startDate}. See you then!
+      Hi ${clientName},<br><br>
+      Quick nudge: <strong>${dogName}</strong> is booked in at
+      <strong>${facilityName}</strong> tomorrow,
+      <strong>${startDate}</strong>. Time to dig out the leash and
+      pack whatever makes drop-off smoothest — favourite toy, a bit
+      of their usual food, anything that'll make them feel at home.
     </p>
     ${emailButton(portalUrl, "View booking →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      See you both soon,<br>The hello DORA Pack 🐾
+    </p>
   `;
 
-  return emailShell("Visit reminder", body);
+  return emailShell("See you tomorrow! 🐾", body);
 }
 
 export function buildStaffInviteHtml({
@@ -188,14 +228,19 @@ export function buildStaffInviteHtml({
 }): string {
   const body = `
     <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
-      You&apos;ve been invited to join the team at <strong>${facilityName}</strong>
-      on hello DORA. Click below to create your staff account.
+      Hi there,<br><br>
+      <strong>${facilityName}</strong>'s team has invited you to join
+      them on hello DORA — the place where all your daycare's
+      bookings, dog profiles, and daily check-ins live in one calm,
+      tidy place.<br><br>
+      Once you're in, you'll be able to check dogs in and out, manage
+      bookings, and see everything the rest of the team sees.
     </p>
-    ${emailButton(signupUrl, "Accept invite →")}
-    ${emailFooter(
-      "This link is personal. If you didn't expect this email, you can safely ignore it.",
-    )}
+    ${emailButton(signupUrl, "Accept your invite →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Welcome aboard,<br>The hello DORA Pack 🐾
+    </p>
   `;
 
-  return emailShell(`You're invited to join ${facilityName}`, body);
+  return emailShell("You're invited to the team", body);
 }

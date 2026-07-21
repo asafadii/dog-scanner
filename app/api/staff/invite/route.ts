@@ -129,7 +129,7 @@ export async function POST(request: Request) {
 
   await sendTransactionalEmail({
     to: email,
-    subject: `You've been invited to join ${facilityName} on DORA`,
+    subject: `You're invited to join ${facilityName} on hello DORA`,
     html: buildStaffInviteHtml({ facilityName, signupUrl }),
   });
 

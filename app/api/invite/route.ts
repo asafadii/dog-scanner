@@ -171,7 +171,7 @@ export async function POST(request: Request) {
   const { error: emailError } = await resend.emails.send({
     from: "hello DORA <info@hellodora.app>",
     to: clientRow.email,
-    subject: "You've been invited to hello DORA",
+    subject: "You've been pawsonally invited to hello DORA 🐾",
     html: buildInviteEmailHtml({
       clientName: clientRow.name,
       facilityName: facility?.name ?? "your daycare",

@@ -158,7 +158,7 @@ export function CapacityCalendar() {
                   {WEEKDAY_HEADERS.map((label) => (
                     <div
                       key={label}
-                      className="rounded-lg bg-[#F2D98A] px-1 py-2 text-center text-xs font-bold text-[#06342F]"
+                      className="rounded-lg bg-[#F2D98A] px-0.5 py-2 text-center text-[10px] leading-tight font-bold text-[#06342F] sm:px-1 sm:text-xs"
                     >
                       {label}
                     </div>
@@ -187,13 +187,13 @@ export function CapacityCalendar() {
                       <p className="text-sm font-semibold text-foreground">
                         {dayNumber(day.date)}
                       </p>
-                      <div className="mt-1.5 flex items-center justify-center gap-2 text-xs tabular-nums sm:block sm:space-y-0.5">
-                        <p className="flex items-center gap-0.5 text-foreground sm:block">
+                      <div className="mt-1 flex flex-col items-center gap-0.5 text-[10px] tabular-nums sm:mt-1.5 sm:flex-row sm:justify-center sm:gap-2 sm:text-xs sm:space-y-0.5">
+                        <p className="flex items-center gap-0.5 text-foreground">
                           <Sun className="h-3 w-3 text-primary sm:hidden" aria-hidden />
                           <span className="font-medium text-primary">{day.daycare}</span>
                           <span className="hidden sm:inline"> daycare</span>
                         </p>
-                        <p className="flex items-center gap-0.5 text-foreground sm:block">
+                        <p className="flex items-center gap-0.5 text-foreground">
                           <Moon className="h-3 w-3 text-warning sm:hidden" aria-hidden />
                           <span className="font-medium text-warning">{day.overnight}</span>
                           <span className="hidden sm:inline"> overnight</span>

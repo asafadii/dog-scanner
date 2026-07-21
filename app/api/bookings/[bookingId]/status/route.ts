@@ -89,7 +89,7 @@ export async function PATCH(
       if (status === "approved") {
         await sendTransactionalEmail({
           to: emailContext.clientEmail,
-          subject: `${emailContext.dogName}'s booking is confirmed! 🎉`,
+          subject: `🎉🐾 ${emailContext.dogName}'s booking is officially confirmed!`,
           html: buildBookingApprovedHtml({
             clientName: emailContext.clientName,
             dogName: emailContext.dogName,

@@ -45,10 +45,10 @@ export default function PrivacyPage() {
                 Ödön fasor 2., 1st floor, door 6, Hungary
               </li>
               <li>
-                <strong>Registration number:</strong>{" "}[EV registration number]
+                <strong>Registration number:</strong>{" "}62174295
               </li>
               <li>
-                <strong>Tax number:</strong>{" "}[tax number]
+                <strong>Tax number:</strong>{" "}91965626-1-43
               </li>
               <li>
                 <strong>Contact:</strong>{" "}

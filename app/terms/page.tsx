@@ -39,8 +39,8 @@ export default function TermsPage() {
               <li>
                 <strong>Provider:</strong>{" "}Safadi Abdulsalam MWN E.V., 1095
                 Budapest, Lechner Ödön fasor 2., 1st floor, door 6, Hungary
-                (registration number: [EV registration number], tax number:
-                [tax number]; &quot;Provider&quot;), operator of the hello
+                (registration number: 62174295, tax number:
+                91965626-1-43; &quot;Provider&quot;), operator of the hello
                 DORA platform (&quot;Service&quot;); and
               </li>
               <li>
