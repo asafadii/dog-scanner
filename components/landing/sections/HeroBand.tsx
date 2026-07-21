@@ -116,9 +116,9 @@ export default function HeroBand() {
 
         {/* Hero sticker dashboard + floaty badge */}
         <div className="relative">
-          <div className="absolute -left-[26px] -top-[42px] z-[3] animate-floaty">
-            <span className="inline-flex h-20 w-20 items-center justify-center rounded-[20px] border-[3px] border-[#06342F] bg-marker shadow-sticker">
-              <Image src="/dora-icon.svg" alt="" width={48} height={48} />
+          <div className="absolute -left-[8px] -top-[28px] z-[3] animate-floaty sm:-left-[26px] sm:-top-[42px]">
+            <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl border-[3px] border-[#06342F] bg-marker shadow-sticker sm:h-20 sm:w-20 sm:rounded-[20px]">
+              <Image src="/dora-icon.svg" alt="" width={36} height={36} className="sm:w-12 sm:h-12" />
             </span>
           </div>
           <DashboardMockup />

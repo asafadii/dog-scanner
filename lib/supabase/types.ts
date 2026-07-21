@@ -220,6 +220,22 @@ export type ClaimAttemptInsert = {
   attempted_at?: string;
 };
 
+export interface EmbedBookingAttemptRow {
+  id: string;
+  ip_address: string;
+  facility_id: string | null;
+  succeeded: boolean;
+  attempted_at: string;
+}
+
+export type EmbedBookingAttemptInsert = {
+  id?: string;
+  ip_address: string;
+  facility_id?: string | null;
+  succeeded: boolean;
+  attempted_at?: string;
+};
+
 export type DbDogDocumentType = "vaccination" | "pedigree" | "other";
 
 export interface DogDocumentRow {
@@ -273,6 +289,7 @@ export interface FacilityRow {
   name: string | null;
   currency: string;
   facility_code: string | null;
+  booking_form_config: Record<string, "hidden" | "optional" | "required"> | null;
   subscription_plan: "dora" | "dora_unlimited";
   subscription_status: "trialing" | "active" | "past_due" | "canceled";
   trial_ends_at: string | null;
@@ -365,6 +382,7 @@ export interface BookingRow {
   transport_required: boolean;
   status: DbBookingStatus;
   notes: string | null;
+  pending_account_link: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -380,6 +398,7 @@ export type BookingInsert = {
   transport_required?: boolean;
   status?: DbBookingStatus;
   notes?: string | null;
+  pending_account_link?: boolean;
   created_at?: string;
   updated_at?: string;
 };
@@ -395,6 +414,7 @@ export type BookingUpdate = {
   transport_required?: boolean;
   status?: DbBookingStatus;
   notes?: string | null;
+  pending_account_link?: boolean;
   created_at?: string;
   updated_at?: string;
 };
@@ -586,6 +606,10 @@ export type Database = {
           name?: string | null;
           currency?: string;
           facility_code?: string | null;
+          booking_form_config?: Record<
+            string,
+            "hidden" | "optional" | "required"
+          > | null;
           subscription_plan?: "dora" | "dora_unlimited";
           subscription_status?: "trialing" | "active" | "past_due" | "canceled";
           trial_ends_at?: string | null;
@@ -600,6 +624,10 @@ export type Database = {
           name?: string | null;
           currency?: string;
           facility_code?: string | null;
+          booking_form_config?: Record<
+            string,
+            "hidden" | "optional" | "required"
+          > | null;
           subscription_plan?: "dora" | "dora_unlimited";
           subscription_status?: "trialing" | "active" | "past_due" | "canceled";
           trial_ends_at?: string | null;
@@ -688,6 +716,12 @@ export type Database = {
         Row: ClaimAttemptRow;
         Insert: ClaimAttemptInsert;
         Update: Partial<ClaimAttemptInsert>;
+        Relationships: [];
+      };
+      embed_booking_attempts: {
+        Row: EmbedBookingAttemptRow;
+        Insert: EmbedBookingAttemptInsert;
+        Update: Partial<EmbedBookingAttemptInsert>;
         Relationships: [];
       };
       dog_documents: {

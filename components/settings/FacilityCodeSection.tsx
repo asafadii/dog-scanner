@@ -70,7 +70,7 @@ export function FacilityCodeSection() {
   }
 
   return (
-    <Card>
+    <Card id="facility-code">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <KeyRound className="h-5 w-5 text-muted-foreground" aria-hidden />

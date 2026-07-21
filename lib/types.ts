@@ -326,3 +326,76 @@ export interface StaffMember {
   role: "admin" | "staff";
   createdAt: string;
 }
+
+export type BookingFormFieldState = "hidden" | "optional" | "required";
+
+export interface BookingFormFieldConfig {
+  key: string;
+  state: BookingFormFieldState;
+}
+
+export type BookingFormConfig = Record<string, BookingFormFieldState>;
+
+export const LOCKED_BOOKING_FORM_FIELDS = [
+  "name",
+  "ownerName",
+  "ownerEmail",
+  "aggressionTowardsPeople",
+  "aggressionTowardsDogs",
+] as const;
+
+// Photo and Documents are not configurable — the public form always shows
+// photo as optional. Do not add them to the config UI.
+export const BOOKING_FORM_FIELD_GROUPS: {
+  section: string;
+  fields: { key: string; label: string }[];
+}[] = [
+  {
+    section: "Dog Details",
+    fields: [
+      { key: "breed", label: "Breed" },
+      { key: "age", label: "Age" },
+      { key: "size", label: "Size" },
+    ],
+  },
+  {
+    section: "Identification",
+    fields: [
+      { key: "microchipNumber", label: "Microchip number" },
+      { key: "isNeutered", label: "Neutered" },
+      { key: "healthCertificateNumber", label: "Health certificate number" },
+    ],
+  },
+  {
+    section: "Owner Information",
+    fields: [
+      { key: "ownerPhone", label: "Owner phone" },
+      { key: "ownerAddress", label: "Owner address" },
+      { key: "ownerEmergencyContact", label: "Emergency contact name" },
+      { key: "ownerEmergencyPhone", label: "Emergency contact phone" },
+      { key: "ownerNotes", label: "Owner notes" },
+    ],
+  },
+  {
+    section: "Health & Safety",
+    fields: [
+      { key: "separationAnxiety", label: "Separation anxiety" },
+      { key: "chewingRisk", label: "Chewing / self-harm risk" },
+      { key: "kennelTrained", label: "Kennel trained" },
+    ],
+  },
+  {
+    section: "Feeding",
+    fields: [
+      { key: "feedingSource", label: "Food source (own/facility)" },
+      { key: "feedingMealsPerDay", label: "Meals per day" },
+      { key: "feedingNotes", label: "Feeding notes" },
+    ],
+  },
+  {
+    section: "Other",
+    fields: [
+      { key: "behavior", label: "Other behavioural notes" },
+    ],
+  },
+];

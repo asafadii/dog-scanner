@@ -244,3 +244,64 @@ export function buildStaffInviteHtml({
 
   return emailShell("You're invited to the team", body);
 }
+
+export function buildBookingCongratulationsHtml({
+  clientName,
+  dogName,
+  facilityName,
+  signupUrl,
+}: {
+  clientName: string;
+  dogName: string;
+  facilityName: string;
+  signupUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      Congratulations — <strong>${dogName}</strong>'s booking at
+      <strong>${facilityName}</strong> has landed safely, tail-wags
+      and all! 🎉<br><br>
+      There's just one thing left to do: finish setting up your free
+      hello DORA account so you can see everything about the booking
+      — dates, what's included, and any details ${facilityName} needs
+      before drop-off.<br><br>
+      It takes about a minute, and we've already got your email on
+      file.
+    </p>
+    ${emailButton(signupUrl, "Finish creating your account →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Welcome to the pack,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Congratulations! 🎉", body);
+}
+
+export function buildNewBookingAddedHtml({
+  clientName,
+  dogName,
+  facilityName,
+  portalUrl,
+}: {
+  clientName: string;
+  dogName: string;
+  facilityName: string;
+  portalUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      Good news — <strong>${dogName}</strong>'s booking at
+      <strong>${facilityName}</strong> has just been added to your
+      hello DORA account. No action needed, it's already sitting in
+      your bookings, ready whenever you like.
+    </p>
+    ${emailButton(portalUrl, "View your booking →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("New booking added", body);
+}

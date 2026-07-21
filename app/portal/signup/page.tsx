@@ -88,6 +88,18 @@ function PortalSignupContent() {
         await claimClientAccount(data.session.access_token, trimmedInviteCode);
       }
 
+      try {
+        await fetch("/api/portal/link-pending", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+        });
+      } catch {
+        // best-effort — never block redirect on this
+      }
+
       router.push("/portal");
       router.refresh();
     } catch (err) {

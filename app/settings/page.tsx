@@ -2,6 +2,7 @@
 
 import { FacilitySettingsSection } from "@/components/settings/FacilitySettingsSection";
 import { FacilityCodeSection } from "@/components/settings/FacilityCodeSection";
+import { BookingFormSection } from "@/components/settings/BookingFormSection";
 import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsSection";
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
@@ -32,6 +33,8 @@ export default function SettingsPage() {
       <FacilitySettingsSection />
 
       <FacilityCodeSection />
+
+      <BookingFormSection />
 
       <CapacitySettingsSection />
 

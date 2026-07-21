@@ -29,6 +29,7 @@ type ServerResult<T> =
 function toBookingInsert(
   facilityId: string,
   input: BookingFormData,
+  options?: { pendingAccountLink?: boolean },
 ): BookingInsert {
   return {
     facility_id: facilityId,
@@ -40,6 +41,7 @@ function toBookingInsert(
     transport_required: input.transportRequired,
     status: "pending",
     notes: input.notes.trim() || null,
+    pending_account_link: options?.pendingAccountLink ?? false,
   };
 }
 
@@ -192,6 +194,7 @@ export async function createBookingServer(
   db: ServerDb,
   facilityId: string,
   input: BookingFormData,
+  options?: { pendingAccountLink?: boolean },
 ): Promise<ServerResult<Booking>> {
   const [clientCheck, dogCheck] = await Promise.all([
     db
@@ -214,7 +217,7 @@ export async function createBookingServer(
 
   const { data, error } = await db
     .from("bookings")
-    .insert(toBookingInsert(facilityId, input))
+    .insert(toBookingInsert(facilityId, input, options))
     .select("*")
     .single();
 
