@@ -188,6 +188,62 @@ export function buildBookingRejectedHtml({
   return emailShell("Update on your booking", body);
 }
 
+export function buildBookingCancelledByClientHtml({
+  dogName,
+  clientName,
+  facilityName,
+  bookingUrl,
+}: {
+  dogName: string;
+  clientName: string;
+  facilityName: string;
+  bookingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi there,<br><br>
+      <strong>${clientName}</strong> has cancelled
+      <strong>${dogName}</strong>'s upcoming booking at
+      <strong>${facilityName}</strong>. No action needed on your end —
+      just letting you know so your calendar stays accurate.
+    </p>
+    ${emailButton(bookingUrl, "View bookings →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Booking cancelled", body);
+}
+
+export function buildBookingCancelledByFacilityHtml({
+  dogName,
+  clientName,
+  facilityName,
+  bookingUrl,
+}: {
+  dogName: string;
+  clientName: string;
+  facilityName: string;
+  bookingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      <strong>${facilityName}</strong> has cancelled
+      <strong>${dogName}</strong>'s upcoming booking. If this was
+      unexpected, reach out to them directly to find out more or
+      reschedule.
+    </p>
+    ${emailButton(bookingUrl, "View portal →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      We're still glad you're here,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Your booking was cancelled", body);
+}
+
 export function buildBookingReminderHtml({
   clientName,
   dogName,

@@ -128,6 +128,28 @@ export function RequireClientAccount({ children }: RequireClientAccountProps) {
     );
   }
 
+  if (!allowed && errorCode === "account_closed") {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center p-8 text-center">
+            <h2 className="text-xl font-semibold text-foreground">
+              Account closed
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This account has been closed.
+            </p>
+            <Link href="/login" className="mt-6 w-full">
+              <Button variant="outline" size="lg" className="w-full">
+                Back to Login
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (!allowed) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center bg-background px-4 py-12">

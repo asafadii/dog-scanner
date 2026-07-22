@@ -135,5 +135,38 @@ export async function GET(request: Request) {
     clientsDeleted += 1;
   }
 
-  return NextResponse.json({ dogsDeleted, clientsDeleted });
+  // client_account_links cascade-delete via FK ON DELETE CASCADE
+  // (see supabase/migrations/007_client_portal.sql)
+  const { data: archivedAccounts, error: accountsError } = await db
+    .from("client_accounts")
+    .select("id")
+    .lt("archived_at", cutoff)
+    .not("archived_at", "is", null);
+
+  if (accountsError) {
+    return NextResponse.json({ error: accountsError.message }, { status: 500 });
+  }
+
+  const accountIds = (
+    (archivedAccounts ?? []) as { id: string }[]
+  ).map((row) => row.id);
+  let accountsDeleted = 0;
+
+  for (const accountId of accountIds) {
+    const { error: deleteAccountError } = await db
+      .from("client_accounts")
+      .delete()
+      .eq("id", accountId);
+
+    if (deleteAccountError) {
+      return NextResponse.json(
+        { error: deleteAccountError.message },
+        { status: 500 },
+      );
+    }
+
+    accountsDeleted += 1;
+  }
+
+  return NextResponse.json({ dogsDeleted, clientsDeleted, accountsDeleted });
 }

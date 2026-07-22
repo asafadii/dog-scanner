@@ -67,6 +67,10 @@ export function getCheckInUnavailableMessage(
   startDate: string,
   endDate: string,
 ): string {
+  if (status === "cancelled") {
+    return "This booking was cancelled. Check-in is not available.";
+  }
+
   if (status !== "approved") {
     return "Check-in opens once your booking is approved.";
   }

@@ -85,9 +85,16 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   }, [loadBooking]);
 
   async function handleStatusChange(
-    status: "approved" | "rejected" | "completed",
+    status: "approved" | "rejected" | "completed" | "cancelled",
   ) {
     if (!booking || updating) return;
+
+    if (status === "cancelled") {
+      const confirmed = window.confirm(
+        "Cancel this booking? The client will be notified by email.",
+      );
+      if (!confirmed) return;
+    }
 
     setUpdating(true);
     setActionError(null);
@@ -177,6 +184,8 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   const canApprove = booking.status === "pending";
   const canReject = booking.status === "pending";
   const canComplete = booking.status === "approved";
+  const canCancel =
+    booking.status === "pending" || booking.status === "approved";
   const canCheckIn = booking.status === "approved" && !dogCheckedIn;
 
   return (
@@ -323,7 +332,7 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         </div>
       )}
 
-      {(canApprove || canReject || canComplete) && (
+      {(canApprove || canReject || canComplete || canCancel) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Admin Actions</CardTitle>
@@ -372,6 +381,16 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
                 Mark Completed
               </Button>
             )}
+            {canCancel && (
+              <Button
+                variant="outline"
+                className="flex-1 border-danger/40 text-danger hover:bg-danger/10"
+                disabled={updating}
+                onClick={() => void handleStatusChange("cancelled")}
+              >
+                Cancel Booking
+              </Button>
+            )}
             </div>
           </CardContent>
         </Card>
@@ -393,7 +412,13 @@ const STATUS_FLOW: { key: string; label: string }[] = [
 function activeFlowIndex(status: Booking["status"], checkedIn: boolean): number {
   if (status === "completed") return 3;
   if (status === "approved") return checkedIn ? 2 : 1;
-  if (status === "rejected" || status === "pending") return 0;
+  if (
+    status === "rejected" ||
+    status === "cancelled" ||
+    status === "pending"
+  ) {
+    return 0;
+  }
   return 0;
 }
 

@@ -4,6 +4,7 @@ import { buildBookingReminderHtml, formatEmailDate } from "@/lib/email";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type {
   BookingRow,
+  ClientAccountRow,
   ClientRow,
   DogRow,
   FacilityRow,
@@ -54,27 +55,35 @@ export async function GET(request: Request) {
   }
 
   let sent = 0;
+  let skippedOptOut = 0;
 
   for (const row of (bookings ?? []) as BookingRow[]) {
-    const [clientResult, dogResult, facilityResult] = await Promise.all([
-      db
-        .from("clients")
-        .select("name, email")
-        .eq("id", row.client_id)
-        .eq("facility_id", row.facility_id)
-        .maybeSingle(),
-      db
-        .from("dogs")
-        .select("name, breed, photo_url")
-        .eq("id", row.dog_id)
-        .eq("facility_id", row.facility_id)
-        .maybeSingle(),
-      db
-        .from("facilities")
-        .select("name")
-        .eq("id", row.facility_id)
-        .maybeSingle(),
-    ]);
+    const [clientResult, dogResult, facilityResult, linkResult] =
+      await Promise.all([
+        db
+          .from("clients")
+          .select("name, email")
+          .eq("id", row.client_id)
+          .eq("facility_id", row.facility_id)
+          .maybeSingle(),
+        db
+          .from("dogs")
+          .select("name, breed, photo_url")
+          .eq("id", row.dog_id)
+          .eq("facility_id", row.facility_id)
+          .maybeSingle(),
+        db
+          .from("facilities")
+          .select("name")
+          .eq("id", row.facility_id)
+          .maybeSingle(),
+        db
+          .from("client_account_links")
+          .select("client_account_id")
+          .eq("client_id", row.client_id)
+          .eq("facility_id", row.facility_id)
+          .maybeSingle(),
+      ]);
 
     const client = clientResult.data as Pick<ClientRow, "name" | "email"> | null;
     const dog = dogResult.data as Pick<
@@ -82,9 +91,32 @@ export async function GET(request: Request) {
       "name" | "breed" | "photo_url"
     > | null;
     const facility = facilityResult.data as Pick<FacilityRow, "name"> | null;
+    const link = linkResult.data as { client_account_id: string } | null;
 
     if (!client?.email?.trim() || !dog) {
       continue;
+    }
+
+    if (link?.client_account_id) {
+      const { data: account } = await db
+        .from("client_accounts")
+        .select("email_reminders_enabled, archived_at")
+        .eq("id", link.client_account_id)
+        .maybeSingle();
+
+      const prefs = account as Pick<
+        ClientAccountRow,
+        "email_reminders_enabled" | "archived_at"
+      > | null;
+
+      if (
+        prefs &&
+        !prefs.archived_at &&
+        prefs.email_reminders_enabled === false
+      ) {
+        skippedOptOut += 1;
+        continue;
+      }
     }
 
     const booking = mapBookingRowToBooking(
@@ -110,5 +142,5 @@ export async function GET(request: Request) {
     sent += 1;
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, skippedOptOut });
 }

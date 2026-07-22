@@ -1,5 +1,5 @@
 import { portalFetch } from "@/lib/portal/api";
-import { requireClientAccount } from "@/lib/portal/auth";
+import { getLinkedClients, requireClientAccount } from "@/lib/portal/auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DogDocumentRow } from "@/lib/supabase/types";
 import type { DogDocument, DogDocumentType } from "@/lib/types";
@@ -86,6 +86,7 @@ export type DocumentValidationCode = "too_large" | "unsupported_format";
 export type PortalDocumentsErrorCode =
   | "incomplete_setup"
   | "unauthorized"
+  | "account_closed"
   | "not_found"
   | "unknown";
 
@@ -220,6 +221,71 @@ export async function getDogDocuments(
 
   return {
     data: (data as DogDocumentRow[]).map(mapDogDocumentRowToDogDocument),
+    error: null,
+  };
+}
+
+export async function getAllPortalDocuments(
+  facilityId: string,
+): Promise<PortalDocumentsResult<(DogDocument & { dogName: string })[]>> {
+  const accountResult = await requireClientAccount();
+  if (accountResult.error) {
+    return { data: null, error: accountResult.error };
+  }
+
+  const linkedResult = await getLinkedClients();
+  if (linkedResult.error) {
+    return { data: null, error: linkedResult.error };
+  }
+
+  const linkedClient = linkedResult.data.find(
+    (client) => client.facilityId === facilityId,
+  );
+
+  if (!linkedClient) {
+    return {
+      data: null,
+      error: toError("Not authorized for this facility", "unauthorized"),
+    };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data: dogs, error: dogsError } = await supabase
+    .from("dogs")
+    .select("id, name")
+    .eq("facility_id", facilityId)
+    .eq("client_id", linkedClient.id)
+    .eq("is_active", true)
+    .is("archived_at", null);
+
+  if (dogsError) {
+    return { data: null, error: toError(dogsError.message) };
+  }
+
+  const dogRows = (dogs ?? []) as { id: string; name: string }[];
+  if (dogRows.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const dogIds = dogRows.map((dog) => dog.id);
+  const dogNameById = new Map(dogRows.map((dog) => [dog.id, dog.name]));
+
+  const { data: documents, error: documentsError } = await supabase
+    .from("dog_documents")
+    .select("*")
+    .eq("facility_id", facilityId)
+    .in("dog_id", dogIds)
+    .order("created_at", { ascending: false });
+
+  if (documentsError) {
+    return { data: null, error: toError(documentsError.message) };
+  }
+
+  return {
+    data: ((documents ?? []) as DogDocumentRow[]).map((row) => ({
+      ...mapDogDocumentRowToDogDocument(row),
+      dogName: dogNameById.get(row.dog_id) ?? "Unknown dog",
+    })),
     error: null,
   };
 }

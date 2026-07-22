@@ -168,6 +168,8 @@ export interface ClientAccountRow {
   id: string;
   email: string;
   full_name: string;
+  email_reminders_enabled: boolean;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -176,6 +178,8 @@ export type ClientAccountInsert = {
   id: string;
   email: string;
   full_name: string;
+  email_reminders_enabled?: boolean;
+  archived_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -184,6 +188,8 @@ export type ClientAccountUpdate = {
   id?: string;
   email?: string;
   full_name?: string;
+  email_reminders_enabled?: boolean;
+  archived_at?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -369,7 +375,10 @@ export type DbBookingStatus =
   | "pending"
   | "approved"
   | "rejected"
-  | "completed";
+  | "completed"
+  | "cancelled";
+
+export type DbBookingCancelledBy = "staff" | "client";
 
 export interface BookingRow {
   id: string;
@@ -381,6 +390,7 @@ export interface BookingRow {
   end_date: string;
   transport_required: boolean;
   status: DbBookingStatus;
+  cancelled_by: DbBookingCancelledBy | null;
   notes: string | null;
   pending_account_link: boolean;
   created_at: string;
@@ -397,6 +407,7 @@ export type BookingInsert = {
   end_date: string;
   transport_required?: boolean;
   status?: DbBookingStatus;
+  cancelled_by?: DbBookingCancelledBy | null;
   notes?: string | null;
   pending_account_link?: boolean;
   created_at?: string;
@@ -413,6 +424,7 @@ export type BookingUpdate = {
   end_date?: string;
   transport_required?: boolean;
   status?: DbBookingStatus;
+  cancelled_by?: DbBookingCancelledBy | null;
   notes?: string | null;
   pending_account_link?: boolean;
   created_at?: string;

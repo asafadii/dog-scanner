@@ -11,6 +11,7 @@ import type { Booking, BookingFormData } from "@/lib/types";
 export type PortalBookingsErrorCode =
   | "incomplete_setup"
   | "unauthorized"
+  | "account_closed"
   | "not_found"
   | "unknown";
 
@@ -183,4 +184,47 @@ export async function createPortalBooking(
   }
 
   return { data: data.booking, error: null };
+}
+
+export interface CancelPortalBookingSuccessResponse {
+  ok: true;
+  data: true;
+}
+
+export interface CancelPortalBookingErrorResponse {
+  ok: false;
+  error: string;
+}
+
+export type CancelPortalBookingResponse =
+  | CancelPortalBookingSuccessResponse
+  | CancelPortalBookingErrorResponse;
+
+export async function cancelPortalBooking(
+  bookingId: string,
+): Promise<PortalBookingsResult<true>> {
+  const response = await portalFetch(
+    `/api/portal/bookings/${bookingId}/cancel`,
+    {
+      method: "POST",
+    },
+  );
+
+  const data = (await response.json()) as CancelPortalBookingResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to cancel booking";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403 ? "unauthorized" : "unknown",
+      ),
+    };
+  }
+
+  return { data: true, error: null };
 }

@@ -63,6 +63,7 @@ export function mapBookingRowToBooking(
     endDate: row.end_date,
     transportRequired: row.transport_required,
     status: row.status,
+    cancelledBy: row.cancelled_by ?? null,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

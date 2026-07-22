@@ -3,7 +3,10 @@
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { getPortalBookingById } from "@/lib/portal/bookings";
+import {
+  cancelPortalBooking,
+  getPortalBookingById,
+} from "@/lib/portal/bookings";
 import {
   formatCheckinTokenForDisplay,
   getCheckInUnavailableMessage,
@@ -57,6 +60,8 @@ function PortalBookingDetailInner({
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -82,6 +87,31 @@ function PortalBookingDetailInner({
   useEffect(() => {
     void loadBooking();
   }, [loadBooking]);
+
+  async function handleCancelBooking() {
+    if (!booking || cancelling) return;
+
+    const confirmed = window.confirm(
+      "Cancel this booking? The facility will be notified by email.",
+    );
+    if (!confirmed) return;
+
+    setCancelling(true);
+    setCancelError(null);
+
+    const result = await cancelPortalBooking(bookingId);
+    if (result.error) {
+      setCancelError(result.error.message);
+    } else {
+      setBooking({
+        ...booking,
+        status: "cancelled",
+        cancelledBy: "client",
+      });
+    }
+
+    setCancelling(false);
+  }
 
   const generateToken = useCallback(async () => {
     setTokenLoading(true);
@@ -163,6 +193,8 @@ function PortalBookingDetailInner({
 
   const minutes = Math.floor(secondsRemaining / 60);
   const seconds = secondsRemaining % 60;
+  const canCancel =
+    booking.status === "pending" || booking.status === "approved";
 
   return (
     <div className="space-y-6">
@@ -178,6 +210,15 @@ function PortalBookingDetailInner({
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{booking.dogBreed}</p>
       </div>
+
+      {cancelError && (
+        <p
+          className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
+          role="alert"
+        >
+          {cancelError}
+        </p>
+      )}
 
       <Card>
         <CardHeader className="pb-2">
@@ -203,6 +244,31 @@ function PortalBookingDetailInner({
           )}
         </CardContent>
       </Card>
+
+      {canCancel && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Manage booking</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            <p className="text-sm text-muted-foreground">
+              Need to cancel? You can cancel this booking while it is still
+              pending or approved.
+            </p>
+            <Button
+              variant="outline"
+              className="border-danger/40 text-danger hover:bg-danger/10"
+              disabled={cancelling}
+              onClick={() => void handleCancelBooking()}
+            >
+              {cancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : null}
+              {cancelling ? "Cancelling..." : "Cancel Booking"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="pb-2">

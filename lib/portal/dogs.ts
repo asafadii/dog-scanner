@@ -15,6 +15,7 @@ import type { Dog, DogAlerts, DogSize, FeedingSource, NewDogFormData } from "@/l
 export type PortalDogsErrorCode =
   | "incomplete_setup"
   | "unauthorized"
+  | "account_closed"
   | "not_found"
   | "unknown";
 

@@ -236,6 +236,7 @@ export async function updateBookingStatusServer(
   facilityId: string,
   bookingId: string,
   status: BookingStatus,
+  options?: { cancelledBy?: "staff" | "client" },
 ): Promise<ServerResult<Booking>> {
   const { data: existing, error: fetchError } = await db
     .from("bookings")
@@ -254,6 +255,15 @@ export async function updateBookingStatusServer(
 
   const bookingRow = existing as BookingRow;
 
+  if (status === "cancelled") {
+    if (bookingRow.status !== "pending" && bookingRow.status !== "approved") {
+      return {
+        data: null,
+        error: "Only pending or approved bookings can be cancelled",
+      };
+    }
+  }
+
   if (status === "approved") {
     const approval = await canApproveBookingServer(db, facilityId, bookingRow);
     if (!approval.canApprove) {
@@ -269,6 +279,9 @@ export async function updateBookingStatusServer(
   const update: BookingUpdate = {
     status,
     updated_at: new Date().toISOString(),
+    ...(status === "cancelled"
+      ? { cancelled_by: options?.cancelledBy ?? "staff" }
+      : {}),
   };
 
   const { data, error } = await db

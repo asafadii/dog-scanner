@@ -20,6 +20,7 @@ const FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "approved", label: "Approved" },
   { value: "rejected", label: "Rejected" },
   { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 function formatServiceType(serviceType: Booking["serviceType"]): string {

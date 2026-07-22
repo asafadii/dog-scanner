@@ -9,12 +9,13 @@ interface BookingStatusBadgeProps {
 
 const STATUS_CONFIG: Record<
   BookingStatus,
-  { label: string; variant: "amber" | "teal" | "red" | "stone" }
+  { label: string; variant: "amber" | "teal" | "red" | "stone" | "default" }
 > = {
   pending: { label: "Pending", variant: "amber" },
   approved: { label: "Approved", variant: "teal" },
   rejected: { label: "Rejected", variant: "red" },
   completed: { label: "Completed", variant: "stone" },
+  cancelled: { label: "Cancelled", variant: "default" },
 };
 
 export function BookingStatusBadge({

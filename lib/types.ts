@@ -168,7 +168,8 @@ export type BookingStatus =
   | "pending"
   | "approved"
   | "rejected"
-  | "completed";
+  | "completed"
+  | "cancelled";
 
 export interface Booking {
   id: string;
@@ -180,6 +181,7 @@ export interface Booking {
   endDate: string;
   transportRequired: boolean;
   status: BookingStatus;
+  cancelledBy: "staff" | "client" | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;

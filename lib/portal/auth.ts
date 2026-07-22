@@ -13,6 +13,7 @@ export const INCOMPLETE_CLIENT_SETUP_MESSAGE =
 export type PortalErrorCode =
   | "incomplete_setup"
   | "unauthorized"
+  | "account_closed"
   | "not_found"
   | "unknown";
 
@@ -67,7 +68,16 @@ export async function requireClientAccount(): Promise<
     };
   }
 
-  return { data: account as ClientAccountRow, error: null };
+  const accountRow = account as ClientAccountRow;
+
+  if (accountRow.archived_at) {
+    return {
+      data: null,
+      error: toError("This account has been closed.", "account_closed"),
+    };
+  }
+
+  return { data: accountRow, error: null };
 }
 
 export async function getLinkedClients(): Promise<PortalResult<LinkedClient[]>> {
@@ -164,9 +174,12 @@ export async function hasClientAccount(): Promise<boolean> {
 
   const { data } = await supabase
     .from("client_accounts")
-    .select("id")
+    .select("id, archived_at")
     .eq("id", user.id)
     .maybeSingle();
 
-  return Boolean(data);
+  if (!data) return false;
+
+  const account = data as { id: string; archived_at: string | null };
+  return !account.archived_at;
 }

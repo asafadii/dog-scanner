@@ -5,6 +5,7 @@ import {
 } from "@/lib/bookings/server";
 import {
   buildBookingApprovedHtml,
+  buildBookingCancelledByFacilityHtml,
   buildBookingRejectedHtml,
   formatEmailDate,
 } from "@/lib/email";
@@ -19,6 +20,7 @@ const STATUS_VALUES = new Set<BookingStatus>([
   "approved",
   "rejected",
   "completed",
+  "cancelled",
 ]);
 
 export async function PATCH(
@@ -55,9 +57,46 @@ export async function PATCH(
 
   if (!status || !STATUS_VALUES.has(status)) {
     return NextResponse.json(
-      { ok: false, error: "status must be approved, rejected, or completed" },
+      {
+        ok: false,
+        error: "status must be approved, rejected, completed, or cancelled",
+      },
       { status: 400 },
     );
+  }
+
+  if (status === "cancelled") {
+    const { data: existing, error: fetchError } = await db
+      .from("bookings")
+      .select("status")
+      .eq("id", bookingId)
+      .eq("facility_id", profile.facility_id)
+      .maybeSingle();
+
+    if (fetchError) {
+      return NextResponse.json(
+        { ok: false, error: fetchError.message },
+        { status: 400 },
+      );
+    }
+
+    if (!existing) {
+      return NextResponse.json(
+        { ok: false, error: "Booking not found" },
+        { status: 404 },
+      );
+    }
+
+    const currentStatus = (existing as { status: BookingStatus }).status;
+    if (currentStatus !== "pending" && currentStatus !== "approved") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Only pending or approved bookings can be cancelled",
+        },
+        { status: 400 },
+      );
+    }
   }
 
   const result = await updateBookingStatusServer(
@@ -65,6 +104,7 @@ export async function PATCH(
     profile.facility_id,
     bookingId,
     status,
+    status === "cancelled" ? { cancelledBy: "staff" } : undefined,
   );
 
   if (result.error || !result.data) {
@@ -76,7 +116,7 @@ export async function PATCH(
 
   const booking = result.data;
 
-  if (status === "approved" || status === "rejected") {
+  if (status === "approved" || status === "rejected" || status === "cancelled") {
     const emailContext = await getBookingEmailContext(
       db,
       profile.facility_id,
@@ -99,7 +139,7 @@ export async function PATCH(
             portalUrl,
           }),
         });
-      } else {
+      } else if (status === "rejected") {
         await sendTransactionalEmail({
           to: emailContext.clientEmail,
           subject: `Update on ${emailContext.dogName}'s booking`,
@@ -108,6 +148,17 @@ export async function PATCH(
             dogName: emailContext.dogName,
             facilityName: emailContext.facilityName,
             portalUrl,
+          }),
+        });
+      } else {
+        await sendTransactionalEmail({
+          to: emailContext.clientEmail,
+          subject: `${emailContext.dogName}'s booking was cancelled`,
+          html: buildBookingCancelledByFacilityHtml({
+            clientName: emailContext.clientName,
+            dogName: emailContext.dogName,
+            facilityName: emailContext.facilityName,
+            bookingUrl: portalUrl,
           }),
         });
       }
