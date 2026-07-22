@@ -1,9 +1,14 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
-import { createBookingServer } from "@/lib/bookings/server";
+import {
+  createBookingServer,
+  getFacilityNotificationRecipients,
+} from "@/lib/bookings/server";
 import { toDogInsert } from "@/lib/dogs";
 import {
   buildBookingCongratulationsHtml,
+  buildFacilityNewBookingRequestHtml,
   buildNewBookingAddedHtml,
+  formatEmailDate,
 } from "@/lib/email";
 import {
   checkEmbedRateLimit,
@@ -228,9 +233,9 @@ function buildDogFormData(
       medication: false,
       allergy: false,
       dietary: false,
-      aggression:
-        body.aggressionTowardsPeople === true ||
-        body.aggressionTowardsDogs === true,
+      aggressionTowardsPeople: body.aggressionTowardsPeople === true,
+      aggressionTowardsDogs: body.aggressionTowardsDogs === true,
+      chewingRisk: false,
       escapeRisk: false,
     },
   };
@@ -608,6 +613,27 @@ export async function POST(request: Request, context: RouteContext) {
           signupUrl: `${APP_URL}/portal/signup?email=${encodeURIComponent(ownerEmail)}`,
         }),
       });
+    }
+
+    const adminEmails = await getFacilityNotificationRecipients(db, facilityId);
+    if (adminEmails.length > 0) {
+      const bookingUrl = `${APP_URL}/bookings/${booking.id}`;
+      const html = buildFacilityNewBookingRequestHtml({
+        dogName,
+        clientName: ownerName,
+        serviceType,
+        startDate: formatEmailDate(startDate),
+        endDate: formatEmailDate(endDate),
+        bookingUrl,
+      });
+
+      for (const email of adminEmails) {
+        await sendTransactionalEmail({
+          to: email,
+          subject: `New booking request for ${dogName}`,
+          html,
+        });
+      }
     }
 
     await recordEmbedAttempt(db, ipAddress, facilityId, true);

@@ -47,7 +47,7 @@ export default function HeroBand() {
             </span>
           </span>
         </Link>
-        <div className="mx-auto flex gap-7 text-[15px] font-bold">
+        <div className="flex gap-5 text-[13px] font-bold sm:mx-auto sm:gap-7 sm:text-[15px]">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
@@ -61,7 +61,7 @@ export default function HeroBand() {
         <div className="flex items-center gap-[13px]">
           <Link
             href="/login"
-            className="hidden rounded text-[15px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:inline"
+            className="rounded text-[15px] font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marker focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
             Sign In
           </Link>

@@ -56,6 +56,16 @@ function generateFacilityCodeValue(): string {
   return code;
 }
 
+function deriveFacilityCodeFromName(name: string): string {
+  const stripped = name
+    .replace(/[^a-zA-Z0-9\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join("");
+  return stripped.slice(0, 20).toUpperCase() || "FACILITY";
+}
+
 async function requireProfile(): Promise<FacilityResult<ProfileRow>> {
   const supabase = createSupabaseBrowserClient();
   const {
@@ -175,9 +185,29 @@ export async function generateFacilityCode(): Promise<
   const supabase = createSupabaseBrowserClient();
   const facilityId = profileResult.data.facility_id;
 
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const code = generateFacilityCodeValue();
+  const { data: facility, error: facilityError } = await supabase
+    .from("facilities")
+    .select("name")
+    .eq("id", facilityId)
+    .maybeSingle();
 
+  if (facilityError) {
+    return { data: null, error: toError(facilityError.message) };
+  }
+
+  if (!facility) {
+    return { data: null, error: toError("Facility not found") };
+  }
+
+  const baseCode = deriveFacilityCodeFromName(facility.name ?? "");
+  const candidates: string[] = [baseCode];
+  for (let suffix = 2; suffix <= 5; suffix += 1) {
+    candidates.push(`${baseCode}${suffix}`);
+  }
+
+  async function tryAssignCode(
+    code: string,
+  ): Promise<FacilityResult<FacilitySettings> | "taken"> {
     const { data: taken } = await supabase
       .from("facilities")
       .select("id")
@@ -186,7 +216,7 @@ export async function generateFacilityCode(): Promise<
       .maybeSingle();
 
     if (taken) {
-      continue;
+      return "taken";
     }
 
     const { data, error } = await supabase
@@ -198,7 +228,7 @@ export async function generateFacilityCode(): Promise<
 
     if (error) {
       if (error.code === "23505") {
-        continue;
+        return "taken";
       }
       return { data: null, error: toError(error.message) };
     }
@@ -213,6 +243,17 @@ export async function generateFacilityCode(): Promise<
       ),
       error: null,
     };
+  }
+
+  for (const code of candidates) {
+    const result = await tryAssignCode(code);
+    if (result === "taken") continue;
+    return result;
+  }
+
+  const randomResult = await tryAssignCode(generateFacilityCodeValue());
+  if (randomResult !== "taken") {
+    return randomResult;
   }
 
   return {

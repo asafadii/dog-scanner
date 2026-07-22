@@ -1,9 +1,18 @@
+import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
 import { mapBookingRowToBooking } from "@/lib/bookings";
+import { getFacilityNotificationRecipients } from "@/lib/bookings/server";
 import {
   DEFAULT_BOARDING_CAPACITY,
   DEFAULT_DAYCARE_CAPACITY,
   enumerateDates,
 } from "@/lib/capacity";
+import {
+  buildBookingApprovedHtml,
+  buildBookingConfirmationHtml,
+  buildFacilityAutoApprovedBookingHtml,
+  buildFacilityNewBookingRequestHtml,
+  formatEmailDate,
+} from "@/lib/email";
 import type { CreatePortalBookingSuccessResponse } from "@/lib/portal/bookings";
 import {
   verifyClientAccountLink,
@@ -12,6 +21,8 @@ import {
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { BookingFormData, BookingServiceType } from "@/lib/types";
 import { NextResponse } from "next/server";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://hellodora.app";
 
 interface CreatePortalBookingBody extends BookingFormData {
   facilityId?: string;
@@ -191,7 +202,7 @@ export async function POST(request: Request) {
 
   const { data: clientRow } = await db
     .from("clients")
-    .select("name")
+    .select("name, email")
     .eq("id", clientId)
     .maybeSingle();
 
@@ -210,5 +221,81 @@ export async function POST(request: Request) {
       dogRow?.breed ?? "",
     ),
   };
+
+  const { data: facilityRow } = await db
+    .from("facilities")
+    .select("name")
+    .eq("id", facilityId)
+    .maybeSingle();
+  const facilityName = facilityRow?.name ?? "your daycare";
+  const startDateFormatted = formatEmailDate(response.booking.startDate);
+  const endDateFormatted = formatEmailDate(response.booking.endDate);
+  const clientNameForEmail = clientRow?.name ?? "A client";
+
+  if (clientRow?.email?.trim()) {
+    const portalUrl = `${APP_URL}/portal/bookings/${response.booking.id}`;
+
+    if (autoApprove) {
+      await sendTransactionalEmail({
+        to: clientRow.email,
+        subject: `🎉🐾 ${response.booking.dogName}'s booking is officially confirmed!`,
+        html: buildBookingApprovedHtml({
+          clientName: clientRow.name,
+          dogName: response.booking.dogName,
+          facilityName,
+          startDate: startDateFormatted,
+          endDate: endDateFormatted,
+          portalUrl,
+        }),
+      });
+    } else {
+      await sendTransactionalEmail({
+        to: clientRow.email,
+        subject: `Booking received for ${response.booking.dogName} 🐾`,
+        html: buildBookingConfirmationHtml({
+          clientName: clientRow.name,
+          dogName: response.booking.dogName,
+          facilityName,
+          serviceType: response.booking.serviceType,
+          startDate: startDateFormatted,
+          endDate: endDateFormatted,
+          portalUrl,
+        }),
+      });
+    }
+  }
+
+  const adminEmails = await getFacilityNotificationRecipients(db, facilityId);
+  if (adminEmails.length > 0) {
+    const bookingUrl = `${APP_URL}/bookings/${response.booking.id}`;
+    const html = autoApprove
+      ? buildFacilityAutoApprovedBookingHtml({
+          dogName: response.booking.dogName,
+          clientName: clientNameForEmail,
+          serviceType: response.booking.serviceType,
+          startDate: startDateFormatted,
+          endDate: endDateFormatted,
+          bookingUrl,
+        })
+      : buildFacilityNewBookingRequestHtml({
+          dogName: response.booking.dogName,
+          clientName: clientNameForEmail,
+          serviceType: response.booking.serviceType,
+          startDate: startDateFormatted,
+          endDate: endDateFormatted,
+          bookingUrl,
+        });
+
+    for (const email of adminEmails) {
+      await sendTransactionalEmail({
+        to: email,
+        subject: autoApprove
+          ? `Booking auto-confirmed for ${response.booking.dogName}`
+          : `New booking request for ${response.booking.dogName}`,
+        html,
+      });
+    }
+  }
+
   return NextResponse.json(response, { status: 201 });
 }

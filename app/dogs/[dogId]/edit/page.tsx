@@ -1,8 +1,10 @@
 "use client";
 
 import { DogForm, type DogFormSubmitPhase } from "@/components/dogs/DogForm";
+import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
 import {
+  archiveDog,
   dogToFormData,
   ensureClientForDogForm,
   getCurrentUserProfile,
@@ -24,6 +26,7 @@ export default function EditDogPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitPhase, setSubmitPhase] = useState<DogFormSubmitPhase>("idle");
   const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+  const [dogName, setDogName] = useState("");
   const [initialData, setInitialData] = useState<ReturnType<
     typeof dogToFormData
   > | null>(null);
@@ -37,9 +40,11 @@ export default function EditDogPage() {
       setError(result.error.message);
       setInitialData(null);
       setExistingPhotoUrl(null);
+      setDogName("");
     } else {
       setInitialData(dogToFormData(result.data));
       setExistingPhotoUrl(result.data.photoUrl);
+      setDogName(result.data.name);
     }
 
     setLoading(false);
@@ -157,6 +162,19 @@ export default function EditDogPage() {
             );
             setSubmitPhase("idle");
           }
+        }}
+      />
+
+      <ArchiveConfirmCard
+        bare
+        entityName={dogName || initialData.name}
+        onConfirm={async () => {
+          const result = await archiveDog(dogId);
+          return { error: result.error };
+        }}
+        onSuccess={() => {
+          router.push("/dogs");
+          router.refresh();
         }}
       />
     </div>

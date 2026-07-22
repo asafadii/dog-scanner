@@ -33,11 +33,29 @@ const ALERT_DEFS: AlertDef[] = [
     variant: "red",
   },
   {
-    key: "aggression",
-    label: "Aggression caution",
-    shortLabel: "Caution",
-    icon: Shield,
+    key: "chewingRisk",
+    label: "Chewing / self-harm risk",
+    shortLabel: "Chewing risk",
+    icon: DoorOpen,
     priority: 2,
+    critical: true,
+    variant: "rose",
+  },
+  {
+    key: "aggressionTowardsPeople",
+    label: "Aggressive towards people",
+    shortLabel: "People caution",
+    icon: Shield,
+    priority: 3,
+    critical: true,
+    variant: "orange",
+  },
+  {
+    key: "aggressionTowardsDogs",
+    label: "Aggressive towards dogs",
+    shortLabel: "Dog caution",
+    icon: Shield,
+    priority: 4,
     critical: true,
     variant: "orange",
   },
@@ -46,16 +64,16 @@ const ALERT_DEFS: AlertDef[] = [
     label: "Escape risk",
     shortLabel: "Escape",
     icon: DoorOpen,
-    priority: 3,
-    critical: true,
-    variant: "rose",
+    priority: 5,
+    critical: false,
+    variant: "amber",
   },
   {
     key: "medication",
     label: "Medication required",
     shortLabel: "Meds",
     icon: Pill,
-    priority: 4,
+    priority: 6,
     critical: false,
     variant: "violet",
   },
@@ -64,23 +82,25 @@ const ALERT_DEFS: AlertDef[] = [
     label: "Dietary restriction",
     shortLabel: "Diet",
     icon: Apple,
-    priority: 5,
+    priority: 7,
     critical: false,
     variant: "amber",
   },
 ];
 
-// SOLID safety treatment (PRIM-04 / D-11 / D-14): the 4 safety flags render
-// as the loudest element — solid fill + white text + leading icon.
-// KEY GOTCHA: the alert key is `escapeRisk` but the token is `safety-escape`.
+// SOLID safety treatment (PRIM-04 / D-11 / D-14): the 4 critical safety flags
+// render as the loudest element — solid fill + white text + leading icon.
 const SAFETY_SOLID: Record<
-  "allergy" | "aggression" | "escapeRisk" | "medication",
+  | "allergy"
+  | "chewingRisk"
+  | "aggressionTowardsPeople"
+  | "aggressionTowardsDogs",
   string
 > = {
   allergy: "bg-safety-allergy text-white",
-  aggression: "bg-safety-aggression text-white",
-  escapeRisk: "bg-safety-escape text-white",
-  medication: "bg-safety-medication text-white",
+  chewingRisk: "bg-safety-chewing text-white",
+  aggressionTowardsPeople: "bg-safety-aggression text-white",
+  aggressionTowardsDogs: "bg-safety-aggression text-white",
 };
 
 // Governed off-scale radius/padding per UI-SPEC Spacing Exception
@@ -150,48 +170,41 @@ export function DogAlertBadges({
 
 export function getCriticalAlertMessages(
   alerts: DogAlerts,
-  care: {
-    medication: string;
-    allergies: string;
-    dietaryNotes: string;
-    behavior: string;
+  notes: {
+    allergyNotes: string;
+    chewingRiskNotes: string;
+    aggressionPeopleNotes: string;
+    aggressionDogsNotes: string;
   },
 ): { type: string; message: string; critical: boolean }[] {
   const messages: { type: string; message: string; critical: boolean }[] = [];
 
-  if (alerts.allergy && care.allergies !== "None known") {
+  if (alerts.allergy && notes.allergyNotes) {
     messages.push({
       type: "Allergy",
-      message: care.allergies,
+      message: notes.allergyNotes,
       critical: true,
     });
   }
-  if (alerts.aggression) {
+  if (alerts.chewingRisk && notes.chewingRiskNotes) {
     messages.push({
-      type: "Aggression Caution",
-      message: care.behavior,
+      type: "Chewing / Self-Harm Risk",
+      message: notes.chewingRiskNotes,
       critical: true,
     });
   }
-  if (alerts.escapeRisk) {
+  if (alerts.aggressionTowardsPeople && notes.aggressionPeopleNotes) {
     messages.push({
-      type: "Escape Risk",
-      message: care.behavior,
+      type: "Aggression — People",
+      message: notes.aggressionPeopleNotes,
       critical: true,
     });
   }
-  if (alerts.medication && care.medication !== "None") {
+  if (alerts.aggressionTowardsDogs && notes.aggressionDogsNotes) {
     messages.push({
-      type: "Medication",
-      message: care.medication,
-      critical: false,
-    });
-  }
-  if (alerts.dietary) {
-    messages.push({
-      type: "Dietary Restriction",
-      message: care.dietaryNotes,
-      critical: false,
+      type: "Aggression — Dogs",
+      message: notes.aggressionDogsNotes,
+      critical: true,
     });
   }
 

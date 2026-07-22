@@ -1,30 +1,40 @@
 "use client";
 
+import {
+  buildFacilityOptions,
+  PortalFacilityPicker,
+  type FacilityOption,
+} from "@/components/portal/PortalFacilityPicker";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { getLinkedClients } from "@/lib/portal/auth";
 import { createPortalBooking } from "@/lib/portal/bookings";
 import { getPortalDogs } from "@/lib/portal/dogs";
 import type { BookingFormData, BookingServiceType, Dog } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 const SERVICE_TYPES: BookingServiceType[] = ["daycare", "boarding"];
 
 export default function PortalNewBookingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const clientId = searchParams.get("clientId") ?? "";
-  const facilityId = searchParams.get("facilityId") ?? "";
+  const initialClientId = searchParams.get("clientId") ?? "";
+  const initialFacilityId = searchParams.get("facilityId") ?? "";
   const initialDogId = searchParams.get("dogId") ?? "";
 
+  const [facilityOptions, setFacilityOptions] = useState<FacilityOption[]>([]);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityOption | null>(
+    null,
+  );
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [loadingDogs, setLoadingDogs] = useState(true);
   const [form, setForm] = useState<BookingFormData>({
-    clientId,
+    clientId: initialClientId,
     dogId: initialDogId,
     serviceType: "daycare",
     startDate: "",
@@ -34,34 +44,94 @@ export default function PortalNewBookingPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [contextError, setContextError] = useState<string | null>(null);
+
+  const clientId = selectedFacility?.clientId ?? "";
+  const facilityId = selectedFacility?.facilityId ?? "";
+
+  useEffect(() => {
+    void getLinkedClients().then((result) => {
+      if (result.error) {
+        setContextError(result.error.message);
+        setLoadingDogs(false);
+        return;
+      }
+
+      const options = buildFacilityOptions(result.data);
+      setFacilityOptions(options);
+
+      const matched =
+        options.find(
+          (option) =>
+            option.facilityId === initialFacilityId &&
+            option.clientId === initialClientId,
+        ) ??
+        options.find((option) => option.facilityId === initialFacilityId) ??
+        options[0] ??
+        null;
+
+      setSelectedFacility(matched);
+      if (!matched) {
+        setContextError(
+          "Missing facility context. Go back to the portal and try again.",
+        );
+        setLoadingDogs(false);
+      }
+    });
+  }, [initialClientId, initialFacilityId]);
 
   useEffect(() => {
     if (!clientId || !facilityId) {
-      setLoadingDogs(false);
       return;
     }
+
+    setLoadingDogs(true);
+    setForm((current) => ({
+      ...current,
+      clientId,
+      dogId: current.clientId === clientId ? current.dogId : initialDogId,
+    }));
 
     void getPortalDogs(clientId, facilityId).then((result) => {
       if (!result.error) {
         setDogs(result.data);
-        if (!initialDogId && result.data.length === 1) {
-          setForm((current) => ({ ...current, dogId: result.data[0].id }));
-        }
+        setForm((current) => {
+          const keepDog =
+            current.dogId &&
+            result.data.some((dog) => dog.id === current.dogId);
+          if (keepDog) return current;
+          if (!initialDogId && result.data.length === 1) {
+            return { ...current, dogId: result.data[0].id };
+          }
+          if (
+            initialDogId &&
+            result.data.some((dog) => dog.id === initialDogId)
+          ) {
+            return { ...current, dogId: initialDogId };
+          }
+          return { ...current, dogId: "" };
+        });
+      } else {
+        setDogs([]);
       }
       setLoadingDogs(false);
     });
   }, [clientId, facilityId, initialDogId]);
 
-  if (!clientId || !facilityId) {
+  const pickerOptions = useMemo(() => facilityOptions, [facilityOptions]);
+
+  if (contextError && !selectedFacility) {
     return (
       <p className="text-sm text-danger" role="alert">
-        Missing facility context. Go back to the portal and try again.
+        {contextError}
       </p>
     );
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!clientId || !facilityId) return;
+
     setError(null);
     setSubmitting(true);
 
@@ -93,6 +163,19 @@ export default function PortalNewBookingPage() {
           Request daycare or boarding for your dog.
         </p>
       </div>
+
+      <PortalFacilityPicker
+        options={pickerOptions}
+        selectedFacilityId={selectedFacility?.facilityId ?? ""}
+        onChange={(option) => {
+          setSelectedFacility(option);
+          setForm((current) => ({
+            ...current,
+            clientId: option.clientId,
+            dogId: "",
+          }));
+        }}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
@@ -135,7 +218,6 @@ export default function PortalNewBookingPage() {
               <label className="mb-2 block text-sm font-medium text-foreground">
                 Service type
               </label>
-              {/* Operational-flat segmented control (active = mint-wash #EAF4F1); matches Plan-04 pattern, NO sticker */}
               <div className="grid grid-cols-2 gap-2">
                 {SERVICE_TYPES.map((serviceType) => (
                   <button
@@ -202,13 +284,10 @@ export default function PortalNewBookingPage() {
         )}
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          {/* Documented portal sticker exception (Pitfall 5, [ASSUMED A1], design line 982):
-              primary submit CTA ONLY — border 2.5px + shadow 4px 4px 0 #06342F. Nowhere else, never in staff app. */}
           <Button
             type="submit"
             size="lg"
-            disabled={submitting || dogs.length === 0}
-            className="border-[2.5px] border-[#06342F] shadow-[4px_4px_0_#06342F] disabled:shadow-none"
+            disabled={submitting || dogs.length === 0 || !selectedFacility}
           >
             {submitting ? "Submitting..." : "Submit Request"}
           </Button>

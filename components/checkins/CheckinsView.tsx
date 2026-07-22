@@ -14,12 +14,18 @@ import { getDogs, INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { getActiveAssignmentsMap } from "@/lib/kennels";
 import { slideUp } from "@/lib/motion";
 import type { Booking, Dog, KennelAssignment, Payment } from "@/lib/types";
-import { formatBookingDateRange } from "@/lib/utils";
+import { cn, formatBookingDateRange } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ClipboardCheck, Dog as DogIcon, Loader2, ScanLine, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
+
+const SERVICE_FILTERS = [
+  { value: "all" as const, label: "All" },
+  { value: "daycare" as const, label: "Daycare" },
+  { value: "boarding" as const, label: "Boarding" },
+];
 
 export function CheckinsView() {
   const [checkedIn, setCheckedIn] = useState<Dog[]>([]);
@@ -32,6 +38,9 @@ export function CheckinsView() {
     null,
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [serviceFilter, setServiceFilter] = useState<
+    "all" | "daycare" | "boarding"
+  >("all");
 
   const loadCheckedIn = useCallback(async () => {
     setLoading(true);
@@ -181,15 +190,20 @@ export function CheckinsView() {
 
   const filteredCheckedIn = useMemo(() => {
     const normalized = searchQuery.trim().toLowerCase();
-    if (!normalized) return checkedIn;
 
-    return checkedIn.filter(
-      (dog) =>
+    return checkedIn.filter((dog) => {
+      const matchesService =
+        serviceFilter === "all" || dog.serviceType === serviceFilter;
+      if (!matchesService) return false;
+      if (!normalized) return true;
+
+      return (
         dog.name.toLowerCase().includes(normalized) ||
         dog.owner.name.toLowerCase().includes(normalized) ||
-        (dog.client?.name.toLowerCase().includes(normalized) ?? false),
-    );
-  }, [checkedIn, searchQuery]);
+        (dog.client?.name.toLowerCase().includes(normalized) ?? false)
+      );
+    });
+  }, [checkedIn, searchQuery, serviceFilter]);
 
   if (loading) {
     return (
@@ -316,24 +330,48 @@ export function CheckinsView() {
       )}
 
       <section className="space-y-3">
-        <h3 className="font-display text-lg text-foreground">On site now</h3>
-
         {checkedIn.length > 0 && (
-          <div className="relative max-w-md">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <Input
-              type="search"
-              placeholder="Search by dog or owner name..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="pl-10"
-              aria-label="Search checked-in dogs"
-            />
-          </div>
+          <>
+            <div className="relative max-w-md">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                placeholder="Search by dog or owner name..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="pl-10"
+                aria-label="Search checked-in dogs"
+              />
+            </div>
+
+            <div
+              className="flex max-w-md gap-2"
+              role="group"
+              aria-label="Filter by service type"
+            >
+              {SERVICE_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  onClick={() => setServiceFilter(filter.value)}
+                  className={cn(
+                    "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                    serviceFilter === filter.value
+                      ? "border-primary bg-mint-wash text-primary"
+                      : "border-border bg-surface text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </>
         )}
+
+        <h3 className="font-display text-lg text-foreground">On site now</h3>
 
       {checkedIn.length === 0 ? (
         <Card className="border-t-4 border-t-marker">
@@ -353,7 +391,7 @@ export function CheckinsView() {
             <div className="mx-auto mb-3 flex w-fit rounded-xl bg-marker/20 p-3 text-[#5a4a1e]">
               <Search className="h-6 w-6" aria-hidden />
             </div>
-            <p className="text-muted-foreground">No dogs match your search.</p>
+            <p className="text-muted-foreground">No dogs match your filters.</p>
           </CardContent>
         </Card>
       ) : (

@@ -54,7 +54,7 @@ export function PortalShell({
 
   return (
     <div className="portal-theme flex min-h-full flex-col bg-background">
-      <header className="border-b border-[#E4D9FC] bg-[#F5F0FE] backdrop-blur-sm">
+      <header className="border-b border-border bg-white backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
           <Link
             href="/portal"

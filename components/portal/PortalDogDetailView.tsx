@@ -183,7 +183,9 @@ export function PortalDogDetailView({
 
       {(dog.alerts.medication ||
         dog.alerts.allergy ||
-        dog.alerts.aggression ||
+        dog.alerts.aggressionTowardsPeople ||
+        dog.alerts.aggressionTowardsDogs ||
+        dog.alerts.chewingRisk ||
         dog.alerts.escapeRisk) && (
         <Card>
           <CardHeader className="pb-2">

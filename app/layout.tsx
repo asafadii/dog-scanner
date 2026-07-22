@@ -1,6 +1,6 @@
 import { Providers } from "@/components/app/Providers";
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
+import { Baloo_2, Inter } from "next/font/google";
 import "./globals.css";
 
 const display = Baloo_2({
@@ -9,7 +9,7 @@ const display = Baloo_2({
   weight: ["700", "800"],
 });
 
-const sans = Plus_Jakarta_Sans({
+const sans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],

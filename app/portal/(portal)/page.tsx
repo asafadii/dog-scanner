@@ -232,47 +232,11 @@ export default function PortalPage() {
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <PawPrint className="h-5 w-5 text-primary" aria-hidden />
-                Your Dogs
-              </h2>
-              <Link href={newDogHref}>
-                <Button size="sm">
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Add a Dog
-                </Button>
-              </Link>
-            </div>
-
-            {dogs.length === 0 ? (
-              <Card>
-                <CardContent className="py-10 text-center text-sm text-muted-foreground">
-                  No dogs on file yet. Add your first dog to get started.
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {dogs.map((dog) =>
-                  selectedFacility ? (
-                    <PortalDogCard
-                      key={dog.id}
-                      dog={dog}
-                      clientId={selectedFacility.clientId}
-                      facilityId={selectedFacility.facilityId}
-                    />
-                  ) : null,
-                )}
-              </div>
-            )}
-          </section>
-
-          <section className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
                 <CalendarPlus className="h-5 w-5 text-primary" aria-hidden />
                 Your Bookings
               </h2>
               <Link href={newBookingHref}>
-                <Button size="sm" variant="outline">
+                <Button size="sm">
                   <Plus className="h-4 w-4" aria-hidden />
                   New Booking
                 </Button>
@@ -292,6 +256,42 @@ export default function PortalPage() {
                     <PortalBookingCard
                       key={booking.id}
                       booking={booking}
+                      clientId={selectedFacility.clientId}
+                      facilityId={selectedFacility.facilityId}
+                    />
+                  ) : null,
+                )}
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <PawPrint className="h-5 w-5 text-primary" aria-hidden />
+                Your Dogs
+              </h2>
+              <Link href={newDogHref}>
+                <Button size="sm" variant="outline">
+                  <Plus className="h-4 w-4" aria-hidden />
+                  Add a Dog
+                </Button>
+              </Link>
+            </div>
+
+            {dogs.length === 0 ? (
+              <Card>
+                <CardContent className="py-10 text-center text-sm text-muted-foreground">
+                  No dogs on file yet. Add your first dog to get started.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {dogs.map((dog) =>
+                  selectedFacility ? (
+                    <PortalDogCard
+                      key={dog.id}
+                      dog={dog}
                       clientId={selectedFacility.clientId}
                       facilityId={selectedFacility.facilityId}
                     />

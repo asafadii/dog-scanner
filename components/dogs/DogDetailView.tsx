@@ -2,6 +2,7 @@
 
 import {
   DogAlertBadges,
+  getActiveAlerts,
   getCriticalAlertMessages,
   hasCriticalAlerts,
 } from "@/components/dogs/DogAlertBadges";
@@ -10,7 +11,6 @@ import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
-import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -24,7 +24,6 @@ import {
   getStaffDogDocuments,
 } from "@/lib/documents";
 import {
-  archiveDog,
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
@@ -298,8 +297,15 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   }
 
   const isCheckedIn = dog.status === "checked_in";
-  const criticalMessages = getCriticalAlertMessages(dog.alerts, dog.care);
-  const criticalOnly = criticalMessages.filter((m) => m.critical);
+  const criticalMessages = getCriticalAlertMessages(dog.alerts, {
+    allergyNotes: dog.allergyNotes,
+    chewingRiskNotes: dog.chewingRiskNotes,
+    aggressionPeopleNotes: dog.aggressionPeopleNotes,
+    aggressionDogsNotes: dog.aggressionDogsNotes,
+  });
+  const hasNonCriticalAlerts = getActiveAlerts(dog.alerts).some(
+    (alert) => !alert.critical,
+  );
 
   function handleSaveNote() {
     if (!noteText.trim()) return;
@@ -392,7 +398,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         </AnimatePresence>
 
         {/* Critical alerts — always near top; #FEF2F2 = documented Alert error tint (D-04) */}
-        {criticalOnly.length > 0 && (
+        {criticalMessages.length > 0 && (
           <Card className="border-2 border-danger/40 bg-[#FEF2F2]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-[22px] text-danger">
@@ -401,7 +407,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pt-0">
-              {criticalOnly.map((alert) => (
+              {criticalMessages.map((alert) => (
                 <div
                   key={alert.type}
                   className="rounded-xl border border-danger/30 bg-surface p-3"
@@ -417,54 +423,38 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         )}
 
         {/* Non-critical alert badges */}
-        {hasCriticalAlerts(dog.alerts) === false &&
-          getCriticalAlertMessages(dog.alerts, dog.care).length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Care Alerts</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 pt-0">
-                <DogAlertBadges alerts={dog.alerts} />
-                {getCriticalAlertMessages(dog.alerts, dog.care)
-                  .filter((m) => !m.critical)
-                  .map((alert) => (
-                    <div key={alert.type} className="text-sm">
-                      <span className="font-medium text-foreground">
-                        {alert.type}:
-                      </span>{" "}
-                      <span className="text-muted-foreground">{alert.message}</span>
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-          )}
+        {hasCriticalAlerts(dog.alerts) === false && hasNonCriticalAlerts && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Care Alerts</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 pt-0">
+              <DogAlertBadges alerts={dog.alerts} />
+            </CardContent>
+          </Card>
+        )}
 
-        {getCriticalAlertMessages(dog.alerts, dog.care).some(
-          (m) => !m.critical,
-        ) &&
-          criticalOnly.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Additional Alerts</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 pt-0">
-                {getCriticalAlertMessages(dog.alerts, dog.care)
-                  .filter((m) => !m.critical)
-                  .map((alert) => (
-                    <div
-                      key={alert.type}
-                      className="rounded-xl border border-border bg-muted p-3 text-sm"
-                    >
-                      <span className="font-medium">{alert.type}:</span>{" "}
-                      {alert.message}
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-          )}
+        {hasNonCriticalAlerts && criticalMessages.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Additional Alerts</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 pt-0">
+              <DogAlertBadges
+                alerts={{
+                  ...dog.alerts,
+                  allergy: false,
+                  chewingRisk: false,
+                  aggressionTowardsPeople: false,
+                  aggressionTowardsDogs: false,
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Owner */}
-        <Card>
+        <Card className="border-t-4 border-t-primary">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-primary" aria-hidden />
@@ -592,7 +582,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         </Card>
 
         {/* Health & Safety */}
-        <Card>
+        <Card className="border-t-4 border-t-warning">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-primary" aria-hidden />
@@ -664,7 +654,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         </Card>
 
         {/* Feeding */}
-        <Card>
+        <Card className="border-t-4 border-t-marker">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Apple className="h-5 w-5 text-primary" aria-hidden />
@@ -717,7 +707,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         )}
 
         {/* Documents (read-only) */}
-        <Card>
+        <Card className="border-t-4 border-t-info">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" aria-hidden />
@@ -761,18 +751,6 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             )}
           </CardContent>
         </Card>
-
-        <ArchiveConfirmCard
-          entityName={dog.name}
-          onConfirm={async () => {
-            const result = await archiveDog(dogId);
-            return { error: result.error };
-          }}
-          onSuccess={() => {
-            router.push("/dogs");
-            router.refresh();
-          }}
-        />
 
         {/* Today's care */}
         {isCheckedIn && dog.todaysCare.length > 0 && (
@@ -829,7 +807,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
         )}
 
         {/* Timeline */}
-        <Card>
+        <Card className="border-t-4 border-t-mint">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-primary" aria-hidden />

@@ -6,7 +6,9 @@ export interface DogAlerts {
   medication: boolean;
   allergy: boolean;
   dietary: boolean;
-  aggression: boolean;
+  aggressionTowardsPeople: boolean;
+  aggressionTowardsDogs: boolean;
+  chewingRisk: boolean;
   escapeRisk: boolean;
 }
 

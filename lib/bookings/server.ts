@@ -333,3 +333,20 @@ export async function getBookingEmailContext(
     booking,
   };
 }
+
+export async function getFacilityNotificationRecipients(
+  db: ServerDb,
+  facilityId: string,
+): Promise<string[]> {
+  const { data, error } = await db
+    .from("profiles")
+    .select("email")
+    .eq("facility_id", facilityId)
+    .eq("role", "admin");
+
+  if (error || !data) return [];
+
+  return data
+    .map((row) => (row as { email: string }).email?.trim())
+    .filter((email): email is string => Boolean(email));
+}

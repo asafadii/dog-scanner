@@ -35,7 +35,9 @@ const defaultAlerts: DogAlerts = {
   medication: false,
   allergy: false,
   dietary: false,
-  aggression: false,
+  aggressionTowardsPeople: false,
+  aggressionTowardsDogs: false,
+  chewingRisk: false,
   escapeRisk: false,
 };
 

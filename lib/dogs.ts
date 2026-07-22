@@ -193,7 +193,9 @@ export function mapDogRowToDog(row: DogRow): Dog {
       medication: row.medication_required,
       allergy: allergyText.length > 0,
       dietary: dietNotes.length > 0,
-      aggression: row.aggression_risk,
+      aggressionTowardsPeople: row.aggression_towards_people ?? false,
+      aggressionTowardsDogs: row.aggression_towards_dogs ?? false,
+      chewingRisk: parseTriStateText(row.chewing_risk) === true,
       escapeRisk: row.escape_risk,
     },
     owner: {

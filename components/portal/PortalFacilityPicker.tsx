@@ -41,7 +41,21 @@ export function PortalFacilityPicker({
   onChange,
   className,
 }: PortalFacilityPickerProps) {
-  if (options.length <= 1) return null;
+  if (options.length === 0) return null;
+
+  if (options.length === 1) {
+    return (
+      <div className={cn("space-y-2", className)}>
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <Building2 className="h-4 w-4 text-primary" aria-hidden />
+          Your facility
+        </span>
+        <div className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground shadow-sm">
+          {options[0].facilityName}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-2", className)}>

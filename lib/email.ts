@@ -305,3 +305,67 @@ export function buildNewBookingAddedHtml({
 
   return emailShell("New booking added", body);
 }
+
+export function buildFacilityNewBookingRequestHtml({
+  dogName,
+  clientName,
+  serviceType,
+  startDate,
+  endDate,
+  bookingUrl,
+}: {
+  dogName: string;
+  clientName: string;
+  serviceType: "daycare" | "boarding";
+  startDate: string;
+  endDate: string;
+  bookingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Heads up — <strong>${dogName}</strong>'s owner
+      (${clientName}) just sent in a new booking request, and it's
+      waiting on you for a paws-up.<br><br>
+      <strong>Service:</strong> ${serviceType}<br>
+      <strong>Dates:</strong> ${startDate} – ${endDate}<br><br>
+      Take a look and approve or decline whenever you're ready.
+    </p>
+    ${emailButton(bookingUrl, "Review request →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Wags & wiggles,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+  return emailShell("New booking request", body);
+}
+
+export function buildFacilityAutoApprovedBookingHtml({
+  dogName,
+  clientName,
+  serviceType,
+  startDate,
+  endDate,
+  bookingUrl,
+}: {
+  dogName: string;
+  clientName: string;
+  serviceType: "daycare" | "boarding";
+  startDate: string;
+  endDate: string;
+  bookingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Just so you're in the loop — <strong>${dogName}</strong>
+      (owner: ${clientName}) has a new booking, and since they're a
+      returning pup with room on the calendar, it's already been
+      auto-confirmed. No action needed on your end.<br><br>
+      <strong>Service:</strong> ${serviceType}<br>
+      <strong>Dates:</strong> ${startDate} – ${endDate}
+    </p>
+    ${emailButton(bookingUrl, "View booking →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+  return emailShell("Booking auto-confirmed", body);
+}

@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import { History, Sparkles } from "lucide-react";
 
@@ -29,9 +28,15 @@ export function DogVisitBadge({
   }
 
   return (
-    <Badge variant="violet" className={className} title="First visit">
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-[7px] px-2 py-[3px] text-[13px] font-extrabold bg-info text-white",
+        className,
+      )}
+      title="First visit"
+    >
       <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
       First Visit
-    </Badge>
+    </span>
   );
 }

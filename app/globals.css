@@ -26,6 +26,7 @@
   /* safety flags */
   --dora-safety-allergy: #DC2626;
   --dora-safety-aggression: #991B1B;
+  --dora-safety-chewing: #B91C1C;
   --dora-safety-escape: #E11D48;
   --dora-safety-medication: #6D28D9;
 
@@ -63,6 +64,7 @@
 
   --color-safety-allergy: var(--dora-safety-allergy);
   --color-safety-aggression: var(--dora-safety-aggression);
+  --color-safety-chewing: var(--dora-safety-chewing);
   --color-safety-escape: var(--dora-safety-escape);
   --color-safety-medication: var(--dora-safety-medication);
 
