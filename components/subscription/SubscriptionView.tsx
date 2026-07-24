@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { staffFetch } from "@/lib/api";
+import { getCurrentUserProfile } from "@/lib/dogs";
 import {
   formatStaffLimit,
   getSubscriptionInfo,
 } from "@/lib/subscription";
+import type { UserRole } from "@/lib/supabase/types";
 import type { SubscriptionInfo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Check, CreditCard, Loader2 } from "lucide-react";
@@ -86,6 +88,7 @@ export function SubscriptionView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+  const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -99,7 +102,17 @@ export function SubscriptionView() {
     setLoading(true);
     setError(null);
 
-    const result = await getSubscriptionInfo();
+    const [result, profileResult] = await Promise.all([
+      getSubscriptionInfo(),
+      getCurrentUserProfile(),
+    ]);
+
+    if (profileResult.data) {
+      setCurrentRole(profileResult.data.role);
+    } else {
+      setCurrentRole(null);
+    }
+
     if (result.error) {
       setError(result.error.message);
       setSubscription(null);
@@ -215,6 +228,154 @@ export function SubscriptionView() {
         >
           Try again
         </Button>
+      </div>
+    );
+  }
+
+  if (!subscription.stripeCustomerId) {
+    const isAdmin = currentRole === "admin";
+
+    return (
+      <div className="space-y-8">
+        <div>
+          <h2 className="font-display text-2xl text-foreground">
+            Start your 14-day free trial
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add a payment method to activate your account. You won&apos;t be
+            charged until your trial ends, and you can cancel anytime.
+          </p>
+        </div>
+
+        {actionError && (
+          <div
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
+            role="alert"
+          >
+            {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
+            {actionError}
+          </div>
+        )}
+
+        {!isAdmin ? (
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-sm text-muted-foreground">
+                Ask a facility admin to set up billing to get started.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div>
+            <h3 className="mb-4 text-lg font-semibold text-foreground">
+              Choose a plan
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {PLAN_CARDS.map((plan) => {
+                const isCheckingOut = checkoutPlan === plan.id;
+                return (
+                  <div
+                    key={plan.id}
+                    className="rounded-2xl border-2 border-border bg-surface p-6"
+                  >
+                    <h4 className="text-lg font-bold text-foreground">
+                      {plan.name}
+                    </h4>
+                    <p className="mt-1">
+                      <span className="text-2xl font-bold text-primary">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {plan.period}
+                      </span>
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {plan.description}
+                    </p>
+                    <ul className="mt-4 space-y-2">
+                      {plan.features.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-start gap-2 text-sm text-muted-foreground"
+                        >
+                          <Check
+                            className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                            aria-hidden
+                          />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button
+                      className="mt-5 w-full"
+                      onClick={() => void handleCheckout(plan.id)}
+                      disabled={checkoutPlan !== null}
+                    >
+                      {isCheckingOut && (
+                        <Loader2
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden
+                        />
+                      )}
+                      {isCheckingOut
+                        ? "Redirecting..."
+                        : "Add payment method"}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (subscription.accessLevel === "blocked") {
+    const isAdmin = currentRole === "admin";
+
+    return (
+      <div className="space-y-8">
+        <div>
+          <h2 className="font-display text-2xl text-foreground">
+            Your account is paused
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Don&apos;t worry — nothing has been deleted. Your data is exactly as
+            you left it. Reactivate to pick up right where you left off.
+          </p>
+        </div>
+
+        {actionError && (
+          <div
+            className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
+            role="alert"
+          >
+            {/* #FEF2F2 documented error-tint (D-04, mirrors Alert.tsx) */}
+            {actionError}
+          </div>
+        )}
+
+        {!isAdmin ? (
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-sm text-muted-foreground">
+                Ask a facility admin to update billing to reactivate.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => void handleManageBilling()}
+            disabled={portalLoading}
+          >
+            {portalLoading && (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            )}
+            {portalLoading ? "Opening billing..." : "Reactivate"}
+          </Button>
+        )}
       </div>
     );
   }

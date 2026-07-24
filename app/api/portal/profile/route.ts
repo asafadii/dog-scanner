@@ -1,3 +1,4 @@
+import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import type { PortalProfileData } from "@/lib/portal/profile";
 import { verifyPortalAccessToken } from "@/lib/portal/server";
 import type { ClientRow } from "@/lib/supabase/types";
@@ -168,6 +169,17 @@ export async function PATCH(request: Request) {
     return NextResponse.json(
       { ok: false, error: "Not authorized" },
       { status: 403 },
+    );
+  }
+
+  const access = await getFacilityAccessLevelServer(db, facilityId);
+  if (access.level === "blocked") {
+    return NextResponse.json(
+      {
+        error:
+          "This facility is not currently accepting profile updates.",
+      },
+      { status: 503 },
     );
   }
 

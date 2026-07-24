@@ -4,6 +4,9 @@
 //         customer.subscription.deleted, invoice.payment_failed,
 //         invoice.payment_succeeded
 
+import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
+import { getFacilityNotificationRecipients } from "@/lib/bookings/server";
+import { buildPaymentConfirmedHtml } from "@/lib/email";
 import {
   facilityUpdateFromSubscription,
   updateFacilityByStripeCustomerId,
@@ -15,6 +18,10 @@ import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://hellodora.app";
+const BILLING_URL = `${APP_URL}/subscription`;
 
 function getStripeCustomerId(
   customer: string | Stripe.Customer | Stripe.DeletedCustomer | null,
@@ -102,6 +109,7 @@ export async function POST(request: Request) {
 
       const result = await updateFacilityByStripeCustomerId(db, customerId, {
         subscription_status: "past_due",
+        past_due_since: new Date().toISOString(),
       });
       if (!result.ok) {
         console.error("[stripe/webhook] facility update failed:", result.error);
@@ -116,9 +124,55 @@ export async function POST(request: Request) {
 
       const result = await updateFacilityByStripeCustomerId(db, customerId, {
         subscription_status: "active",
+        past_due_since: null,
+        grace_started_email_sent_at: null,
+        access_blocked_email_sent_at: null,
       });
       if (!result.ok) {
         console.error("[stripe/webhook] facility update failed:", result.error);
+        break;
+      }
+
+      try {
+        const { data: facility, error: facilityError } = await db
+          .from("facilities")
+          .select("id, name")
+          .eq("stripe_customer_id", customerId)
+          .maybeSingle();
+
+        if (facilityError) {
+          console.error(
+            "[stripe/webhook] payment confirmed facility lookup failed:",
+            facilityError.message,
+          );
+          break;
+        }
+
+        if (!facility) break;
+
+        const facilityRow = facility as { id: string; name: string | null };
+        const facilityName = facilityRow.name?.trim() || "your facility";
+        const recipients = await getFacilityNotificationRecipients(
+          db,
+          facilityRow.id,
+        );
+        const html = buildPaymentConfirmedHtml({
+          facilityName,
+          billingUrl: BILLING_URL,
+        });
+
+        for (const email of recipients) {
+          await sendTransactionalEmail({
+            to: email,
+            subject: "You're all set!",
+            html,
+          });
+        }
+      } catch (err) {
+        console.error(
+          "[stripe/webhook] payment confirmed email failed:",
+          err instanceof Error ? err.message : err,
+        );
       }
       break;
     }

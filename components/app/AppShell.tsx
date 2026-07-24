@@ -1,5 +1,6 @@
 "use client";
 
+import { BillingBanner } from "@/components/app/BillingBanner";
 import { DesktopStaffNav } from "@/components/app/DesktopStaffNav";
 import { MobileBottomNav } from "@/components/app/MobileBottomNav";
 import { TopBar } from "@/components/app/TopBar";
@@ -14,6 +15,7 @@ interface AppShellProps {
 export function AppShell({ children, className }: AppShellProps) {
   return (
     <div className="flex min-h-full flex-col bg-background">
+      <BillingBanner />
       <TopBar />
       <DesktopStaffNav />
       <main

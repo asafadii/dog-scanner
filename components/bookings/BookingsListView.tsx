@@ -1,6 +1,10 @@
 "use client";
 
 import { BookingCard } from "@/components/bookings/BookingCard";
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Pill } from "@/components/ui/Pills";
@@ -40,6 +44,8 @@ function matchesSearch(booking: Booking, query: string): boolean {
 }
 
 export function BookingsListView() {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,12 +130,23 @@ export function BookingsListView() {
             View all dog profiles
           </Link>
         </div>
-        <Link href="/bookings/new">
-          <Button className="w-full sm:w-auto">
+        {writeLocked ? (
+          <Button
+            className="w-full sm:w-auto"
+            disabled
+            title={WRITE_LOCKED_TITLE}
+          >
             <Plus className="h-4 w-4" aria-hidden />
             New Booking
           </Button>
-        </Link>
+        ) : (
+          <Link href="/bookings/new">
+            <Button className="w-full sm:w-auto">
+              <Plus className="h-4 w-4" aria-hidden />
+              New Booking
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">

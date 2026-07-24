@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
+import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import {
   getBookingEmailContext,
   updateBookingStatusServer,
@@ -63,6 +64,19 @@ export async function PATCH(
       },
       { status: 400 },
     );
+  }
+
+  if (status === "approved") {
+    const access = await getFacilityAccessLevelServer(db, profile.facility_id);
+    if (access.level === "blocked") {
+      return NextResponse.json(
+        {
+          error:
+            "Your subscription needs attention before approving new bookings. Visit Settings → Subscription.",
+        },
+        { status: 402 },
+      );
+    }
   }
 
   if (status === "cancelled") {

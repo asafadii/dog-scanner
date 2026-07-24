@@ -1,3 +1,4 @@
+import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import {
   verifyDogLinkedToClientAccount,
   verifyPortalAccessToken,
@@ -73,6 +74,20 @@ export async function POST(
     return NextResponse.json(
       { ok: false, error: dogResult.error },
       { status: dogResult.status },
+    );
+  }
+
+  const access = await getFacilityAccessLevelServer(
+    db,
+    dogResult.dog.facility_id,
+  );
+  if (access.level === "blocked") {
+    return NextResponse.json(
+      {
+        error:
+          "This facility is not currently accepting new dog profiles.",
+      },
+      { status: 503 },
     );
   }
 

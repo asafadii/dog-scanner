@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
+import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import {
   createBookingServer,
   getFacilityNotificationRecipients,
@@ -426,6 +427,17 @@ export async function POST(request: Request, context: RouteContext) {
   const config = isBookingFormConfig(facilityRow.booking_form_config)
     ? facilityRow.booking_form_config
     : {};
+
+  const access = await getFacilityAccessLevelServer(db, facilityId);
+  if (access.level === "blocked") {
+    await recordEmbedAttempt(db, ipAddress, facilityId, false);
+    return NextResponse.json(
+      {
+        error: "This facility is not currently accepting new bookings.",
+      },
+      { status: 503 },
+    );
+  }
 
   const validationError = validateRequiredFields(body, config);
   if (validationError) {

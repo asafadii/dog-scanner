@@ -1,30 +1,98 @@
 "use client";
 
+import { FacilityAccessProvider } from "@/components/app/FacilityAccessContext";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { getCurrentUserProfile } from "@/lib/dogs";
+import { getSubscriptionInfo } from "@/lib/subscription";
+import type { UserRole } from "@/lib/supabase/types";
+import type { SubscriptionInfo } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
 
 interface RequireAuthProps {
   children: ReactNode;
 }
 
+function AuthLoadingSpinner() {
+  return (
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 bg-background">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+      <p className="text-sm text-muted-foreground">Loading...</p>
+    </div>
+  );
+}
+
 export function RequireAuth({ children }: RequireAuthProps) {
   const { user, loading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [subscriptionInfo, setSubscriptionInfo] =
+    useState<SubscriptionInfo | null>(null);
+  const [subscriptionFailed, setSubscriptionFailed] = useState(false);
+  const [role, setRole] = useState<UserRole | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setSubscriptionLoading(false);
+      setSubscriptionInfo(null);
+      setSubscriptionFailed(false);
+      setRole(null);
+      return;
+    }
+
+    let cancelled = false;
+    setSubscriptionLoading(true);
+    setSubscriptionFailed(false);
+
+    void Promise.all([getSubscriptionInfo(), getCurrentUserProfile()]).then(
+      ([subscriptionResult, profileResult]) => {
+        if (cancelled) return;
+
+        if (profileResult.data) {
+          setRole(profileResult.data.role);
+        } else {
+          setRole(null);
+        }
+
+        if (subscriptionResult.error) {
+          setSubscriptionFailed(true);
+          setSubscriptionInfo(null);
+        } else {
+          setSubscriptionInfo(subscriptionResult.data);
+          setSubscriptionFailed(false);
+        }
+        setSubscriptionLoading(false);
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const onSubscriptionPage = pathname.startsWith("/subscription");
+  const needsSubscriptionRedirect =
+    Boolean(user) &&
+    !subscriptionLoading &&
+    !subscriptionFailed &&
+    subscriptionInfo !== null &&
+    !onSubscriptionPage &&
+    (subscriptionInfo.stripeCustomerId === null ||
+      subscriptionInfo.accessLevel === "blocked");
+
+  useEffect(() => {
+    if (!needsSubscriptionRedirect) return;
+    router.push("/subscription");
+  }, [needsSubscriptionRedirect, router]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 bg-background">
-        <Loader2
-          className="h-8 w-8 animate-spin text-primary"
-          aria-hidden
-        />
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <AuthLoadingSpinner />;
   }
 
   if (!user) {
@@ -62,5 +130,20 @@ export function RequireAuth({ children }: RequireAuthProps) {
     );
   }
 
-  return <>{children}</>;
+  if (subscriptionLoading || needsSubscriptionRedirect) {
+    return <AuthLoadingSpinner />;
+  }
+
+  return (
+    <FacilityAccessProvider
+      value={{
+        accessLevel: subscriptionInfo?.accessLevel ?? "full",
+        daysUntilBlocked: subscriptionInfo?.daysUntilBlocked ?? null,
+        role,
+        loading: false,
+      }}
+    >
+      {children}
+    </FacilityAccessProvider>
+  );
 }

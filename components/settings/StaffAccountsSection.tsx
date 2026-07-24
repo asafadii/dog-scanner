@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -22,6 +26,8 @@ import { Loader2, User, UserPlus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 export function StaffAccountsSection() {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [staffCount, setStaffCount] = useState(0);
@@ -261,11 +267,13 @@ export function StaffAccountsSection() {
                 <Button
                   className="w-full sm:w-auto"
                   onClick={openInviteModal}
-                  disabled={atStaffLimit}
+                  disabled={atStaffLimit || writeLocked}
                   title={
-                    atStaffLimit
-                      ? "Staff limit reached — upgrade to invite more."
-                      : undefined
+                    writeLocked
+                      ? WRITE_LOCKED_TITLE
+                      : atStaffLimit
+                        ? "Staff limit reached — upgrade to invite more."
+                        : undefined
                   }
                 >
                   <UserPlus className="h-4 w-4" aria-hidden />
@@ -323,8 +331,10 @@ export function StaffAccountsSection() {
                           disabled={
                             inviteSending ||
                             !inviteEmail.trim() ||
-                            atStaffLimit
+                            atStaffLimit ||
+                            writeLocked
                           }
+                          title={writeLocked ? WRITE_LOCKED_TITLE : undefined}
                         >
                           {inviteSending && (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -1,7 +1,12 @@
 import { cn } from "@/lib/utils";
 import type { HTMLAttributes, ReactNode } from "react";
 
-export type StatCardAccent = "default" | "ink" | "mint" | "marker";
+export type StatCardAccent =
+  | "default"
+  | "ink"
+  | "mint"
+  | "marker"
+  | "marker-light";
 
 export interface StatCardProps extends HTMLAttributes<HTMLDivElement> {
   value: ReactNode;
@@ -21,20 +26,20 @@ export function StatCard({
   ...props
 }: StatCardProps) {
   const isInk = accent === "ink";
-  const isMarker = accent === "marker";
+  const isMarkerFamily = accent === "marker" || accent === "marker-light";
   const textColor = isInk
     ? "text-white"
-    : isMarker
+    : isMarkerFamily
       ? "text-[#5a4a1e]"
       : "text-primary";
   const iconColor = isInk
     ? "text-white/70"
-    : isMarker
+    : isMarkerFamily
       ? "text-[#5a4a1e]"
       : "text-muted-foreground";
   const labelColor = isInk
     ? "text-white/80"
-    : isMarker
+    : isMarkerFamily
       ? "text-[#5a4a1e]"
       : "text-muted-foreground";
 
@@ -46,6 +51,7 @@ export function StatCard({
         accent === "ink" && "border-transparent bg-[#06342F]",
         accent === "mint" && "border-border bg-mint-wash",
         accent === "marker" && "border-[#e8c84a] bg-marker",
+        accent === "marker-light" && "border-[#F2D98A]/40 bg-[#FBF3E6]",
         className,
       )}
       {...props}

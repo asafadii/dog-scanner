@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { DogCard } from "@/components/dogs/DogCard";
 import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
@@ -33,6 +37,8 @@ interface ClientDetailViewProps {
 }
 
 export function ClientDetailView({ clientId }: ClientDetailViewProps) {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const router = useRouter();
   const [client, setClient] = useState<Client | null>(null);
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -178,18 +184,41 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
             )}
             {inviteSendLoading ? "Sending..." : "Invite Owner"}
           </Button>
-          <Link href={`/clients/${clientId}/edit`}>
-            <Button variant="outline" className="w-full sm:w-auto">
+          {writeLocked ? (
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled
+              title={WRITE_LOCKED_TITLE}
+            >
               <Pencil className="h-4 w-4" aria-hidden />
               Edit Client
             </Button>
-          </Link>
-          <Link href={`/dogs/new?clientId=${clientId}`}>
-            <Button className="w-full sm:w-auto">
+          ) : (
+            <Link href={`/clients/${clientId}/edit`}>
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Pencil className="h-4 w-4" aria-hidden />
+                Edit Client
+              </Button>
+            </Link>
+          )}
+          {writeLocked ? (
+            <Button
+              className="w-full sm:w-auto"
+              disabled
+              title={WRITE_LOCKED_TITLE}
+            >
               <Plus className="h-4 w-4" aria-hidden />
               Add Dog
             </Button>
-          </Link>
+          ) : (
+            <Link href={`/dogs/new?clientId=${clientId}`}>
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4" aria-hidden />
+                Add Dog
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -331,12 +360,24 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
               <PawPrint className="h-6 w-6" aria-hidden />
             </div>
             <p className="text-muted-foreground">No dogs linked to this client yet.</p>
-            <Link href={`/dogs/new?clientId=${clientId}`}>
-              <Button variant="outline" className="mt-4">
+            {writeLocked ? (
+              <Button
+                variant="outline"
+                className="mt-4"
+                disabled
+                title={WRITE_LOCKED_TITLE}
+              >
                 <Plus className="h-4 w-4" aria-hidden />
                 Add Dog
               </Button>
-            </Link>
+            ) : (
+              <Link href={`/dogs/new?clientId=${clientId}`}>
+                <Button variant="outline" className="mt-4">
+                  <Plus className="h-4 w-4" aria-hidden />
+                  Add Dog
+                </Button>
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">

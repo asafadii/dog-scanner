@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
+import {
   DogAlertBadges,
   getActiveAlerts,
   getCriticalAlertMessages,
@@ -112,6 +116,8 @@ interface DogDetailViewProps {
 }
 
 export function DogDetailView({ dogId }: DogDetailViewProps) {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const router = useRouter();
   const [dog, setDog] = useState<Dog | null>(null);
   const [loading, setLoading] = useState(true);
@@ -327,13 +333,25 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           sizes="(max-width: 768px) 100vw, 1024px"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-        <Link
-          href={`/dogs/${dogId}/edit`}
-          className="absolute right-4 top-4 flex min-h-[44px] items-center gap-2 rounded-xl bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm hover:bg-black/55"
-        >
-          <Pencil className="h-4 w-4" aria-hidden />
-          Edit
-        </Link>
+        {writeLocked ? (
+          <button
+            type="button"
+            disabled
+            title={WRITE_LOCKED_TITLE}
+            className="absolute right-4 top-4 flex min-h-[44px] items-center gap-2 rounded-xl bg-black/40 px-3 py-2 text-sm font-medium text-white/60 backdrop-blur-sm opacity-70"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+            Edit
+          </button>
+        ) : (
+          <Link
+            href={`/dogs/${dogId}/edit`}
+            className="absolute right-4 top-4 flex min-h-[44px] items-center gap-2 rounded-xl bg-black/40 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm hover:bg-black/55"
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+            Edit
+          </Link>
+        )}
         <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>

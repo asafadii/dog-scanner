@@ -1,6 +1,10 @@
 "use client";
 
 import { DogCard } from "@/components/dogs/DogCard";
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -19,6 +23,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function DogsListView() {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,12 +152,23 @@ export function DogsListView() {
             {filtered.length} of {dogs.length} profiles
           </p>
         </div>
-        <Link href="/dogs/new">
-          <Button className="w-full sm:w-auto">
+        {writeLocked ? (
+          <Button
+            className="w-full sm:w-auto"
+            disabled
+            title={WRITE_LOCKED_TITLE}
+          >
             <Plus className="h-4 w-4" aria-hidden />
             Add Dog
           </Button>
-        </Link>
+        ) : (
+          <Link href="/dogs/new">
+            <Button className="w-full sm:w-auto">
+              <Plus className="h-4 w-4" aria-hidden />
+              Add Dog
+            </Button>
+          </Link>
+        )}
       </div>
 
       <AnimatePresence>

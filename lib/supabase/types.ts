@@ -303,6 +303,10 @@ export interface FacilityRow {
   subscription_started_at: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  past_due_since: string | null;
+  trial_7day_email_sent_at: string | null;
+  grace_started_email_sent_at: string | null;
+  access_blocked_email_sent_at: string | null;
   created_at: string;
 }
 
@@ -629,6 +633,10 @@ export type Database = {
           subscription_started_at?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
+          past_due_since?: string | null;
+          trial_7day_email_sent_at?: string | null;
+          grace_started_email_sent_at?: string | null;
+          access_blocked_email_sent_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -647,6 +655,10 @@ export type Database = {
           subscription_started_at?: string | null;
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
+          past_due_since?: string | null;
+          trial_7day_email_sent_at?: string | null;
+          grace_started_email_sent_at?: string | null;
+          access_blocked_email_sent_at?: string | null;
           created_at?: string;
         };
         Relationships: [];

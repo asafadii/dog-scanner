@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
+import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import { buildStaffInviteHtml } from "@/lib/email";
 import { verifyStaffAccessToken } from "@/lib/staff/server";
 import type { FacilityRow } from "@/lib/supabase/types";
@@ -27,6 +28,17 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "Only facility admins can invite staff." },
       { status: 403 },
+    );
+  }
+
+  const access = await getFacilityAccessLevelServer(db, profile.facility_id);
+  if (access.level === "blocked") {
+    return NextResponse.json(
+      {
+        error:
+          "Your subscription needs attention before inviting staff.",
+      },
+      { status: 402 },
     );
   }
 

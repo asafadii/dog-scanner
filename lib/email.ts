@@ -425,3 +425,105 @@ export function buildFacilityAutoApprovedBookingHtml({
   `;
   return emailShell("Booking auto-confirmed", body);
 }
+
+export function buildTrialEndingSoonHtml({
+  facilityName,
+  trialEndsAt,
+  billingUrl,
+}: {
+  facilityName: string;
+  trialEndsAt: string;
+  billingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi there,<br><br>
+      Just a heads up — your hello DORA trial for
+      <strong>${facilityName}</strong> ends on
+      <strong>${trialEndsAt}</strong>. Add a payment method before
+      then to keep everything running without a hitch.
+    </p>
+    ${emailButton(billingUrl, "Manage billing →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Your trial ends in 7 days", body);
+}
+
+export function buildTrialEndedGraceHtml({
+  facilityName,
+  daysUntilBlocked,
+  billingUrl,
+}: {
+  facilityName: string;
+  daysUntilBlocked: number;
+  billingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi there,<br><br>
+      We tried to charge the card on file for
+      <strong>${facilityName}</strong> and it didn't go through. No
+      worries yet — you have <strong>${daysUntilBlocked}</strong> more
+      days to update your payment method before your account pauses.
+      Your data is safe either way.
+    </p>
+    ${emailButton(billingUrl, "Update payment method →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("We couldn't charge your card", body);
+}
+
+export function buildAccessBlockedHtml({
+  facilityName,
+  billingUrl,
+}: {
+  facilityName: string;
+  billingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi there,<br><br>
+      <strong>${facilityName}</strong>'s hello DORA account is now
+      paused since we couldn't get a payment through in time. Don't
+      worry — nothing has been deleted, your data is exactly as you
+      left it. Reactivate anytime to pick up right where you left off.
+    </p>
+    ${emailButton(billingUrl, "Reactivate →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Your account is paused", body);
+}
+
+export function buildPaymentConfirmedHtml({
+  facilityName,
+  billingUrl,
+}: {
+  facilityName: string;
+  billingUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi there,<br><br>
+      Payment for <strong>${facilityName}</strong> went through
+      successfully — everything's active and ready to go.
+    </p>
+    ${emailButton(billingUrl, "View subscription →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+    ${emailFooter(
+      "Manage your plan any time from Settings → Subscription.",
+    )}
+  `;
+
+  return emailShell("You're all set!", body);
+}

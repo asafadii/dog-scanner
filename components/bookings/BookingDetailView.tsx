@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { DogSnapshotCard } from "@/components/dogs/DogSnapshotCard";
 import { Button } from "@/components/ui/Button";
@@ -37,6 +41,8 @@ function formatServiceType(serviceType: Booking["serviceType"]): string {
 }
 
 export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -202,12 +208,24 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
             {formatServiceType(booking.serviceType)} booking
           </p>
         </div>
-        <Link href={`/bookings/${bookingId}/edit`}>
-          <Button variant="outline" className="w-full sm:w-auto">
+        {writeLocked ? (
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            disabled
+            title={WRITE_LOCKED_TITLE}
+          >
             <Pencil className="h-4 w-4" aria-hidden />
             Edit Booking
           </Button>
-        </Link>
+        ) : (
+          <Link href={`/bookings/${bookingId}/edit`}>
+            <Button variant="outline" className="w-full sm:w-auto">
+              <Pencil className="h-4 w-4" aria-hidden />
+              Edit Booking
+            </Button>
+          </Link>
+        )}
       </div>
 
       <AnimatePresence>

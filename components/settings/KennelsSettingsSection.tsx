@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -15,6 +19,8 @@ import { Home, Loader2, Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function KennelsSettingsSection() {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [kennels, setKennels] = useState<Kennel[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -298,7 +304,8 @@ export function KennelsSettingsSection() {
               <Button
                 className="mt-3 w-full sm:w-auto"
                 onClick={() => void handleAddKennel()}
-                disabled={adding || !newName.trim()}
+                disabled={adding || !newName.trim() || writeLocked}
+                title={writeLocked ? WRITE_LOCKED_TITLE : undefined}
               >
                 {adding ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

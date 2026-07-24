@@ -1,6 +1,10 @@
 "use client";
 
 import { ClientCard } from "@/components/clients/ClientCard";
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -13,6 +17,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function ClientsListView() {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -177,12 +183,23 @@ export function ClientsListView() {
             <Mail className="h-4 w-4" aria-hidden />
             Invite Owner
           </Button>
-          <Link href="/clients/new">
-            <Button className="w-full sm:w-auto">
+          {writeLocked ? (
+            <Button
+              className="w-full sm:w-auto"
+              disabled
+              title={WRITE_LOCKED_TITLE}
+            >
               <Plus className="h-4 w-4" aria-hidden />
               Add Client
             </Button>
-          </Link>
+          ) : (
+            <Link href="/clients/new">
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4" aria-hidden />
+                Add Client
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { DogPhotoUpload } from "@/components/dogs/DogPhotoUpload";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -192,6 +196,8 @@ export function DogForm({
   submitPhase = "idle",
   dogId,
 }: DogFormProps) {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [form, setForm] = useState<NewDogFormData>(
     initialData ?? { ...defaultForm, clientId: initialClientId },
   );
@@ -325,7 +331,7 @@ export function DogForm({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || writeLocked) return;
     void onSubmit(form, photoFile, vaccinationFiles);
   }
 
@@ -931,7 +937,8 @@ export function DogForm({
         type="submit"
         size="lg"
         className="w-full"
-        disabled={isSubmitting}
+        disabled={isSubmitting || writeLocked}
+        title={writeLocked ? WRITE_LOCKED_TITLE : undefined}
       >
         {isSubmitting && (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

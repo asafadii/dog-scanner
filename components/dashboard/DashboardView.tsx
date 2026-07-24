@@ -57,7 +57,7 @@ const STAT_CONFIG = [
   },
 ];
 
-const STAT_ACCENTS: StatCardAccent[] = ["ink", "marker", "default", "default"];
+const STAT_ACCENTS: StatCardAccent[] = ["marker", "marker-light", "default", "default"];
 
 export function DashboardView() {
   const [dogs, setDogs] = useState<Dog[]>([]);

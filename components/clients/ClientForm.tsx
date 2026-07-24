@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  useFacilityAccess,
+  WRITE_LOCKED_TITLE,
+} from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -23,6 +27,8 @@ export function ClientForm({
   initialData,
   submitPhase = "idle",
 }: ClientFormProps) {
+  const { accessLevel } = useFacilityAccess();
+  const writeLocked = accessLevel !== "full";
   const [form, setForm] = useState<ClientFormData>(
     initialData ?? {
       name: "",
@@ -46,7 +52,7 @@ export function ClientForm({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || writeLocked) return;
     void onSubmit(form);
   }
 
@@ -128,7 +134,8 @@ export function ClientForm({
         type="submit"
         size="lg"
         className="w-full"
-        disabled={isSubmitting}
+        disabled={isSubmitting || writeLocked}
+        title={writeLocked ? WRITE_LOCKED_TITLE : undefined}
       >
         {isSubmitting && (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

@@ -321,6 +321,9 @@ export interface SubscriptionInfo {
   isUnlimited: boolean;
   isActive: boolean;
   daysLeftInTrial: number | null;
+  stripeCustomerId: string | null;
+  accessLevel: "full" | "grace" | "blocked";
+  daysUntilBlocked: number | null;
 }
 
 export interface StaffMember {

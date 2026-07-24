@@ -1,3 +1,4 @@
+import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import { mapDogRowToDog, toDogInsert } from "@/lib/dogs";
 import type { CreatePortalDogSuccessResponse } from "@/lib/portal/dogs";
 import {
@@ -88,6 +89,17 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "Not authorized" },
       { status: 403 },
+    );
+  }
+
+  const access = await getFacilityAccessLevelServer(db, facilityId);
+  if (access.level === "blocked") {
+    return NextResponse.json(
+      {
+        error:
+          "This facility is not currently accepting new dog profiles.",
+      },
+      { status: 503 },
     );
   }
 

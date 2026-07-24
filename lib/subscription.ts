@@ -1,3 +1,4 @@
+import { computeFacilityAccessLevel } from "@/lib/billing/access";
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { FacilityRow, ProfileRow } from "@/lib/supabase/types";
@@ -40,6 +41,11 @@ function mapFacilityToSubscriptionInfo(row: FacilityRow): SubscriptionInfo {
     );
   }
 
+  const access = computeFacilityAccessLevel(
+    row.subscription_status,
+    row.past_due_since,
+  );
+
   return {
     plan: row.subscription_plan,
     status: row.subscription_status,
@@ -48,6 +54,9 @@ function mapFacilityToSubscriptionInfo(row: FacilityRow): SubscriptionInfo {
     isUnlimited: row.subscription_plan === "dora_unlimited",
     isActive,
     daysLeftInTrial,
+    stripeCustomerId: row.stripe_customer_id,
+    accessLevel: access.level,
+    daysUntilBlocked: access.daysUntilBlocked,
   };
 }
 
