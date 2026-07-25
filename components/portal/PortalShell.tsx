@@ -1,6 +1,7 @@
 "use client";
 
 import { Logo } from "@/components/ui/Logo";
+import { useScrollDirection } from "@/lib/hooks/useScrollDirection";
 import { appearScale } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -29,6 +30,7 @@ export function PortalShell({
   className,
 }: PortalShellProps) {
   const initials = initialsFrom(displayName);
+  const hidden = useScrollDirection();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +56,12 @@ export function PortalShell({
 
   return (
     <div className="portal-theme flex min-h-full flex-col bg-background">
-      <header className="border-b border-border bg-white backdrop-blur-sm">
+      <header
+        className={cn(
+          "sticky top-0 z-40 border-b border-border bg-white backdrop-blur-sm transition-transform duration-200",
+          hidden ? "-translate-y-full" : "translate-y-0",
+        )}
+      >
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
           <Link
             href="/portal"

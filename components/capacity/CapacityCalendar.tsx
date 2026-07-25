@@ -187,7 +187,7 @@ export function CapacityCalendar() {
                       <p className="text-sm font-semibold text-foreground">
                         {dayNumber(day.date)}
                       </p>
-                      <div className="mt-1 flex flex-col items-center gap-0.5 text-[10px] tabular-nums sm:mt-1.5 sm:flex-row sm:justify-center sm:gap-2 sm:text-xs sm:space-y-0.5">
+                      <div className="mt-1 flex flex-col items-center gap-0.5 text-[10px] tabular-nums sm:mt-1.5 sm:gap-1 sm:text-xs">
                         <p className="flex items-center gap-0.5 text-foreground">
                           <Sun className="h-3 w-3 text-primary sm:hidden" aria-hidden />
                           <span className="font-medium text-primary">{day.daycare}</span>

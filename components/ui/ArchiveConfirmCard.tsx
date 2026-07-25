@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -47,12 +47,8 @@ export function ArchiveConfirmCard({
   const confirmBody = !open ? (
     <Button
       type="button"
-      variant={bare ? "danger" : "outline"}
-      className={
-        bare
-          ? undefined
-          : "border-danger/40 text-danger hover:bg-[#FEF2F2]"
-      }
+      variant="danger"
+      className={bare ? undefined : "w-full"}
       onClick={() => {
         setOpen(true);
         setConfirmName("");
@@ -116,13 +112,7 @@ export function ArchiveConfirmCard({
 
   return (
     <Card className="border-danger/20">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base text-danger">
-          <Trash2 className="h-5 w-5" aria-hidden />
-          Delete Profile
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 pt-0">{confirmBody}</CardContent>
+      <CardContent className="space-y-3 pt-4">{confirmBody}</CardContent>
     </Card>
   );
 }

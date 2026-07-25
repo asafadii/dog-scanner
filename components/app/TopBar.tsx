@@ -2,6 +2,7 @@
 
 import { AvatarDropdown } from "@/components/app/AvatarDropdown";
 import { Logo } from "@/components/ui/Logo";
+import { useScrollDirection } from "@/lib/hooks/useScrollDirection";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -10,10 +11,13 @@ interface TopBarProps {
 }
 
 export function TopBar({ className }: TopBarProps) {
+  const hidden = useScrollDirection();
+
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm",
+        "sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm transition-transform duration-200",
+        hidden ? "-translate-y-full" : "translate-y-0",
         className,
       )}
     >
