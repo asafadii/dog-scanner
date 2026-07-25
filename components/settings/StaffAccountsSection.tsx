@@ -16,7 +16,8 @@ import {
 import {
   formatStaffLimit,
   getFacilityStaff,
-  getStaffCount,
+  getPendingStaffInvites,
+  type PendingStaffInvite,
   getSubscriptionInfo,
 } from "@/lib/subscription";
 import type { UserRole } from "@/lib/supabase/types";
@@ -29,6 +30,9 @@ export function StaffAccountsSection() {
   const { accessLevel } = useFacilityAccess();
   const writeLocked = accessLevel !== "full";
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingStaffInvite[]>(
+    [],
+  );
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [staffCount, setStaffCount] = useState(0);
   const [showLimitUi, setShowLimitUi] = useState(false);
@@ -48,11 +52,13 @@ export function StaffAccountsSection() {
     setLoading(true);
     setError(null);
 
-    const [staffResult, subscriptionResult, profileResult] = await Promise.all([
-      getFacilityStaff(),
-      getSubscriptionInfo(),
-      getCurrentUserProfile(),
-    ]);
+    const [staffResult, pendingResult, subscriptionResult, profileResult] =
+      await Promise.all([
+        getFacilityStaff(),
+        getPendingStaffInvites(),
+        getSubscriptionInfo(),
+        getCurrentUserProfile(),
+      ]);
 
     if (profileResult.data) {
       setCurrentRole(profileResult.data.role);
@@ -61,28 +67,33 @@ export function StaffAccountsSection() {
     if (staffResult.error) {
       setError(staffResult.error.message);
       setStaff([]);
+      setPendingInvites([]);
+      setLoading(false);
+      return;
+    }
+
+    if (pendingResult.error) {
+      setError(pendingResult.error.message);
+      setStaff([]);
+      setPendingInvites([]);
       setLoading(false);
       return;
     }
 
     setStaff(staffResult.data);
+    setPendingInvites(pendingResult.data);
+
+    const combinedCount =
+      staffResult.data.length + pendingResult.data.length;
 
     if (subscriptionResult.error) {
       setShowLimitUi(false);
       setSubscription(null);
-      setStaffCount(staffResult.data.length);
+      setStaffCount(combinedCount);
     } else {
       setSubscription(subscriptionResult.data);
       setShowLimitUi(true);
-
-      if (profileResult.data) {
-        const countResult = await getStaffCount(profileResult.data.facility_id);
-        setStaffCount(
-          countResult.error ? staffResult.data.length : countResult.data ?? 0,
-        );
-      } else {
-        setStaffCount(staffResult.data.length);
-      }
+      setStaffCount(combinedCount);
     }
 
     setLoading(false);
@@ -141,6 +152,7 @@ export function StaffAccountsSection() {
     } else {
       setInviteSuccess(`Invite sent to ${trimmed}`);
       setInviteEmail("");
+      await loadStaffSection();
     }
 
     setInviteSending(false);
@@ -213,52 +225,73 @@ export function StaffAccountsSection() {
             )}
 
             <ul className="divide-y divide-border rounded-xl border border-border">
-              {staff.length === 0 ? (
+              {staff.length === 0 && pendingInvites.length === 0 ? (
                 <li className="px-4 py-6 text-center text-sm text-muted-foreground">
                   No staff accounts yet.
                 </li>
               ) : (
-                staff.map((member) => (
-                  <li
-                    key={member.id}
-                    className="flex items-center justify-between gap-3 px-4 py-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-foreground">
-                        {member.fullName}
-                      </p>
-                      <p className="truncate text-sm text-muted-foreground">
-                        {member.email}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      {isAdmin && member.role === "staff" && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={promotingId === member.id}
-                          onClick={() => void handleMakeAdmin(member)}
-                        >
-                          {promotingId === member.id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : null}
-                          Make Admin
-                        </Button>
-                      )}
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          member.role === "admin"
-                            ? "bg-mint-wash text-primary"
-                            : "bg-muted text-muted-foreground",
+                <>
+                  {staff.map((member) => (
+                    <li
+                      key={member.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-foreground">
+                          {member.fullName}
+                        </p>
+                        <p className="truncate text-sm text-muted-foreground">
+                          {member.email}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {isAdmin && member.role === "staff" && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={promotingId === member.id}
+                            onClick={() => void handleMakeAdmin(member)}
+                          >
+                            {promotingId === member.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : null}
+                            Make Admin
+                          </Button>
                         )}
-                      >
-                        {formatStaffRoleLabel(member.role)}
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-xs font-medium",
+                            member.role === "admin"
+                              ? "bg-mint-wash text-primary"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {formatStaffRoleLabel(member.role)}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                  {pendingInvites.map((invite) => (
+                    <li
+                      key={`invite-${invite.id}`}
+                      className="flex items-center justify-between gap-3 px-4 py-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-foreground">
+                          {invite.email}
+                        </p>
+                        <p className="truncate text-sm text-muted-foreground">
+                          Invited{" "}
+                          {new Date(invite.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
+                        Pending
                       </span>
-                    </div>
-                  </li>
-                ))
+                    </li>
+                  ))}
+                </>
               )}
             </ul>
 

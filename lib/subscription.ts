@@ -171,6 +171,44 @@ export async function getFacilityStaff(): Promise<
   };
 }
 
+export interface PendingStaffInvite {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+export async function getPendingStaffInvites(): Promise<
+  SubscriptionResult<PendingStaffInvite[]>
+> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("staff_invites")
+    .select("id, email, created_at")
+    .eq("facility_id", profileResult.data.facility_id)
+    .is("accepted_at", null)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  return {
+    data: (data as { id: string; email: string; created_at: string }[]).map(
+      (row) => ({
+        id: row.id,
+        email: row.email,
+        createdAt: row.created_at,
+      }),
+    ),
+    error: null,
+  };
+}
+
 export function formatStaffLimit(staffLimit: number): string {
   if (staffLimit > 100) return "Unlimited";
   return String(staffLimit);
