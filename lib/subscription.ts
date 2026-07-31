@@ -174,6 +174,7 @@ export async function getFacilityStaff(): Promise<
 export interface PendingStaffInvite {
   id: string;
   email: string;
+  role: "admin" | "staff";
   createdAt: string;
 }
 
@@ -188,7 +189,7 @@ export async function getPendingStaffInvites(): Promise<
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
     .from("staff_invites")
-    .select("id, email, created_at")
+    .select("id, email, role, created_at")
     .eq("facility_id", profileResult.data.facility_id)
     .is("accepted_at", null)
     .order("created_at", { ascending: false });
@@ -198,13 +199,19 @@ export async function getPendingStaffInvites(): Promise<
   }
 
   return {
-    data: (data as { id: string; email: string; created_at: string }[]).map(
-      (row) => ({
-        id: row.id,
-        email: row.email,
-        createdAt: row.created_at,
-      }),
-    ),
+    data: (
+      data as {
+        id: string;
+        email: string;
+        role: "admin" | "staff";
+        created_at: string;
+      }[]
+    ).map((row) => ({
+      id: row.id,
+      email: row.email,
+      role: row.role === "admin" ? "admin" : "staff",
+      createdAt: row.created_at,
+    })),
     error: null,
   };
 }

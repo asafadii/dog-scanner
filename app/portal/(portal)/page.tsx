@@ -20,9 +20,19 @@ import {
 } from "@/lib/portal/auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Booking, Dog } from "@/lib/types";
-import { CalendarPlus, KeyRound, Loader2, PawPrint, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Building2,
+  CalendarPlus,
+  KeyRound,
+  Loader2,
+  PawPrint,
+  Plus,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+
+const HOME_BOOKINGS_PREVIEW_LIMIT = 3;
 
 export default function PortalPage() {
   const [linkedClients, setLinkedClients] = useState<LinkedClient[] | null>(
@@ -38,6 +48,7 @@ export default function PortalPage() {
   const [contentLoading, setContentLoading] = useState(false);
   const [claimCode, setClaimCode] = useState("");
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [claimSuccess, setClaimSuccess] = useState<string | null>(null);
   const [claimLoading, setClaimLoading] = useState(false);
 
   const facilityOptions = useMemo(
@@ -103,9 +114,16 @@ export default function PortalPage() {
     void loadFacilityContent(selectedFacility);
   }, [loadFacilityContent, selectedFacility]);
 
+  useEffect(() => {
+    if (!claimSuccess) return;
+    const timer = setTimeout(() => setClaimSuccess(null), 4000);
+    return () => clearTimeout(timer);
+  }, [claimSuccess]);
+
   async function handleClaim(e: FormEvent) {
     e.preventDefault();
     setClaimError(null);
+    setClaimSuccess(null);
     setClaimLoading(true);
 
     try {
@@ -122,6 +140,7 @@ export default function PortalPage() {
 
       await claimClientAccount(accessToken, claimCode);
       setClaimCode("");
+      setClaimSuccess("Daycare linked successfully.");
       await loadPortalData();
     } catch (err) {
       setClaimError(
@@ -167,11 +186,11 @@ export default function PortalPage() {
           </CardHeader>
           <CardContent className="pt-0">
             <p className="mb-4 text-sm text-muted-foreground">
-              Enter the facility code your daycare gave you to link your profile.
+              Enter the daycare code you were given to link your profile.
             </p>
             <form onSubmit={handleClaim} className="space-y-4">
               <Input
-                label="Facility code"
+                label="Daycare code"
                 type="text"
                 required
                 value={claimCode}
@@ -186,6 +205,12 @@ export default function PortalPage() {
                   role="alert"
                 >
                   {claimError}
+                </p>
+              )}
+
+              {claimSuccess && (
+                <p className="text-sm text-primary" role="status">
+                  {claimSuccess}
                 </p>
               )}
 
@@ -205,6 +230,10 @@ export default function PortalPage() {
   const newBookingHref = selectedFacility
     ? `/portal/bookings/new?clientId=${encodeURIComponent(selectedFacility.clientId)}&facilityId=${encodeURIComponent(selectedFacility.facilityId)}`
     : "/portal/bookings/new";
+  const allBookingsHref = selectedFacility
+    ? `/portal/bookings?clientId=${encodeURIComponent(selectedFacility.clientId)}&facilityId=${encodeURIComponent(selectedFacility.facilityId)}`
+    : "/portal/bookings";
+  const previewBookings = bookings.slice(0, HOME_BOOKINGS_PREVIEW_LIMIT);
 
   return (
     <div className="space-y-8">
@@ -216,12 +245,6 @@ export default function PortalPage() {
           Manage your dogs and bookings
         </p>
       </div>
-
-      <PortalFacilityPicker
-        options={facilityOptions}
-        selectedFacilityId={selectedFacility?.facilityId ?? ""}
-        onChange={setSelectedFacility}
-      />
 
       {contentLoading ? (
         <div className="flex min-h-[20vh] items-center justify-center">
@@ -250,18 +273,26 @@ export default function PortalPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
-                {bookings.map((booking) =>
-                  selectedFacility ? (
-                    <PortalBookingCard
-                      key={booking.id}
-                      booking={booking}
-                      clientId={selectedFacility.clientId}
-                      facilityId={selectedFacility.facilityId}
-                    />
-                  ) : null,
-                )}
-              </div>
+              <>
+                <div className="grid gap-4">
+                  {previewBookings.map((booking) =>
+                    selectedFacility ? (
+                      <PortalBookingCard
+                        key={booking.id}
+                        booking={booking}
+                        clientId={selectedFacility.clientId}
+                        facilityId={selectedFacility.facilityId}
+                      />
+                    ) : null,
+                  )}
+                </div>
+                <Link
+                  href={allBookingsHref}
+                  className="inline-flex text-sm font-medium text-primary hover:underline"
+                >
+                  View all bookings
+                </Link>
+              </>
             )}
           </section>
 
@@ -286,7 +317,12 @@ export default function PortalPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div
+                className={cn(
+                  "grid gap-4",
+                  dogs.length > 1 && "sm:grid-cols-2",
+                )}
+              >
                 {dogs.map((dog) =>
                   selectedFacility ? (
                     <PortalDogCard
@@ -300,44 +336,63 @@ export default function PortalPage() {
               </div>
             )}
           </section>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Link another facility</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <form onSubmit={handleClaim} className="space-y-4">
-                <Input
-                  label="Facility code"
-                  type="text"
-                  required
-                  value={claimCode}
-                  onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
-                  placeholder="Enter another facility code"
-                  autoComplete="off"
-                />
-
-                {claimError && (
-                  <p
-                    className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
-                    role="alert"
-                  >
-                    {claimError}
-                  </p>
-                )}
-
-                <Button
-                  type="submit"
-                  variant="outline"
-                  disabled={claimLoading}
-                >
-                  {claimLoading ? "Linking..." : "Add Link"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
         </>
       )}
+
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+          <Building2 className="h-5 w-5 text-primary" aria-hidden />
+          Daycares
+        </h2>
+        <PortalFacilityPicker
+          options={facilityOptions}
+          selectedFacilityId={selectedFacility?.facilityId ?? ""}
+          onChange={setSelectedFacility}
+          showLabel={false}
+        />
+      </section>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Link a daycare</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <form onSubmit={handleClaim} className="space-y-4">
+            <Input
+              label="Daycare code"
+              type="text"
+              required
+              value={claimCode}
+              onChange={(e) => setClaimCode(e.target.value.toUpperCase())}
+              placeholder="Enter another daycare code"
+              autoComplete="off"
+            />
+
+            {claimError && (
+              <p
+                className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
+                role="alert"
+              >
+                {claimError}
+              </p>
+            )}
+
+            {claimSuccess && (
+              <p className="text-sm text-primary" role="status">
+                {claimSuccess}
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={claimLoading}
+            >
+              {claimLoading ? "Linking..." : "Add Link"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

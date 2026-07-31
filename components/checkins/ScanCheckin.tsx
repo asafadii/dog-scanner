@@ -15,10 +15,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type ScanPhase = "idle" | "processing" | "success";
 
-export function ScanCheckin() {
+export function ScanCheckin({
+  initialToken = null,
+}: {
+  initialToken?: string | null;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const scannerRef = useRef<QrScanner | null>(null);
   const processingRef = useRef(false);
+  const initialTokenHandledRef = useRef(false);
 
   const [manualCode, setManualCode] = useState("");
   const [phase, setPhase] = useState<ScanPhase>("idle");
@@ -74,6 +79,12 @@ export function ScanCheckin() {
     },
     [phase],
   );
+
+  useEffect(() => {
+    if (!initialToken || initialTokenHandledRef.current) return;
+    initialTokenHandledRef.current = true;
+    void handleToken(initialToken);
+  }, [initialToken, handleToken]);
 
   useEffect(() => {
     const video = videoRef.current;

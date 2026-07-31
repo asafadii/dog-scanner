@@ -1,4 +1,4 @@
-import { checkOutDog } from "@/lib/checkins";
+import { checkOutDog, getEffectiveServiceType } from "@/lib/checkins";
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
@@ -429,11 +429,19 @@ export async function calculateStayPrice(
   }
 
   const { checkin, booking, bookingItem, rules } = contextResult.data;
-  const serviceType = booking?.service_type ?? "daycare";
+  const checkoutAt = new Date();
+  const bookedServiceType = booking?.service_type ?? "daycare";
+  // Effective type is calculation-only — stored booking.service_type is unchanged.
+  // Same-calendar-day checkout → daycare (52a); 24h+ → boarding (§18.3).
+  const serviceType: BookingServiceType = getEffectiveServiceType(
+    checkin.checked_in_at,
+    bookedServiceType,
+    checkoutAt,
+  );
   const units = computeUnits(
     serviceType,
     checkin.checked_in_at,
-    new Date(),
+    checkoutAt,
   );
   const foodAddonOnBooking = bookingItem?.food_addon ?? false;
   const foodAddonActive =

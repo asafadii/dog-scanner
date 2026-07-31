@@ -117,12 +117,13 @@ export async function promoteToAdmin(
 
 export async function sendStaffInvite(
   email: string,
+  role: UserRole = "staff",
 ): Promise<StaffManageResult<true>> {
   try {
     const response = await staffFetch("/api/staff/invite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, role }),
     });
 
     const body = (await response.json()) as {

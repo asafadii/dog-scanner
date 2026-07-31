@@ -276,7 +276,7 @@ export function SubscriptionView() {
                 return (
                   <div
                     key={plan.id}
-                    className="rounded-2xl border-2 border-border bg-surface p-6"
+                    className="flex h-full flex-col rounded-2xl border-2 border-border bg-surface p-6"
                   >
                     <h4 className="text-lg font-bold text-foreground">
                       {plan.name}
@@ -292,7 +292,7 @@ export function SubscriptionView() {
                     <p className="mt-2 text-sm text-muted-foreground">
                       {plan.description}
                     </p>
-                    <ul className="mt-4 space-y-2">
+                    <ul className="mt-4 flex-1 space-y-2">
                       {plan.features.map((feature) => (
                         <li
                           key={feature}
@@ -472,7 +472,7 @@ export function SubscriptionView() {
               <div
                 key={plan.id}
                 className={cn(
-                  "relative rounded-2xl border-2 p-6",
+                  "relative flex h-full flex-col rounded-2xl border-2 p-6",
                   isCurrent
                     ? "border-primary bg-mint-wash" // #EAF4F1 documented mint-wash (D-04)
                     : "border-border bg-surface",
@@ -491,7 +491,7 @@ export function SubscriptionView() {
                   <span className="text-sm text-muted-foreground">{plan.period}</span>
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-                <ul className="mt-4 space-y-2">
+                <ul className="mt-4 flex-1 space-y-2">
                   {plan.features.map((feature) => (
                     <li
                       key={feature}

@@ -4,8 +4,10 @@ import {
   ClientForm,
   type ClientFormSubmitPhase,
 } from "@/components/clients/ClientForm";
+import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
 import {
+  archiveClient,
   clientToFormData,
   getClientById,
   INCOMPLETE_SETUP_MESSAGE,
@@ -23,6 +25,7 @@ export default function EditClientPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitPhase, setSubmitPhase] = useState<ClientFormSubmitPhase>("idle");
+  const [clientName, setClientName] = useState("");
   const [initialData, setInitialData] = useState<ReturnType<
     typeof clientToFormData
   > | null>(null);
@@ -36,6 +39,7 @@ export default function EditClientPage() {
       setError(result.error.message);
       setInitialData(null);
     } else {
+      setClientName(result.data.name);
       setInitialData(clientToFormData(result.data));
     }
 
@@ -118,6 +122,19 @@ export default function EditClientPage() {
           }
 
           router.push(`/clients/${clientId}`);
+          router.refresh();
+        }}
+      />
+
+      <ArchiveConfirmCard
+        bare
+        entityName={clientName || initialData.name}
+        onConfirm={async () => {
+          const result = await archiveClient(clientId);
+          return { error: result.error };
+        }}
+        onSuccess={() => {
+          router.push("/clients");
           router.refresh();
         }}
       />

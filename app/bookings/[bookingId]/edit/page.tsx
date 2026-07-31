@@ -107,7 +107,10 @@ export default function EditBookingPage() {
         onSubmit={async (data) => {
           if (submitPhase !== "idle") return;
 
-          if (data.endDate < data.startDate) {
+          const formData = Array.isArray(data) ? data[0] : data;
+          if (!formData) return;
+
+          if (formData.endDate < formData.startDate) {
             setError("End date must be on or after start date.");
             return;
           }
@@ -115,7 +118,7 @@ export default function EditBookingPage() {
           setError(null);
           setSubmitPhase("saving");
 
-          const result = await updateBooking(bookingId, data);
+          const result = await updateBooking(bookingId, formData);
           if (result.error) {
             setError(result.error.message);
             setSubmitPhase("idle");

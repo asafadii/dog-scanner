@@ -2,6 +2,7 @@ import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   BookingRow,
+  DogCheckinRow,
   FacilityCapacityRow,
   ProfileRow,
 } from "@/lib/supabase/types";
@@ -120,6 +121,40 @@ async function requireProfile(): Promise<CapacityResult<ProfileRow>> {
   return { data: profile as ProfileRow, error: null };
 }
 
+function toLocalDateString(value: string | Date): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addOneCalendarDay(date: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  const next = new Date(year, month - 1, day);
+  next.setDate(next.getDate() + 1);
+  return toLocalDateString(next);
+}
+
+/** Active check-ins cover check-in date through today; completed ones cover through checkout date. */
+function checkinCoversDate(
+  checkedInAt: string,
+  checkedOutAt: string | null,
+  date: string,
+  today: string,
+): boolean {
+  const checkInDate = toLocalDateString(checkedInAt);
+  if (checkInDate > date) {
+    return false;
+  }
+
+  if (checkedOutAt) {
+    return toLocalDateString(checkedOutAt) >= date;
+  }
+
+  return date <= today;
+}
+
 async function countApprovedBookingsOnDate(
   facilityId: string,
   date: string,
@@ -127,25 +162,91 @@ async function countApprovedBookingsOnDate(
   excludeBookingId?: string,
 ): Promise<number> {
   const supabase = createSupabaseBrowserClient();
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("id")
-    .eq("facility_id", facilityId)
-    .eq("status", "approved")
-    .eq("service_type", serviceType)
-    .lte("start_date", date)
-    .gte("end_date", date);
+  const today = todayDateString();
+  const dayAfter = addOneCalendarDay(date);
 
-  if (error || !data) {
-    return 0;
+  const [bookingsResult, checkinsResult] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select("id, dog_id")
+      .eq("facility_id", facilityId)
+      .eq("status", "approved")
+      .eq("service_type", serviceType)
+      .lte("start_date", date)
+      .gte("end_date", date),
+    supabase
+      .from("dog_checkins")
+      .select("dog_id, booking_id, checked_in_at, checked_out_at")
+      .eq("facility_id", facilityId)
+      .lt("checked_in_at", `${dayAfter}T23:59:59.999`)
+      .or(`checked_out_at.is.null,checked_out_at.gte.${date}T00:00:00`),
+  ]);
+
+  const dogIds = new Set<string>();
+
+  if (!bookingsResult.error && bookingsResult.data) {
+    const rows = bookingsResult.data as Pick<BookingRow, "id" | "dog_id">[];
+    for (const row of rows) {
+      if (excludeBookingId && row.id === excludeBookingId) {
+        continue;
+      }
+      dogIds.add(row.dog_id);
+    }
   }
 
-  const rows = data as Pick<BookingRow, "id">[];
-  if (!excludeBookingId) {
-    return rows.length;
+  if (!checkinsResult.error && checkinsResult.data) {
+    const checkins = checkinsResult.data as Pick<
+      DogCheckinRow,
+      "dog_id" | "booking_id" | "checked_in_at" | "checked_out_at"
+    >[];
+    const covering = checkins.filter((checkin) =>
+      checkinCoversDate(
+        checkin.checked_in_at,
+        checkin.checked_out_at,
+        date,
+        today,
+      ),
+    );
+
+    const bookingIds = [
+      ...new Set(
+        covering
+          .map((checkin) => checkin.booking_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+
+    const serviceByBookingId = new Map<string, "daycare" | "boarding">();
+    if (bookingIds.length > 0) {
+      const { data: linkedBookings } = await supabase
+        .from("bookings")
+        .select("id, service_type")
+        .eq("facility_id", facilityId)
+        .in("id", bookingIds);
+
+      if (linkedBookings) {
+        for (const row of linkedBookings as Pick<
+          BookingRow,
+          "id" | "service_type"
+        >[]) {
+          serviceByBookingId.set(row.id, row.service_type);
+        }
+      }
+    }
+
+    for (const checkin of covering) {
+      // Walk-ins (no booking) count as daycare, matching check-in enrichment.
+      const checkinServiceType = checkin.booking_id
+        ? (serviceByBookingId.get(checkin.booking_id) ?? "daycare")
+        : "daycare";
+
+      if (checkinServiceType === serviceType) {
+        dogIds.add(checkin.dog_id);
+      }
+    }
   }
 
-  return rows.filter((row) => row.id !== excludeBookingId).length;
+  return dogIds.size;
 }
 
 export async function getFacilityCapacity(): Promise<

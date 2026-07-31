@@ -325,6 +325,7 @@ export interface StaffInviteRow {
   email: string;
   token: string;
   invited_by: string;
+  role: UserRole;
   accepted_at: string | null;
   created_at: string;
 }
@@ -335,6 +336,7 @@ export type StaffInviteInsert = {
   email: string;
   token: string;
   invited_by: string;
+  role?: UserRole;
   accepted_at?: string | null;
   created_at?: string;
 };

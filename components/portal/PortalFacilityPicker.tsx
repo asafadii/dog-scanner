@@ -33,6 +33,10 @@ interface PortalFacilityPickerProps {
   selectedFacilityId: string;
   onChange: (option: FacilityOption) => void;
   className?: string;
+  /** When false, only the control is rendered (parent supplies the heading). */
+  showLabel?: boolean;
+  label?: string;
+  labelClassName?: string;
 }
 
 export function PortalFacilityPicker({
@@ -40,16 +44,21 @@ export function PortalFacilityPicker({
   selectedFacilityId,
   onChange,
   className,
+  showLabel = true,
+  label = "Daycares",
+  labelClassName = "flex items-center gap-2 text-sm font-medium text-foreground",
 }: PortalFacilityPickerProps) {
   if (options.length === 0) return null;
 
   if (options.length === 1) {
     return (
       <div className={cn("space-y-2", className)}>
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <Building2 className="h-4 w-4 text-primary" aria-hidden />
-          Your facility
-        </span>
+        {showLabel && (
+          <span className={labelClassName}>
+            <Building2 className="h-4 w-4 text-primary" aria-hidden />
+            {label}
+          </span>
+        )}
         <div className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground shadow-sm">
           {options[0].facilityName}
         </div>
@@ -59,13 +68,12 @@ export function PortalFacilityPicker({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label
-        htmlFor="portal-facility"
-        className="flex items-center gap-2 text-sm font-medium text-foreground"
-      >
-        <Building2 className="h-4 w-4 text-primary" aria-hidden />
-        Your facility
-      </label>
+      {showLabel && (
+        <label htmlFor="portal-facility" className={labelClassName}>
+          <Building2 className="h-4 w-4 text-primary" aria-hidden />
+          {label}
+        </label>
+      )}
       <select
         id="portal-facility"
         value={selectedFacilityId}
@@ -76,6 +84,7 @@ export function PortalFacilityPicker({
           if (option) onChange(option);
         }}
         className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        aria-label={showLabel ? undefined : label}
       >
         {options.map((option) => (
           <option key={option.facilityId} value={option.facilityId}>

@@ -43,7 +43,20 @@ export function formatCheckinTokenForDisplay(token: string): string {
 }
 
 export function normalizeCheckinTokenInput(input: string): string {
-  return input.trim().replace(/-/g, "");
+  const trimmed = input.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const tokenParam = new URL(trimmed).searchParams.get("token");
+      if (tokenParam) {
+        return tokenParam.replace(/-/g, "");
+      }
+    } catch {
+      // Fall through to bare-token handling
+    }
+  }
+
+  return trimmed.replace(/-/g, "");
 }
 
 export function isBookingCheckInAvailableToday(

@@ -21,11 +21,47 @@ type CheckinsResult<T> =
   | { data: T; error: null }
   | { data: null; error: CheckinsError };
 
+const MS_24_HOURS = 24 * 60 * 60 * 1000;
+
 function toError(
   message: string,
   code: CheckinsErrorCode = "unknown",
 ): CheckinsError {
   return { message, code };
+}
+
+/** Compare local calendar dates (year/month/day), matching other same-day checks. */
+function isSameCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+/**
+ * Effective service type for display and pricing (calculation-only — never persist).
+ * - Same calendar day as check-in → daycare (Sprint 52a same-day pricing)
+ * - 24+ hours since check-in → boarding / Overnight (§18.3 display flip)
+ * - Otherwise → stored type
+ */
+export function getEffectiveServiceType(
+  checkedInAt: string | Date,
+  storedServiceType: BookingServiceType,
+  asOf: Date = new Date(),
+): BookingServiceType {
+  const checkedIn =
+    typeof checkedInAt === "string" ? new Date(checkedInAt) : checkedInAt;
+
+  if (isSameCalendarDay(checkedIn, asOf)) {
+    return "daycare";
+  }
+
+  if (asOf.getTime() - checkedIn.getTime() >= MS_24_HOURS) {
+    return "boarding";
+  }
+
+  return storedServiceType;
 }
 
 export function enrichDogWithCheckin(

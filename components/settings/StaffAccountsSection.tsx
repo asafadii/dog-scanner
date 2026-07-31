@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { getCurrentUserProfile } from "@/lib/dogs";
 import {
   formatStaffRoleLabel,
@@ -44,6 +45,7 @@ export function StaffAccountsSection() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<UserRole>("staff");
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -127,6 +129,7 @@ export function StaffAccountsSection() {
   function openInviteModal() {
     setInviteOpen(true);
     setInviteEmail("");
+    setInviteRole("staff");
     setInviteError(null);
     setInviteSuccess(null);
   }
@@ -134,6 +137,7 @@ export function StaffAccountsSection() {
   function closeInviteModal() {
     setInviteOpen(false);
     setInviteEmail("");
+    setInviteRole("staff");
     setInviteError(null);
     setInviteSending(false);
   }
@@ -146,12 +150,13 @@ export function StaffAccountsSection() {
     setInviteError(null);
     setInviteSuccess(null);
 
-    const result = await sendStaffInvite(trimmed);
+    const result = await sendStaffInvite(trimmed, inviteRole);
     if (result.error) {
       setInviteError(result.error.message);
     } else {
       setInviteSuccess(`Invite sent to ${trimmed}`);
       setInviteEmail("");
+      setInviteRole("staff");
       await loadStaffSection();
     }
 
@@ -286,9 +291,21 @@ export function StaffAccountsSection() {
                           {new Date(invite.createdAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className="shrink-0 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
-                        Pending
-                      </span>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-xs font-medium",
+                            invite.role === "admin"
+                              ? "bg-mint-wash text-primary"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {formatStaffRoleLabel(invite.role)}
+                        </span>
+                        <span className="shrink-0 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
+                          Pending
+                        </span>
+                      </div>
                     </li>
                   ))}
                 </>
@@ -337,6 +354,19 @@ export function StaffAccountsSection() {
                         placeholder="colleague@facility.com"
                         disabled={inviteSending}
                       />
+                      <Select
+                        label="Role"
+                        value={inviteRole}
+                        onChange={(e) =>
+                          setInviteRole(
+                            e.target.value === "admin" ? "admin" : "staff",
+                          )
+                        }
+                        disabled={inviteSending}
+                      >
+                        <option value="staff">Member</option>
+                        <option value="admin">Admin</option>
+                      </Select>
                       {inviteError && (
                         <p className="text-sm text-danger" role="alert">
                           {inviteError}

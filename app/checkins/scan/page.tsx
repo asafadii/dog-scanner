@@ -1,7 +1,20 @@
 import { ScanCheckin } from "@/components/checkins/ScanCheckin";
 import Link from "next/link";
 
-export default function ScanCheckinPage() {
+export default async function ScanCheckinPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const rawToken = params.token;
+  const initialToken =
+    typeof rawToken === "string"
+      ? rawToken
+      : Array.isArray(rawToken)
+        ? (rawToken[0] ?? null)
+        : null;
+
   return (
     <div className="space-y-6">
       <div>
@@ -19,7 +32,7 @@ export default function ScanCheckinPage() {
         </p>
       </div>
 
-      <ScanCheckin />
+      <ScanCheckin initialToken={initialToken} />
     </div>
   );
 }

@@ -122,7 +122,10 @@ function PortalBookingDetailInner({
       setToken(result.token);
       setExpiresAt(result.expiresAt);
 
-      const dataUrl = await QRCode.toDataURL(result.token, {
+      const APP_URL =
+        process.env.NEXT_PUBLIC_APP_URL ?? "https://hellodora.app";
+      const qrPayload = `${APP_URL}/checkins/scan?token=${encodeURIComponent(result.token)}`;
+      const dataUrl = await QRCode.toDataURL(qrPayload, {
         margin: 2,
         width: 280,
         // Mint brand ink for the QR modules (documented brand literal #06342F); light stays white

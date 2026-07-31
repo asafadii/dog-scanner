@@ -8,6 +8,7 @@ import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
 import { Button } from "@/components/ui/Button";
 import { updateBookingServiceType } from "@/lib/bookings";
+import { getEffectiveServiceType } from "@/lib/checkins";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
 import type { BookingServiceType, Dog, DogStatus, KennelAssignment, Payment } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
@@ -68,10 +69,18 @@ export function DogCard({
   const [serviceChangeError, setServiceChangeError] = useState<string | null>(null);
   const isCheckedIn = dog.status === "checked_in";
   const critical = hasCriticalAlerts(dog.alerts);
-  const serviceType = dog.serviceType ?? "daycare";
+  const storedServiceType = dog.serviceType ?? "daycare";
+  // Display-only via shared helper — never written back. Stored boarding stays
+  // Overnight; daycare flips to Overnight once 24h have elapsed (§18.3).
+  const serviceType =
+    isCheckedIn && dog.lastCheckIn
+      ? storedServiceType === "boarding"
+        ? "boarding"
+        : getEffectiveServiceType(dog.lastCheckIn, storedServiceType)
+      : storedServiceType;
   const canChangeServiceType = isCheckedIn && Boolean(dog.activeBookingId);
   const alternateServiceType: BookingServiceType =
-    serviceType === "daycare" ? "boarding" : "daycare";
+    storedServiceType === "daycare" ? "boarding" : "daycare";
 
   async function handleConfirmServiceChange() {
     if (!dog.activeBookingId) return;
@@ -203,12 +212,10 @@ export function DogCard({
             </div>
           </div>
 
-          <DogAlertBadges
-            alerts={dog.alerts}
-            compact
-            className="mt-2.5"
-          />
-          <DogVisitBadge isReturning={dog.isReturning} compact className="mt-2" />
+          <div className="mt-2.5 min-h-[3.25rem]">
+            <DogAlertBadges alerts={dog.alerts} compact />
+            <DogVisitBadge isReturning={dog.isReturning} compact className="mt-2" />
+          </div>
         </div>
       </div>
 

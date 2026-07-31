@@ -3,7 +3,6 @@ import type { DogAlerts } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
-  Apple,
   DoorOpen,
   Pill,
   Shield,
@@ -76,15 +75,6 @@ const ALERT_DEFS: AlertDef[] = [
     priority: 6,
     critical: false,
     variant: "violet",
-  },
-  {
-    key: "dietary",
-    label: "Dietary restriction",
-    shortLabel: "Diet",
-    icon: Apple,
-    priority: 7,
-    critical: false,
-    variant: "amber",
   },
 ];
 

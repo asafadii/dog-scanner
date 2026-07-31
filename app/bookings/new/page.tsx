@@ -5,7 +5,7 @@ import {
   type BookingFormSubmitPhase,
 } from "@/components/bookings/BookingForm";
 import { Button } from "@/components/ui/Button";
-import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { createBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { BookingFormData } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,14 +44,32 @@ export default function NewBookingPage() {
         onSubmit={async (data) => {
           if (submitPhase !== "idle") return;
 
-          if (data.endDate < data.startDate) {
-            setError("End date must be on or after start date.");
-            return;
+          const rows = Array.isArray(data) ? data : [data];
+
+          for (const row of rows) {
+            if (row.endDate < row.startDate) {
+              setError("End date must be on or after start date.");
+              return;
+            }
           }
 
           setError(null);
           setSubmitPhase("saving");
 
+          if (rows.length > 1) {
+            const result = await createBookings(rows);
+            if (result.error) {
+              setError(result.error.message);
+              setSubmitPhase("idle");
+              return;
+            }
+
+            router.push("/bookings");
+            router.refresh();
+            return;
+          }
+
+          const single = rows[0];
           const supabase = createSupabaseBrowserClient();
           const {
             data: { session },
@@ -70,7 +88,7 @@ export default function NewBookingPage() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${accessToken}`,
             },
-            body: JSON.stringify(data satisfies BookingFormData),
+            body: JSON.stringify(single satisfies BookingFormData),
           });
 
           const result = (await response.json()) as

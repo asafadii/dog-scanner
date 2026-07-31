@@ -116,19 +116,25 @@ export function BookingsListView() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            Bookings
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {filtered.length} of {bookings.length} bookings
-          </p>
-          <Link
-            href="/dogs"
-            className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-          >
-            View all dog profiles
-          </Link>
+        <div className="flex items-start gap-4">
+          {/* mint-wash icon chip (#EAF4F1) — documented D-04 exception, no named token */}
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mint-wash text-primary">
+            <CalendarDays className="h-6 w-6" aria-hidden />
+          </span>
+          <div>
+            <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
+              Bookings
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filtered.length} of {bookings.length} bookings
+            </p>
+            <Link
+              href="/dogs"
+              className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+            >
+              View all dog profiles
+            </Link>
+          </div>
         </div>
         {writeLocked ? (
           <Button

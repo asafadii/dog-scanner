@@ -48,7 +48,7 @@ export function ArchiveConfirmCard({
     <Button
       type="button"
       variant="danger"
-      className={bare ? undefined : "w-full"}
+      className="w-full"
       onClick={() => {
         setOpen(true);
         setConfirmName("");

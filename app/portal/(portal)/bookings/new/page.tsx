@@ -10,19 +10,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { getLinkedClients } from "@/lib/portal/auth";
-import { createPortalBooking } from "@/lib/portal/bookings";
+import {
+  createPortalBooking,
+  createPortalBookings,
+} from "@/lib/portal/bookings";
 import { getPortalDogs } from "@/lib/portal/dogs";
 import type { BookingFormData, BookingServiceType, Dog } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useId, useMemo, useState, type FormEvent } from "react";
 
 const SERVICE_TYPES: BookingServiceType[] = ["daycare", "boarding"];
+
+interface BookingDateRow {
+  key: string;
+  startDate: string;
+  endDate: string;
+}
 
 export default function PortalNewBookingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const rowIdPrefix = useId();
   const initialClientId = searchParams.get("clientId") ?? "";
   const initialFacilityId = searchParams.get("facilityId") ?? "";
   const initialDogId = searchParams.get("dogId") ?? "";
@@ -42,6 +53,9 @@ export default function PortalNewBookingPage() {
     transportRequired: false,
     notes: "",
   });
+  const [dateRows, setDateRows] = useState<BookingDateRow[]>([
+    { key: `${rowIdPrefix}-0`, startDate: "", endDate: "" },
+  ]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [contextError, setContextError] = useState<string | null>(null);
@@ -128,6 +142,52 @@ export default function PortalNewBookingPage() {
     );
   }
 
+  function handleServiceTypeChange(serviceType: BookingServiceType) {
+    setForm((current) => ({
+      ...current,
+      serviceType,
+    }));
+    // Daycare is always same-day — collapse any boarding range to start date.
+    if (serviceType === "daycare") {
+      setDateRows((rows) =>
+        rows.map((row) => ({ ...row, endDate: row.startDate })),
+      );
+    }
+  }
+
+  function updateDateRow(
+    key: string,
+    patch: Partial<Pick<BookingDateRow, "startDate" | "endDate">>,
+  ) {
+    setDateRows((rows) =>
+      rows.map((row) => {
+        if (row.key !== key) return row;
+        const next = { ...row, ...patch };
+        if (form.serviceType === "daycare" && patch.startDate !== undefined) {
+          next.endDate = patch.startDate;
+        }
+        return next;
+      }),
+    );
+  }
+
+  function addDateRow() {
+    setDateRows((rows) => [
+      ...rows,
+      {
+        key: `${rowIdPrefix}-${rows.length}-${Date.now()}`,
+        startDate: "",
+        endDate: "",
+      },
+    ]);
+  }
+
+  function removeDateRow(key: string) {
+    setDateRows((rows) =>
+      rows.length <= 1 ? rows : rows.filter((row) => row.key !== key),
+    );
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!clientId || !facilityId) return;
@@ -135,21 +195,38 @@ export default function PortalNewBookingPage() {
     setError(null);
     setSubmitting(true);
 
-    const result = await createPortalBooking({
+    const payloads = dateRows.map((row) => ({
       ...form,
+      startDate: row.startDate,
+      endDate:
+        form.serviceType === "daycare" ? row.startDate : row.endDate,
       clientId,
       facilityId,
-    });
+    }));
 
+    if (payloads.length === 1) {
+      const result = await createPortalBooking(payloads[0]);
+      if (result.error) {
+        setError(result.error.message);
+        setSubmitting(false);
+        return;
+      }
+
+      router.push(
+        `/portal/bookings/${result.data.id}?clientId=${encodeURIComponent(clientId)}&facilityId=${encodeURIComponent(facilityId)}`,
+      );
+      router.refresh();
+      return;
+    }
+
+    const result = await createPortalBookings(payloads);
     if (result.error) {
       setError(result.error.message);
       setSubmitting(false);
       return;
     }
 
-    router.push(
-      `/portal/bookings/${result.data.id}?clientId=${encodeURIComponent(clientId)}&facilityId=${encodeURIComponent(facilityId)}`,
-    );
+    router.push("/portal");
     router.refresh();
   }
 
@@ -223,7 +300,7 @@ export default function PortalNewBookingPage() {
                   <button
                     key={serviceType}
                     type="button"
-                    onClick={() => setForm({ ...form, serviceType })}
+                    onClick={() => handleServiceTypeChange(serviceType)}
                     className={cn(
                       "rounded-xl border px-3 py-2 text-sm capitalize transition-colors",
                       form.serviceType === serviceType
@@ -237,21 +314,82 @@ export default function PortalNewBookingPage() {
               </div>
             </div>
 
-            <Input
-              label="Start date"
-              type="date"
-              required
-              value={form.startDate}
-              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-            />
-            <Input
-              label="End date"
-              type="date"
-              required
-              value={form.endDate}
-              min={form.startDate || undefined}
-              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-            />
+            <div className="space-y-3">
+              {dateRows.map((row, index) => (
+                <div
+                  key={row.key}
+                  className={cn(
+                    "space-y-3",
+                    dateRows.length > 1 &&
+                      "rounded-xl border border-border bg-surface/40 p-3",
+                  )}
+                >
+                  {dateRows.length > 1 && (
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        Date {index + 1}
+                      </p>
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeDateRow(row.key)}
+                          disabled={submitting}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={`Remove date ${index + 1}`}
+                        >
+                          <X className="h-4 w-4" aria-hidden />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {form.serviceType === "daycare" ? (
+                    <Input
+                      label="Date"
+                      type="date"
+                      required
+                      value={row.startDate}
+                      onChange={(e) =>
+                        updateDateRow(row.key, { startDate: e.target.value })
+                      }
+                    />
+                  ) : (
+                    <>
+                      <Input
+                        label="Start date"
+                        type="date"
+                        required
+                        value={row.startDate}
+                        onChange={(e) =>
+                          updateDateRow(row.key, { startDate: e.target.value })
+                        }
+                      />
+                      <Input
+                        label="End date"
+                        type="date"
+                        required
+                        value={row.endDate}
+                        min={row.startDate || undefined}
+                        onChange={(e) =>
+                          updateDateRow(row.key, { endDate: e.target.value })
+                        }
+                      />
+                    </>
+                  )}
+                </div>
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                disabled={submitting}
+                onClick={addDateRow}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                Add another date
+              </Button>
+            </div>
 
             <label className="flex items-center gap-3 text-sm text-foreground">
               <input

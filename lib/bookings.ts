@@ -295,6 +295,29 @@ export async function getBookingById(
   return { data: booking, error: null };
 }
 
+function validateBookingFormData(
+  input: BookingFormData,
+  rowLabel?: string,
+): BookingsError | null {
+  const prefix = rowLabel ? `${rowLabel}: ` : "";
+
+  if (
+    !input.clientId?.trim() ||
+    !input.dogId?.trim() ||
+    (input.serviceType !== "daycare" && input.serviceType !== "boarding") ||
+    !input.startDate?.trim() ||
+    !input.endDate?.trim()
+  ) {
+    return toError(`${prefix}Missing required booking fields`);
+  }
+
+  if (input.endDate < input.startDate) {
+    return toError(`${prefix}End date must be on or after start date`);
+  }
+
+  return null;
+}
+
 export async function createBooking(
   input: BookingFormData,
 ): Promise<BookingsResult<Booking>> {
@@ -320,6 +343,45 @@ export async function createBooking(
   );
 
   return { data: booking, error: null };
+}
+
+export async function createBookings(
+  inputs: BookingFormData[],
+): Promise<BookingsResult<BookingRow[]>> {
+  if (inputs.length === 0) {
+    return { data: null, error: toError("No bookings to create") };
+  }
+
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  for (let index = 0; index < inputs.length; index += 1) {
+    const validationError = validateBookingFormData(
+      inputs[index],
+      `Date ${index + 1}`,
+    );
+    if (validationError) {
+      return { data: null, error: validationError };
+    }
+  }
+
+  const inserts = inputs.map((input) =>
+    toBookingInsert(profileResult.data.facility_id, input),
+  );
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert(inserts)
+    .select("*");
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  return { data: (data ?? []) as BookingRow[], error: null };
 }
 
 export async function updateBooking(

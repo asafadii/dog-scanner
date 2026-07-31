@@ -186,6 +186,48 @@ export async function createPortalBooking(
   return { data: data.booking, error: null };
 }
 
+export interface CreatePortalBookingsSuccessResponse {
+  ok: true;
+  bookings: Booking[];
+}
+
+export interface CreatePortalBookingsErrorResponse {
+  ok: false;
+  error: string;
+}
+
+export type CreatePortalBookingsResponse =
+  | CreatePortalBookingsSuccessResponse
+  | CreatePortalBookingsErrorResponse;
+
+export async function createPortalBookings(
+  inputs: PortalCreateBookingInput[],
+): Promise<PortalBookingsResult<Booking[]>> {
+  const response = await portalFetch("/api/portal/bookings/batch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bookings: inputs }),
+  });
+
+  const data = (await response.json()) as CreatePortalBookingsResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to create bookings";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403 ? "unauthorized" : "unknown",
+      ),
+    };
+  }
+
+  return { data: data.bookings, error: null };
+}
+
 export interface CancelPortalBookingSuccessResponse {
   ok: true;
   data: true;

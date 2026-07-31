@@ -6,13 +6,10 @@ import {
   WRITE_LOCKED_TITLE,
 } from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
 import { getClients, INCOMPLETE_SETUP_MESSAGE } from "@/lib/clients";
-import { sendClientInvite } from "@/lib/invite";
 import type { Client } from "@/lib/types";
-import { Loader2, Mail, Plus, Search, User, X } from "lucide-react";
+import { Loader2, Plus, Search, User } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -23,12 +20,6 @@ export function ClientsListView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteClientId, setInviteClientId] = useState("");
-  const [inviteSearch, setInviteSearch] = useState("");
-  const [inviteSending, setInviteSending] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
-  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   const loadClients = useCallback(async () => {
     setLoading(true);
@@ -59,72 +50,6 @@ export function ClientsListView() {
         (client.phone?.toLowerCase().includes(q) ?? false),
     );
   }, [clients, query]);
-
-  const inviteableClients = useMemo(
-    () => clients.filter((client) => client.email?.trim()),
-    [clients],
-  );
-
-  const filteredInviteClients = useMemo(() => {
-    const q = inviteSearch.trim().toLowerCase();
-    if (!q) return inviteableClients;
-    return inviteableClients.filter(
-      (client) =>
-        client.name.toLowerCase().includes(q) ||
-        (client.email?.toLowerCase().includes(q) ?? false),
-    );
-  }, [inviteableClients, inviteSearch]);
-
-  useEffect(() => {
-    if (!inviteOpen) return;
-
-    if (
-      inviteClientId &&
-      !filteredInviteClients.some((client) => client.id === inviteClientId)
-    ) {
-      setInviteClientId(filteredInviteClients[0]?.id ?? "");
-    }
-  }, [inviteOpen, inviteClientId, filteredInviteClients]);
-
-  useEffect(() => {
-    if (!inviteOpen) return;
-
-    const timer = setTimeout(() => setInviteSuccess(null), 4000);
-    return () => clearTimeout(timer);
-  }, [inviteOpen, inviteSuccess]);
-
-  function openInvitePanel() {
-    setInviteOpen(true);
-    setInviteError(null);
-    setInviteSuccess(null);
-    setInviteSearch("");
-    setInviteClientId(inviteableClients[0]?.id ?? "");
-  }
-
-  function closeInvitePanel() {
-    setInviteOpen(false);
-    setInviteError(null);
-    setInviteSuccess(null);
-    setInviteSending(false);
-  }
-
-  async function handleSendInvite() {
-    if (!inviteClientId) return;
-
-    setInviteSending(true);
-    setInviteError(null);
-    setInviteSuccess(null);
-
-    const result = await sendClientInvite(inviteClientId);
-    if (result.ok) {
-      const client = inviteableClients.find((item) => item.id === inviteClientId);
-      setInviteSuccess(`Invite sent to ${client?.email ?? "the client"}!`);
-    } else {
-      setInviteError(result.error);
-    }
-
-    setInviteSending(false);
-  }
 
   if (loading) {
     return (
@@ -168,134 +93,24 @@ export function ClientsListView() {
             {filtered.length} of {clients.length} client profiles
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        {writeLocked ? (
           <Button
-            variant="outline"
             className="w-full sm:w-auto"
-            onClick={openInvitePanel}
-            disabled={inviteableClients.length === 0}
-            title={
-              inviteableClients.length === 0
-                ? "No clients with an email address"
-                : undefined
-            }
+            disabled
+            title={WRITE_LOCKED_TITLE}
           >
-            <Mail className="h-4 w-4" aria-hidden />
-            Invite Owner
+            <Plus className="h-4 w-4" aria-hidden />
+            Add Client
           </Button>
-          {writeLocked ? (
-            <Button
-              className="w-full sm:w-auto"
-              disabled
-              title={WRITE_LOCKED_TITLE}
-            >
+        ) : (
+          <Link href="/clients/new">
+            <Button className="w-full sm:w-auto">
               <Plus className="h-4 w-4" aria-hidden />
               Add Client
             </Button>
-          ) : (
-            <Link href="/clients/new">
-              <Button className="w-full sm:w-auto">
-                <Plus className="h-4 w-4" aria-hidden />
-                Add Client
-              </Button>
-            </Link>
-          )}
-        </div>
+          </Link>
+        )}
       </div>
-
-      {inviteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
-          <Card className="w-full max-w-md">
-            <CardContent className="space-y-4 p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Invite Owner
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Send a signup link to a client by email.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={closeInvitePanel}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-                  aria-label="Close invite panel"
-                >
-                  <X className="h-5 w-5" aria-hidden />
-                </button>
-              </div>
-
-              <Input
-                type="search"
-                label="Search clients"
-                placeholder="Search by name or email..."
-                value={inviteSearch}
-                onChange={(e) => setInviteSearch(e.target.value)}
-                disabled={inviteSending}
-              />
-
-              <Select
-                label="Client"
-                value={inviteClientId}
-                onChange={(e) => setInviteClientId(e.target.value)}
-                disabled={inviteSending || filteredInviteClients.length === 0}
-              >
-                <option value="" disabled>
-                  {filteredInviteClients.length === 0
-                    ? "No matching clients with email"
-                    : "Select a client"}
-                </option>
-                {filteredInviteClients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name} ({client.email})
-                  </option>
-                ))}
-              </Select>
-
-              {inviteError && (
-                <p className="text-sm text-danger" role="alert">
-                  {inviteError}
-                </p>
-              )}
-
-              {inviteSuccess && (
-                <p
-                  className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm text-success"
-                  role="status"
-                >
-                  {inviteSuccess}
-                </p>
-              )}
-
-              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                <Button
-                  variant="outline"
-                  onClick={closeInvitePanel}
-                  disabled={inviteSending}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => void handleSendInvite()}
-                  disabled={
-                    inviteSending ||
-                    !inviteClientId ||
-                    filteredInviteClients.length === 0
-                  }
-                  className="w-full sm:w-auto"
-                >
-                  {inviteSending && (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  )}
-                  {inviteSending ? "Sending..." : "Send Invite"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <div className="relative">
         <Search

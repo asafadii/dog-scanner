@@ -539,38 +539,6 @@ export default function PortalNewDogPage() {
               )}
             </div>
 
-            <div className="space-y-3">
-              <label
-                className={cn(
-                  "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
-                  form.alerts.dietary
-                    ? "border-primary/40 bg-primary/5"
-                    : "border-border hover:bg-muted",
-                  isSubmitting && "cursor-not-allowed opacity-60",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={form.alerts.dietary}
-                  disabled={isSubmitting}
-                  onChange={() => toggleAlert("dietary")}
-                  className="mt-0.5 h-5 w-5 rounded border-border text-primary focus:ring-ring"
-                />
-                <span className="text-sm font-medium text-foreground">
-                  Dietary Restriction
-                </span>
-              </label>
-              {form.alerts.dietary && (
-                <Textarea
-                  label="What's the restriction?"
-                  value={form.dietaryNotes}
-                  onChange={(e) => updateField("dietaryNotes", e.target.value)}
-                  rows={3}
-                  disabled={isSubmitting}
-                />
-              )}
-            </div>
-
             <TriStateControl
               label="Aggressive towards people?"
               value={form.aggressionTowardsPeople}

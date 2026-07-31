@@ -352,6 +352,25 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             Edit
           </Link>
         )}
+        {isCheckedIn && (
+          <div className="absolute left-4 top-4">
+            <LocationChip assignment={dog.currentAssignment} />
+          </div>
+        )}
+        {isCheckedIn && dog.activeCheckinId && (
+          <div className="absolute bottom-20 right-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMoveOpen((open) => !open)}
+              aria-expanded={moveOpen}
+              className="border-white/40 bg-black/40 text-white backdrop-blur-sm hover:bg-black/55"
+            >
+              <ArrowRightLeft className="h-4 w-4" aria-hidden />
+              Move Kennel
+            </Button>
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -363,22 +382,6 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <DogStatusBadge status={dog.status} />
-              {isCheckedIn && (
-                <>
-                  <LocationChip assignment={dog.currentAssignment} />
-                  {dog.activeCheckinId && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setMoveOpen((open) => !open)}
-                      aria-expanded={moveOpen}
-                    >
-                      <ArrowRightLeft className="h-4 w-4" aria-hidden />
-                      Move Kennel
-                    </Button>
-                  )}
-                </>
-              )}
               <DogVisitBadge isReturning={dog.isReturning} />
             </div>
           </div>
@@ -513,30 +516,42 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     </Button>
                   )}
                 </div>
-                {dog.client.emergencyContact && (
-                  <div className="border-t border-border pt-3 text-sm">
-                    <span className="text-muted-foreground">Emergency: </span>
-                    <span className="font-medium text-foreground">
-                      {dog.client.emergencyContact}
-                    </span>
-                    {dog.client.emergencyPhone && (
-                      <>
-                        {" "}
-                        <a
-                          href={`tel:${dog.client.emergencyPhone}`}
-                          className="text-primary hover:underline"
-                        >
-                          {dog.client.emergencyPhone}
-                        </a>
-                      </>
+                {(dog.client.emergencyContact || dog.client.address) && (
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border pt-3">
+                    {dog.client.emergencyContact && (
+                      <div>
+                        <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                          Emergency
+                        </dt>
+                        <dd className="mt-1 text-sm font-medium">
+                          <span className="text-foreground">
+                            {dog.client.emergencyContact}
+                          </span>
+                          {dog.client.emergencyPhone && (
+                            <>
+                              {" "}
+                              <a
+                                href={`tel:${dog.client.emergencyPhone}`}
+                                className="text-primary hover:underline"
+                              >
+                                {dog.client.emergencyPhone}
+                              </a>
+                            </>
+                          )}
+                        </dd>
+                      </div>
                     )}
-                  </div>
-                )}
-                {dog.client.address && (
-                  <div className="border-t border-border pt-3 text-sm">
-                    <span className="text-muted-foreground">Address: </span>
-                    <span className="text-foreground">{dog.client.address}</span>
-                  </div>
+                    {dog.client.address && (
+                      <div>
+                        <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                          Address
+                        </dt>
+                        <dd className="mt-1 text-sm font-medium text-foreground">
+                          {dog.client.address}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
                 )}
                 <Link
                   href={`/clients/${dog.client.id}`}
@@ -566,34 +581,38 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                     <Phone className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid gap-2 border-t border-border pt-3 text-sm">
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Emergency</span>
-                    <a
-                      href={`tel:${dog.owner.emergencyPhone}`}
-                      className="text-right font-medium text-primary hover:underline"
-                    >
-                      {dog.owner.emergencyContact} — {dog.owner.emergencyPhone}
-                    </a>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-4 border-t border-border pt-3">
+                  <div>
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Emergency
+                    </dt>
+                    <dd className="mt-1 text-sm font-medium">
+                      <a
+                        href={`tel:${dog.owner.emergencyPhone}`}
+                        className="text-primary hover:underline"
+                      >
+                        {dog.owner.emergencyContact} — {dog.owner.emergencyPhone}
+                      </a>
+                    </dd>
                   </div>
                   {dog.owner.veterinarian && (
-                    <div className="flex items-start justify-between gap-4">
-                      <span className="flex items-center gap-1 text-muted-foreground">
+                    <div>
+                      <dt className="flex items-center gap-1 text-xs uppercase tracking-wide text-muted-foreground">
                         <Stethoscope className="h-3.5 w-3.5" aria-hidden />
                         Vet
-                      </span>
-                      <div className="text-right">
-                        <p className="font-medium">{dog.owner.veterinarian}</p>
+                      </dt>
+                      <dd className="mt-1 text-sm font-medium">
+                        <p>{dog.owner.veterinarian}</p>
                         <a
                           href={`tel:${dog.owner.vetPhone}`}
                           className="text-primary hover:underline"
                         >
                           {dog.owner.vetPhone}
                         </a>
-                      </div>
+                      </dd>
                     </div>
                   )}
-                </div>
+                </dl>
               </>
             )}
           </CardContent>
@@ -607,66 +626,117 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               Health &amp; Safety
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 pt-0 text-sm">
-            {dog.alerts.medication && (
+          <CardContent className="pt-0 text-sm">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
               <div>
-                <p className="font-semibold text-foreground">Medication</p>
-                <p className="mt-0.5 text-muted-foreground">
-                  {dog.care.medication !== "None"
-                    ? dog.care.medication
-                    : "Required — see staff notes"}
-                </p>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Aggressive towards people
+                </dt>
+                <dd className="mt-1 text-sm font-medium">
+                  <TriStateAnswer value={dog.aggressionTowardsPeople} />
+                </dd>
               </div>
-            )}
-            {dog.alerts.allergy && (
               <div>
-                <p className="font-semibold text-foreground">Allergy</p>
-                <p className="mt-0.5 text-muted-foreground">{dog.care.allergies}</p>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Aggressive towards other dogs
+                </dt>
+                <dd className="mt-1 text-sm font-medium">
+                  <TriStateAnswer value={dog.aggressionTowardsDogs} />
+                </dd>
               </div>
-            )}
-            {dog.alerts.dietary && (
+              {dog.alerts.escapeRisk && (
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Escape risk
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium text-danger">Yes</dd>
+                </div>
+              )}
               <div>
-                <p className="font-semibold text-foreground">Dietary Restriction</p>
-                <p className="mt-0.5 text-muted-foreground">{dog.care.dietaryNotes}</p>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Separation anxiety
+                </dt>
+                <dd className="mt-1 text-sm font-medium">
+                  <TriStateAnswer value={dog.separationAnxiety} />
+                </dd>
               </div>
-            )}
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-muted-foreground">Aggressive towards people</span>
-              <TriStateAnswer value={dog.aggressionTowardsPeople} />
-            </div>
-            {dog.aggressionTowardsPeople === true && dog.aggressionPeopleNotes && (
-              <p className="pl-0 text-muted-foreground">{dog.aggressionPeopleNotes}</p>
-            )}
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-muted-foreground">Aggressive towards other dogs</span>
-              <TriStateAnswer value={dog.aggressionTowardsDogs} />
-            </div>
-            {dog.aggressionTowardsDogs === true && dog.aggressionDogsNotes && (
-              <p className="text-muted-foreground">{dog.aggressionDogsNotes}</p>
-            )}
-            {dog.alerts.escapeRisk && (
-              <div className="flex items-start justify-between gap-4">
-                <span className="text-muted-foreground">Escape risk</span>
-                <span className="font-medium text-danger">Yes</span>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Chewing / self-harm risk
+                </dt>
+                <dd className="mt-1 text-sm font-medium">
+                  <TriStateAnswer value={dog.chewingRisk} />
+                </dd>
               </div>
-            )}
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-muted-foreground">Separation anxiety</span>
-              <TriStateAnswer value={dog.separationAnxiety} />
-            </div>
-            {dog.separationAnxiety === true && dog.separationAnxietyNotes && (
-              <p className="text-muted-foreground">{dog.separationAnxietyNotes}</p>
-            )}
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-muted-foreground">Chewing / self-harm risk</span>
-              <TriStateAnswer value={dog.chewingRisk} />
-            </div>
-            {dog.chewingRisk === true && dog.chewingRiskNotes && (
-              <p className="text-muted-foreground">{dog.chewingRiskNotes}</p>
-            )}
-            <div className="flex items-start justify-between gap-4">
-              <span className="text-muted-foreground">Kennel trained</span>
-              <TriStateAnswer value={dog.kennelTrained} />
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Kennel trained
+                </dt>
+                <dd className="mt-1 text-sm font-medium">
+                  <TriStateAnswer value={dog.kennelTrained} />
+                </dd>
+              </div>
+            </dl>
+            <div className="mt-4 space-y-4">
+              {dog.alerts.medication && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Medication
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {dog.care.medication !== "None"
+                      ? dog.care.medication
+                      : "Required — see staff notes"}
+                  </p>
+                </div>
+              )}
+              {dog.alerts.allergy && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Allergy
+                  </p>
+                  <p className="mt-1 text-sm font-medium">{dog.care.allergies}</p>
+                </div>
+              )}
+              {dog.aggressionTowardsPeople === true &&
+                dog.aggressionPeopleNotes && (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Notes — Aggressive towards people
+                    </p>
+                    <p className="mt-1 text-sm font-medium">
+                      {dog.aggressionPeopleNotes}
+                    </p>
+                  </div>
+                )}
+              {dog.aggressionTowardsDogs === true && dog.aggressionDogsNotes && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Notes — Aggressive towards other dogs
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {dog.aggressionDogsNotes}
+                  </p>
+                </div>
+              )}
+              {dog.separationAnxiety === true && dog.separationAnxietyNotes && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Notes — Separation anxiety
+                  </p>
+                  <p className="mt-1 text-sm font-medium">
+                    {dog.separationAnxietyNotes}
+                  </p>
+                </div>
+              )}
+              {dog.chewingRisk === true && dog.chewingRiskNotes && (
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Notes — Chewing / self-harm risk
+                  </p>
+                  <p className="mt-1 text-sm font-medium">{dog.chewingRiskNotes}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -679,32 +749,39 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               Feeding
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 pt-0 text-sm">
+          <CardContent className="pt-0 text-sm">
             {dog.feedingSource ? (
-              <>
-                <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Food source</span>
-                  <span className="font-medium text-foreground">
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Food source
+                  </dt>
+                  <dd className="mt-1 text-sm font-medium text-foreground">
                     {dog.feedingSource === "own" ? "Own food" : "Facility food"}
-                  </span>
+                  </dd>
                 </div>
                 {dog.feedingMealsPerDay !== null && (
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground">Meals</span>
-                    <span className="font-medium text-foreground">
+                  <div>
+                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Meals
+                    </dt>
+                    <dd className="mt-1 text-sm font-medium text-foreground">
                       {dog.feedingMealsPerDay} meal
                       {dog.feedingMealsPerDay === 1 ? "" : "s"} per day
-                    </span>
+                    </dd>
                   </div>
                 )}
-              </>
+              </dl>
             ) : (
               <p className="text-muted-foreground">Not recorded</p>
             )}
             {dog.care.feedingNotes !== "None" && (
-              <p className="border-t border-border pt-2 text-muted-foreground">
-                {dog.care.feedingNotes}
-              </p>
+              <div className="mt-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Notes
+                </p>
+                <p className="mt-1 text-sm font-medium">{dog.care.feedingNotes}</p>
+              </div>
             )}
           </CardContent>
         </Card>

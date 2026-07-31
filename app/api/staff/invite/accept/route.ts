@@ -174,7 +174,7 @@ export async function POST(request: Request) {
     facility_id: inviteRow.facility_id,
     full_name: fullName,
     email: userEmail,
-    role: "staff",
+    role: inviteRow.role === "admin" ? "admin" : "staff",
   });
 
   if (profileError || !staffProfile) {

@@ -161,7 +161,9 @@ export function ReportsView() {
                 isAdvancedGated
               }
               title={
-                isAdvancedGated ? "Available on DORA Unlimited" : undefined
+                isAdvancedGated
+                  ? "This is a DORA Unlimited feature — upgrade to unlock Excel exports"
+                  : undefined
               }
             >
               <Download className="h-4 w-4" aria-hidden />
@@ -266,8 +268,8 @@ export function ReportsView() {
               {isAdvancedGated && (
                 <div className="mb-4 rounded-xl border border-primary/20 bg-mint-wash px-4 py-3 text-sm text-foreground">
                   {/* #EAF4F1 documented mint-wash (D-04) — no named token */}
-                  Upgrade to DORA Unlimited for advanced analytics and Excel
-                  export.{" "}
+                  Excel export and advanced analytics are DORA Unlimited
+                  features. Upgrade anytime from Settings → Subscription.{" "}
                   <Link
                     href="/subscription"
                     className="font-medium text-primary hover:underline"

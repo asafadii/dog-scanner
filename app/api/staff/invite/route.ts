@@ -66,6 +66,22 @@ export async function POST(request: Request) {
     );
   }
 
+  const rawRole =
+    body &&
+    typeof body === "object" &&
+    typeof (body as Record<string, unknown>).role === "string"
+      ? (body as Record<string, string>).role.trim()
+      : "staff";
+
+  if (rawRole !== "admin" && rawRole !== "staff") {
+    return NextResponse.json(
+      { ok: false, error: "Role must be admin or staff" },
+      { status: 400 },
+    );
+  }
+
+  const role = rawRole;
+
   const { data: facility, error: facilityError } = await db
     .from("facilities")
     .select("*")
@@ -127,6 +143,7 @@ export async function POST(request: Request) {
     email,
     token,
     invited_by: profile.id,
+    role,
   });
 
   if (insertError) {

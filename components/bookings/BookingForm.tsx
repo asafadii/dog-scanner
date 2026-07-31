@@ -9,15 +9,21 @@ import { getClientDogs, getClients } from "@/lib/clients";
 import { getBookingCapacityWarning } from "@/lib/capacity";
 import type { BookingFormData, BookingServiceType, Client, Dog } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { Loader2, Plus, X } from "lucide-react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 
 const SERVICE_TYPES: BookingServiceType[] = ["daycare", "boarding"];
 
 export type BookingFormSubmitPhase = "idle" | "saving";
 
+interface BookingDateRow {
+  key: string;
+  startDate: string;
+  endDate: string;
+}
+
 interface BookingFormProps {
-  onSubmit: (data: BookingFormData) => void | Promise<void>;
+  onSubmit: (data: BookingFormData | BookingFormData[]) => void | Promise<void>;
   submitLabel?: string;
   initialData?: BookingFormData;
   initialClientId?: string | null;
@@ -31,6 +37,7 @@ export function BookingForm({
   initialClientId = null,
   submitPhase = "idle",
 }: BookingFormProps) {
+  const rowIdPrefix = useId();
   const [form, setForm] = useState<BookingFormData>(
     initialData ?? {
       clientId: initialClientId ?? "",
@@ -42,6 +49,13 @@ export function BookingForm({
       notes: "",
     },
   );
+  const [dateRows, setDateRows] = useState<BookingDateRow[]>([
+    {
+      key: `${rowIdPrefix}-0`,
+      startDate: initialData?.startDate ?? "",
+      endDate: initialData?.endDate ?? "",
+    },
+  ]);
   const [clients, setClients] = useState<Client[]>([]);
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [clientsLoading, setClientsLoading] = useState(true);
@@ -112,11 +126,14 @@ export function BookingForm({
       return;
     }
 
-    if (
-      !form.startDate ||
-      !form.endDate ||
-      form.endDate < form.startDate
-    ) {
+    const rowsToCheck = dateRows.filter(
+      (row) =>
+        row.startDate &&
+        row.endDate &&
+        row.endDate >= row.startDate,
+    );
+
+    if (rowsToCheck.length === 0) {
       setCapacityWarning(null);
       return;
     }
@@ -124,9 +141,25 @@ export function BookingForm({
     let cancelled = false;
 
     async function checkCapacity() {
-      const result = await getBookingCapacityWarning(form);
-      if (cancelled) return;
-      setCapacityWarning(result.error ? null : result.data);
+      for (const row of rowsToCheck) {
+        const result = await getBookingCapacityWarning({
+          ...form,
+          startDate: row.startDate,
+          endDate: row.endDate,
+        });
+        if (cancelled) return;
+        if (result.error) {
+          setCapacityWarning(null);
+          return;
+        }
+        if (result.data) {
+          setCapacityWarning(result.data);
+          return;
+        }
+      }
+      if (!cancelled) {
+        setCapacityWarning(null);
+      }
     }
 
     void checkCapacity();
@@ -134,13 +167,59 @@ export function BookingForm({
     return () => {
       cancelled = true;
     };
-  }, [isCreateMode, form.serviceType, form.startDate, form.endDate]);
+  }, [isCreateMode, form, dateRows]);
 
   function updateField<K extends keyof BookingFormData>(
     key: K,
     value: BookingFormData[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleServiceTypeChange(serviceType: BookingServiceType) {
+    setForm((prev) => ({
+      ...prev,
+      serviceType,
+    }));
+    // Daycare is always same-day — collapse any boarding range to start date.
+    if (serviceType === "daycare") {
+      setDateRows((rows) =>
+        rows.map((row) => ({ ...row, endDate: row.startDate })),
+      );
+    }
+  }
+
+  function updateDateRow(
+    key: string,
+    patch: Partial<Pick<BookingDateRow, "startDate" | "endDate">>,
+  ) {
+    setDateRows((rows) =>
+      rows.map((row) => {
+        if (row.key !== key) return row;
+        const next = { ...row, ...patch };
+        if (form.serviceType === "daycare" && patch.startDate !== undefined) {
+          next.endDate = patch.startDate;
+        }
+        return next;
+      }),
+    );
+  }
+
+  function addDateRow() {
+    setDateRows((rows) => [
+      ...rows,
+      {
+        key: `${rowIdPrefix}-${rows.length}-${Date.now()}`,
+        startDate: "",
+        endDate: "",
+      },
+    ]);
+  }
+
+  function removeDateRow(key: string) {
+    setDateRows((rows) =>
+      rows.length <= 1 ? rows : rows.filter((row) => row.key !== key),
+    );
   }
 
   function handleClientChange(clientId: string) {
@@ -154,7 +233,91 @@ export function BookingForm({
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (isSubmitting) return;
-    void onSubmit(form);
+
+    const payloads: BookingFormData[] = dateRows.map((row) => ({
+      ...form,
+      startDate: row.startDate,
+      endDate:
+        form.serviceType === "daycare" ? row.startDate : row.endDate,
+    }));
+
+    if (payloads.length === 1) {
+      void onSubmit(payloads[0]);
+      return;
+    }
+
+    void onSubmit(payloads);
+  }
+
+  function renderDateFields(row: BookingDateRow, index: number) {
+    const showRemove = isCreateMode && index > 0;
+
+    return (
+      <div
+        key={row.key}
+        className={cn(
+          "space-y-3",
+          dateRows.length > 1 &&
+            "rounded-xl border border-border bg-surface/40 p-3",
+        )}
+      >
+        {dateRows.length > 1 && (
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-medium text-foreground">
+              Date {index + 1}
+            </p>
+            {showRemove && (
+              <button
+                type="button"
+                onClick={() => removeDateRow(row.key)}
+                disabled={isSubmitting}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label={`Remove date ${index + 1}`}
+              >
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            )}
+          </div>
+        )}
+
+        {form.serviceType === "daycare" ? (
+          <Input
+            label="Date"
+            type="date"
+            required
+            value={row.startDate}
+            onChange={(e) =>
+              updateDateRow(row.key, { startDate: e.target.value })
+            }
+            disabled={isSubmitting}
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="Start Date"
+              type="date"
+              required
+              value={row.startDate}
+              onChange={(e) =>
+                updateDateRow(row.key, { startDate: e.target.value })
+              }
+              disabled={isSubmitting}
+            />
+            <Input
+              label="End Date"
+              type="date"
+              required
+              value={row.endDate}
+              onChange={(e) =>
+                updateDateRow(row.key, { endDate: e.target.value })
+              }
+              min={row.startDate || undefined}
+              disabled={isSubmitting}
+            />
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -244,7 +407,7 @@ export function BookingForm({
                   key={type}
                   type="button"
                   disabled={isSubmitting}
-                  onClick={() => updateField("serviceType", type)}
+                  onClick={() => handleServiceTypeChange(type)}
                   className={cn(
                     "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-colors",
                     form.serviceType === type
@@ -259,24 +422,21 @@ export function BookingForm({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Start Date"
-              type="date"
-              required
-              value={form.startDate}
-              onChange={(e) => updateField("startDate", e.target.value)}
-              disabled={isSubmitting}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              required
-              value={form.endDate}
-              onChange={(e) => updateField("endDate", e.target.value)}
-              min={form.startDate || undefined}
-              disabled={isSubmitting}
-            />
+          <div className="space-y-3">
+            {dateRows.map((row, index) => renderDateFields(row, index))}
+
+            {isCreateMode && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={addDateRow}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                Add another date
+              </Button>
+            )}
           </div>
 
           <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">

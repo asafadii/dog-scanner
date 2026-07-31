@@ -288,7 +288,7 @@ export function DashboardView() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {upcomingBookings.map((booking) => (
               <Link key={booking.id} href={`/bookings/${booking.id}`}>
                 <Card className="transition-shadow hover:shadow-md">
