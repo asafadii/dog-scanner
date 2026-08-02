@@ -1,5 +1,6 @@
 "use client";
 
+import { CookiePreferencesButton } from "@/components/consent/CookiePreferencesButton";
 import { FacilitySettingsSection } from "@/components/settings/FacilitySettingsSection";
 import { FacilityCodeSection } from "@/components/settings/FacilityCodeSection";
 import { BookingFormSection } from "@/components/settings/BookingFormSection";
@@ -7,6 +8,8 @@ import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsS
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
 import { StaffAccountsSection } from "@/components/settings/StaffAccountsSection";
+import { Card, CardContent } from "@/components/ui/Card";
+import { isClarityEnabled } from "@/lib/clarity";
 
 export default function SettingsPage() {
   return (
@@ -33,6 +36,14 @@ export default function SettingsPage() {
       <PricingSettingsSection />
 
       <StaffAccountsSection />
+
+      {isClarityEnabled() ? (
+        <Card>
+          <CardContent className="p-4">
+            <CookiePreferencesButton className="text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:ring-ring focus-visible:ring-offset-background" />
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

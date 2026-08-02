@@ -5,10 +5,12 @@ import {
   type FacilityOption,
 } from "@/components/portal/PortalFacilityPicker";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { CookiePreferencesButton } from "@/components/consent/CookiePreferencesButton";
 import { ArchiveConfirmCard } from "@/components/ui/ArchiveConfirmCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { isClarityEnabled } from "@/lib/clarity";
 import { deletePortalAccount } from "@/lib/portal/account";
 import { getLinkedClients, requireClientAccount } from "@/lib/portal/auth";
 import {
@@ -609,7 +611,7 @@ export default function PortalSettingsPage() {
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Account</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="space-y-3 pt-0">
           <Link
             href="/forgot-password"
             className="flex min-h-[44px] items-center gap-3 rounded-xl border border-border px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
@@ -617,6 +619,9 @@ export default function PortalSettingsPage() {
             <KeyRound className="h-4 w-4 text-primary" aria-hidden />
             Change password
           </Link>
+          {isClarityEnabled() ? (
+            <CookiePreferencesButton className="px-4 text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:ring-ring focus-visible:ring-offset-background" />
+          ) : null}
         </CardContent>
       </Card>
 

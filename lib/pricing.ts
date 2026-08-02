@@ -1,4 +1,5 @@
 import { checkOutDog, getEffectiveServiceType } from "@/lib/checkins";
+import { clarity } from "@/lib/clarity";
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
@@ -573,6 +574,7 @@ export async function recordPayment(
       return { data: null, error: toError(checkoutResult.error.message) };
     }
 
+    clarity("event", "checkout_completed");
     return {
       data: mapPaymentRow(existingPayment as PaymentRow),
       error: null,
@@ -648,6 +650,7 @@ export async function recordPayment(
     return { data: null, error: toError(checkoutResult.error.message) };
   }
 
+  clarity("event", "checkout_completed");
   return {
     data: mapPaymentRow(paymentRow as PaymentRow),
     error: null,

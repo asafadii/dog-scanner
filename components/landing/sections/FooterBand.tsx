@@ -1,3 +1,4 @@
+import { CookiePreferencesButton } from "@/components/consent/CookiePreferencesButton";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -59,6 +60,7 @@ export default function FooterBand() {
             >
               Service Agreement
             </Link>
+            <CookiePreferencesButton className="text-[#cfe7e2] focus-visible:ring-offset-[#06342F]" />
           </div>
         </div>
 

@@ -1,7 +1,11 @@
 import { Providers } from "@/components/app/Providers";
+import { CookieConsentBanner } from "@/components/consent/CookieConsentBanner";
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+
+const clarityProjectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID?.trim();
 
 const display = Baloo_2({
   variable: "--font-display",
@@ -52,7 +56,29 @@ export default function RootLayout({
       className={`${display.variable} ${sans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <Providers>{children}</Providers>
+        {clarityProjectId ? (
+          <Script id="microsoft-clarity" strategy="afterInteractive">
+            {`(function(c,l,a,r,i,t,y){
+  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  try {
+    var consent = localStorage.getItem("dora-cookie-consent");
+    if (consent === "granted") {
+      c[a]("consentv2", { ad_Storage: "granted", analytics_Storage: "granted" });
+    } else {
+      c[a]("consentv2", { ad_Storage: "denied", analytics_Storage: "denied" });
+    }
+  } catch (e) {
+    c[a]("consentv2", { ad_Storage: "denied", analytics_Storage: "denied" });
+  }
+})(window, document, "clarity", "script", ${JSON.stringify(clarityProjectId)});`}
+          </Script>
+        ) : null}
+        <Providers>
+          {children}
+          <CookieConsentBanner />
+        </Providers>
       </body>
     </html>
   );

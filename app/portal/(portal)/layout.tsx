@@ -1,5 +1,6 @@
 "use client";
 
+import { ClarityPortalTags } from "@/components/consent/ClarityPortalTags";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { RequireClientAccount } from "@/components/portal/RequireClientAccount";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -28,6 +29,7 @@ export default function PortalAuthenticatedLayout({
 
   return (
     <RequireClientAccount>
+      <ClarityPortalTags />
       <PortalShell
         displayName={displayName}
         onSignOut={() => void handleSignOut()}

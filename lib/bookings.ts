@@ -1,5 +1,6 @@
-import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { canApproveBooking } from "@/lib/capacity";
+import { clarity } from "@/lib/clarity";
+import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   BookingInsert,
@@ -342,6 +343,7 @@ export async function createBooking(
     profileResult.data.facility_id,
   );
 
+  clarity("event", "booking_created");
   return { data: booking, error: null };
 }
 
@@ -381,6 +383,7 @@ export async function createBookings(
     return { data: null, error: toError(error.message) };
   }
 
+  clarity("event", "booking_created");
   return { data: (data ?? []) as BookingRow[], error: null };
 }
 

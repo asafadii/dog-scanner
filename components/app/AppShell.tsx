@@ -4,6 +4,7 @@ import { BillingBanner } from "@/components/app/BillingBanner";
 import { DesktopStaffNav } from "@/components/app/DesktopStaffNav";
 import { MobileBottomNav } from "@/components/app/MobileBottomNav";
 import { TopBar } from "@/components/app/TopBar";
+import { ClarityStaffTags } from "@/components/consent/ClarityStaffTags";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -15,6 +16,7 @@ interface AppShellProps {
 export function AppShell({ children, className }: AppShellProps) {
   return (
     <div className="flex min-h-full flex-col bg-background">
+      <ClarityStaffTags />
       <BillingBanner />
       <TopBar />
       <DesktopStaffNav />

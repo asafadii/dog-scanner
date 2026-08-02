@@ -1,3 +1,4 @@
+import { clarity } from "@/lib/clarity";
 import { getCurrentUserProfile } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { BookingRow, DogCheckinRow } from "@/lib/supabase/types";
@@ -352,6 +353,7 @@ export async function checkInDog(
     return { data: null, error: toError(error.message) };
   }
 
+  clarity("event", "checkin_completed");
   return { data: data as DogCheckinRow, error: null };
 }
 
