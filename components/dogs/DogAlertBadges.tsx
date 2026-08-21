@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/Badge";
+import { getVaccinationExpiryBadgeStatus } from "@/lib/dogs";
 import type { DogAlerts } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -6,6 +7,7 @@ import {
   DoorOpen,
   Pill,
   Shield,
+  Syringe,
   type LucideIcon,
 } from "lucide-react";
 
@@ -110,20 +112,37 @@ export function hasCriticalAlerts(alerts: DogAlerts): boolean {
 
 interface DogAlertBadgesProps {
   alerts: DogAlerts;
+  vaccinationExpiryDate?: string | null;
   className?: string;
   compact?: boolean;
 }
 
 export function DogAlertBadges({
   alerts,
+  vaccinationExpiryDate,
   className,
   compact = false,
 }: DogAlertBadgesProps) {
   const activeAlerts = getActiveAlerts(alerts);
+  const vaxStatus = getVaccinationExpiryBadgeStatus(vaccinationExpiryDate);
+  const vaxLabel =
+    vaxStatus === "expired"
+      ? compact
+        ? "Vax expired"
+        : "Vaccination expired"
+      : vaxStatus === "expiring_soon"
+        ? compact
+          ? "Vax due"
+          : "Vaccination expires soon"
+        : null;
 
-  if (activeAlerts.length === 0) return null;
+  if (activeAlerts.length === 0 && !vaxLabel) return null;
 
-  const summary = `${activeAlerts.length} care alert${activeAlerts.length > 1 ? "s" : ""}: ${activeAlerts.map((a) => a.label).join(", ")}`;
+  const summaryParts = [
+    ...activeAlerts.map((a) => a.label),
+    ...(vaxLabel ? [vaxLabel] : []),
+  ];
+  const summary = `${summaryParts.length} care alert${summaryParts.length > 1 ? "s" : ""}: ${summaryParts.join(", ")}`;
 
   return (
     <div
@@ -154,6 +173,17 @@ export function DogAlertBadges({
           </Badge>
         );
       })}
+      {vaxStatus && vaxLabel ? (
+        <Badge
+          key="vaccination-expiry"
+          variant={vaxStatus === "expired" ? "red" : "amber"}
+          role="listitem"
+          title={vaxLabel}
+        >
+          <Syringe className="h-3 w-3 shrink-0" aria-hidden />
+          {vaxLabel}
+        </Badge>
+      ) : null}
     </div>
   );
 }

@@ -213,7 +213,11 @@ export function DogCard({
           </div>
 
           <div className="mt-2.5 min-h-[3.25rem]">
-            <DogAlertBadges alerts={dog.alerts} compact />
+            <DogAlertBadges
+              alerts={dog.alerts}
+              vaccinationExpiryDate={dog.vaccinationExpiryDate}
+              compact
+            />
             <DogVisitBadge isReturning={dog.isReturning} compact className="mt-2" />
           </div>
         </div>
@@ -265,7 +269,6 @@ export function DogCard({
         <div className="mt-3 pl-2">
           <CheckoutPicker
             checkinId={dog.activeCheckinId}
-            feedingSource={dog.feedingSource}
             onComplete={(payment) => {
               onCheckoutComplete?.(dog.id, payment);
               setCheckoutOpen(false);

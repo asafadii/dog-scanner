@@ -4,6 +4,9 @@ import {
   DOCUMENT_MAX_BYTES,
   extensionForMimeType,
   mapDogDocumentRowToDogDocument,
+  parseVaccinationExpiryDate,
+  VACCINATION_EXPIRY_REQUIRED_MESSAGE,
+  VACCINATION_NOTIFICATION_RESET,
 } from "@/lib/portal/documents";
 import type { UploadPortalDocumentSuccessResponse } from "@/lib/portal/documents";
 import {
@@ -41,6 +44,9 @@ export async function POST(request: Request) {
 
   const dogId = String(formData.get("dogId") ?? "").trim();
   const documentType = String(formData.get("documentType") ?? "").trim() as DogDocumentType;
+  const vaccinationExpiryDate = parseVaccinationExpiryDate(
+    formData.get("vaccinationExpiryDate"),
+  );
   const file = formData.get("file");
 
   if (!dogId) {
@@ -53,6 +59,13 @@ export async function POST(request: Request) {
   if (!DOCUMENT_TYPES.includes(documentType)) {
     return NextResponse.json(
       { ok: false, error: "Invalid document type" },
+      { status: 400 },
+    );
+  }
+
+  if (documentType === "vaccination" && !vaccinationExpiryDate) {
+    return NextResponse.json(
+      { ok: false, error: VACCINATION_EXPIRY_REQUIRED_MESSAGE },
       { status: 400 },
     );
   }
@@ -141,6 +154,25 @@ export async function POST(request: Request) {
       { ok: false, error: insertError?.message ?? "Failed to save document record" },
       { status: 500 },
     );
+  }
+
+  if (documentType === "vaccination" && vaccinationExpiryDate) {
+    const { error: expiryError } = await db
+      .from("dogs")
+      .update({
+        vaccination_expiry_date: vaccinationExpiryDate,
+        ...VACCINATION_NOTIFICATION_RESET,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", dogId)
+      .eq("facility_id", dogResult.dog.facility_id);
+
+    if (expiryError) {
+      return NextResponse.json(
+        { ok: false, error: expiryError.message },
+        { status: 500 },
+      );
+    }
   }
 
   const response: UploadPortalDocumentSuccessResponse = {

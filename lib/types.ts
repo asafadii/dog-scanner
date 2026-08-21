@@ -2,6 +2,8 @@ export type DogStatus = "checked_in" | "checked_out";
 
 export type DogSize = "small" | "medium" | "large";
 
+export type DogGender = "male" | "female";
+
 export interface DogAlerts {
   medication: boolean;
   allergy: boolean;
@@ -23,6 +25,8 @@ export interface DogOwner {
 }
 
 export type FeedingSource = "own" | "facility";
+
+export type FoodSource = FeedingSource;
 
 export interface DogCare {
   medication: string;
@@ -91,6 +95,7 @@ export interface Dog {
   breed: string;
   age: string;
   size: DogSize;
+  gender?: DogGender | null;
   photoUrl: string | null;
   status: DogStatus;
   alerts: DogAlerts;
@@ -101,6 +106,7 @@ export interface Dog {
   microchipNumber: string | null;
   isNeutered: boolean | null;
   healthCertificateNumber: string | null;
+  vaccinationExpiryDate: string | null;
   aggressionTowardsPeople: boolean | null;
   aggressionTowardsDogs: boolean | null;
   separationAnxiety: boolean | null;
@@ -131,6 +137,7 @@ export interface NewDogFormData {
   breed: string;
   age: string;
   size: DogSize;
+  gender: DogGender | null;
   clientId: string | null;
   ownerName: string;
   ownerPhone: string;
@@ -142,6 +149,7 @@ export interface NewDogFormData {
   microchipNumber: string;
   isNeutered: boolean | null;
   healthCertificateNumber: string;
+  vaccinationExpiryDate: string;
   aggressionTowardsPeople: boolean | null;
   aggressionTowardsDogs: boolean | null;
   separationAnxiety: boolean | null;
@@ -162,6 +170,8 @@ export interface NewDogFormData {
   alerts: DogAlerts;
 }
 
+export type RecurrenceFrequency = "weekly" | "biweekly";
+
 export type BookingServiceType = "daycare" | "boarding";
 
 export type BookingStatus =
@@ -179,6 +189,8 @@ export interface Booking {
   serviceType: BookingServiceType;
   startDate: string;
   endDate: string;
+  arrivalTime: string | null;
+  endTime: string | null;
   transportRequired: boolean;
   status: BookingStatus;
   cancelledBy: "staff" | "client" | null;
@@ -189,6 +201,9 @@ export interface Booking {
   dogName: string;
   dogBreed: string;
   dogPhotoUrl: string | null;
+  seriesId: string | null;
+  seriesOccurrenceDate: string | null;
+  foodSource: FoodSource | null;
 }
 
 export interface BookingFormData {
@@ -197,8 +212,81 @@ export interface BookingFormData {
   serviceType: BookingServiceType;
   startDate: string;
   endDate: string;
+  arrivalTime?: string;
+  endTime?: string;
   transportRequired: boolean;
+  foodSource?: FoodSource | null;
   notes: string;
+}
+
+export interface RecurringBookingInput {
+  clientId: string;
+  dogId: string;
+  serviceType: BookingServiceType;
+  recurrenceFreq: RecurrenceFrequency;
+  recurrenceDaysOfWeek: number[];
+  recurrenceStartDate: string;
+  recurrenceEndDate: string;
+  /** First-occurrence end date; boarding stay length is this minus start. */
+  endDate: string;
+  arrivalTime?: string;
+  endTime?: string;
+  transportRequired: boolean;
+  foodSource?: FoodSource | null;
+  notes: string;
+}
+
+export interface BookingSeries {
+  id: string;
+  facilityId: string;
+  clientId: string;
+  dogId: string;
+  serviceType: BookingServiceType;
+  recurrenceFreq: RecurrenceFrequency;
+  recurrenceDaysOfWeek: number[];
+  recurrenceStartDate: string;
+  recurrenceEndDate: string;
+  arrivalTime: string | null;
+  endTime: string | null;
+  transportRequired: boolean;
+  foodSource: FoodSource | null;
+  notes: string | null;
+  status: "active" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type BookingHistorySeriesStatus = "active" | "completed" | "cancelled";
+
+export interface DogBookingHistoryEntry {
+  booking: Booking;
+  series: BookingSeries | null;
+  occurrenceCount: number;
+  seriesStatus: BookingHistorySeriesStatus | null;
+}
+
+export interface DogBookingHistoryPage {
+  entries: DogBookingHistoryEntry[];
+  hasMore: boolean;
+}
+
+export type BookingSeriesCancelScope = "this" | "future" | "all";
+
+export interface CancelBookingSeriesResult {
+  cancelledCount: number;
+  skippedCount: number;
+}
+
+export interface EditBookingSeriesFields {
+  arrivalTime?: string;
+  endTime?: string;
+  transportRequired?: boolean;
+  notes?: string;
+}
+
+export interface EditBookingSeriesResult {
+  updatedCount: number;
+  skippedCount: number;
 }
 
 export interface FacilityCapacity {
@@ -238,7 +326,54 @@ export interface KennelAssignment {
   assignedAt: string;
 }
 
-export type PaymentMethod = "cash" | "card" | "transfer";
+export type PaymentMethod = "cash" | "card" | "transfer" | "pass";
+
+export type ClientPassStatus =
+  | "active"
+  | "exhausted"
+  | "expired"
+  | "cancelled";
+
+export type ClientPassDisplayStatus =
+  | "active"
+  | "expiring_soon"
+  | "expired"
+  | "exhausted"
+  | "cancelled";
+
+export interface PassType {
+  id: string;
+  facilityId: string;
+  name: string;
+  serviceType: BookingServiceType;
+  price: number;
+  occasions: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClientPass {
+  id: string;
+  facilityId: string;
+  clientId: string;
+  passTypeId: string;
+  serviceType: BookingServiceType;
+  price: number;
+  occasionsTotal: number;
+  occasionsUsed: number;
+  expiryDate: string;
+  status: ClientPassStatus;
+  assignedAt: string;
+  assignedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClientPassListItem extends ClientPass {
+  displayStatus: ClientPassDisplayStatus;
+  passTypeName: string;
+}
 
 export interface PricingRules {
   facilityId: string;
@@ -297,6 +432,7 @@ export interface RevenueReport {
     cash: number;
     card: number;
     transfer: number;
+    pass: number;
   };
   payments: PaymentReportRow[];
 }

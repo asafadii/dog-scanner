@@ -6,11 +6,38 @@ import {
   getDogActiveCheckin,
 } from "@/lib/checkins";
 import { getCurrentAssignment } from "@/lib/kennels";
+import {
+  formatLocalDateString,
+  parseLocalDateString,
+} from "@/lib/recurrence";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ClientRow, DogInsert, DogRow, DogUpdate, ProfileRow } from "@/lib/supabase/types";
 import type { Dog, DogClientLink, NewDogFormData } from "@/lib/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const INCOMPLETE_SETUP_MESSAGE = "Your account setup is incomplete.";
+
+export type VaccinationExpiryBadgeStatus = "expired" | "expiring_soon";
+
+export function getVaccinationExpiryBadgeStatus(
+  expiryDate: string | null | undefined,
+  now = new Date(),
+): VaccinationExpiryBadgeStatus | null {
+  if (!expiryDate) return null;
+
+  const expiry = parseLocalDateString(expiryDate);
+  if (!expiry) return null;
+
+  const today = parseLocalDateString(formatLocalDateString(now));
+  if (!today) return null;
+
+  const daysUntil = Math.round(
+    (expiry.getTime() - today.getTime()) / 86_400_000,
+  );
+  if (daysUntil < 0) return "expired";
+  if (daysUntil <= 7) return "expiring_soon";
+  return null;
+}
 
 export type DogsErrorCode =
   | "incomplete_setup"
@@ -167,6 +194,7 @@ export function mapDogRowToDog(row: DogRow): Dog {
     breed: row.breed,
     age: row.age,
     size: row.size,
+    gender: row.sex,
     photoUrl: row.photo_url,
     status: "checked_out",
     clientId: row.client_id,
@@ -174,6 +202,7 @@ export function mapDogRowToDog(row: DogRow): Dog {
     microchipNumber: row.microchip_number,
     isNeutered: row.is_neutered,
     healthCertificateNumber: row.health_certificate_number,
+    vaccinationExpiryDate: row.vaccination_expiry_date,
     aggressionTowardsPeople: row.aggression_towards_people,
     aggressionTowardsDogs: row.aggression_towards_dogs,
     separationAnxiety: parseTriStateText(row.separation_anxiety),
@@ -233,6 +262,7 @@ export function dogToFormData(dog: Dog): NewDogFormData {
     breed: dog.breed,
     age: dog.age,
     size: dog.size,
+    gender: dog.gender ?? null,
     clientId: dog.clientId,
     ownerName: dog.client?.name ?? dog.owner.name,
     ownerPhone: dog.client?.phone ?? dog.owner.phone,
@@ -244,6 +274,7 @@ export function dogToFormData(dog: Dog): NewDogFormData {
     microchipNumber: dog.microchipNumber ?? "",
     isNeutered: dog.isNeutered,
     healthCertificateNumber: dog.healthCertificateNumber ?? "",
+    vaccinationExpiryDate: dog.vaccinationExpiryDate ?? "",
     aggressionTowardsPeople: dog.aggressionTowardsPeople,
     aggressionTowardsDogs: dog.aggressionTowardsDogs,
     separationAnxiety: dog.separationAnxiety,
@@ -283,7 +314,7 @@ export function toDogInsert(
     breed: input.breed.trim(),
     age: input.age.trim(),
     size: input.size,
-    sex: null,
+    sex: input.gender,
     photo_url: photoUrl ?? null,
     owner_name: input.ownerName.trim(),
     owner_phone: input.ownerPhone.trim(),
@@ -304,8 +335,9 @@ export function toDogInsert(
     kennel_trained: triStateToText(input.kennelTrained),
     chewing_risk: triStateToText(input.chewingRisk),
     health_certificate_number: input.healthCertificateNumber.trim() || null,
+    vaccination_expiry_date: input.vaccinationExpiryDate.trim() || null,
     feeding_source: input.feedingSource,
-    feeding_meals_per_day: input.feedingSource ? input.feedingMealsPerDay : null,
+    feeding_meals_per_day: input.feedingMealsPerDay,
     feeding_notes: input.feedingNotes.trim() || null,
     is_active: true,
   };
@@ -318,6 +350,7 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
   if (input.breed !== undefined) update.breed = input.breed.trim();
   if (input.age !== undefined) update.age = input.age.trim();
   if (input.size !== undefined) update.size = input.size;
+  if (input.gender !== undefined) update.sex = input.gender;
   if (input.clientId !== undefined) update.client_id = input.clientId;
   if (input.ownerName !== undefined) update.owner_name = input.ownerName.trim();
   if (input.ownerPhone !== undefined) {
@@ -375,6 +408,10 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
     update.health_certificate_number =
       input.healthCertificateNumber.trim() || null;
   }
+  if (input.vaccinationExpiryDate !== undefined) {
+    update.vaccination_expiry_date =
+      input.vaccinationExpiryDate.trim() || null;
+  }
   if (input.aggressionTowardsPeople !== undefined) {
     update.aggression_towards_people = input.aggressionTowardsPeople;
   }
@@ -392,10 +429,8 @@ export function toDogUpdate(input: UpdateDogInput): DogUpdate {
   }
   if (input.feedingSource !== undefined) {
     update.feeding_source = input.feedingSource;
-    update.feeding_meals_per_day = input.feedingSource
-      ? (input.feedingMealsPerDay ?? null)
-      : null;
-  } else if (input.feedingMealsPerDay !== undefined) {
+  }
+  if (input.feedingMealsPerDay !== undefined) {
     update.feeding_meals_per_day = input.feedingMealsPerDay;
   }
   if (input.feedingNotes !== undefined) {
@@ -758,26 +793,37 @@ export async function updateDog(
   return { data: mapDogRowToDog(data as DogRow), error: null };
 }
 
-export async function archiveDog(
+/**
+ * Same archive semantics as Facility's archiveDog: set archived_at (soft
+ * delete). Callers supply a db client and ownership filters.
+ */
+export async function archiveDogRecord(
+  db: SupabaseClient,
   dogId: string,
+  scope: {
+    facilityId: string;
+    clientId?: string;
+    requireActive?: boolean;
+  },
 ): Promise<DogsResult<true>> {
-  const profileResult = await requireProfile();
-  if (profileResult.error) {
-    return { data: null, error: profileResult.error };
-  }
-
-  const supabase = createSupabaseBrowserClient();
-  const { data, error } = await supabase
+  let query = db
     .from("dogs")
     .update({
       archived_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("id", dogId)
-    .eq("facility_id", profileResult.data.facility_id)
-    .is("archived_at", null)
-    .select("id")
-    .maybeSingle();
+    .eq("facility_id", scope.facilityId)
+    .is("archived_at", null);
+
+  if (scope.clientId) {
+    query = query.eq("client_id", scope.clientId);
+  }
+  if (scope.requireActive) {
+    query = query.eq("is_active", true);
+  }
+
+  const { data, error } = await query.select("id").maybeSingle();
 
   if (error) {
     return { data: null, error: toError(error.message) };
@@ -788,6 +834,20 @@ export async function archiveDog(
   }
 
   return { data: true, error: null };
+}
+
+export async function archiveDog(
+  dogId: string,
+): Promise<DogsResult<true>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  return archiveDogRecord(supabase, dogId, {
+    facilityId: profileResult.data.facility_id,
+  });
 }
 
 export async function ensureClientForDogForm(

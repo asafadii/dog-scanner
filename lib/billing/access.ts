@@ -33,8 +33,23 @@ function toFacilityError(message: string): FacilityError {
 export function computeFacilityAccessLevel(
   subscriptionStatus: string,
   pastDueSince: string | null,
+  trialEndsAt: string | null,
+  stripeSubscriptionId: string | null,
 ): FacilityAccessInfo {
-  if (subscriptionStatus === "trialing" || subscriptionStatus === "active") {
+  if (subscriptionStatus === "trialing") {
+    // Abandoned checkout: trial clock ran out and Stripe never created a subscription.
+    // trial_ends_at null is treated as current behavior (do not guess / do not block).
+    if (
+      !stripeSubscriptionId &&
+      trialEndsAt &&
+      Date.now() - new Date(trialEndsAt).getTime() >= 0
+    ) {
+      return BLOCKED_ACCESS;
+    }
+    return FULL_ACCESS;
+  }
+
+  if (subscriptionStatus === "active") {
     return FULL_ACCESS;
   }
 
@@ -71,7 +86,9 @@ export async function getFacilityAccessLevel(
     const supabase = createSupabaseBrowserClient();
     const { data, error } = await supabase
       .from("facilities")
-      .select("subscription_status, past_due_since")
+      .select(
+        "subscription_status, past_due_since, trial_ends_at, stripe_subscription_id",
+      )
       .eq("id", facilityId)
       .maybeSingle();
 
@@ -86,12 +103,16 @@ export async function getFacilityAccessLevel(
     const row = data as {
       subscription_status: string;
       past_due_since: string | null;
+      trial_ends_at: string | null;
+      stripe_subscription_id: string | null;
     };
 
     return {
       data: computeFacilityAccessLevel(
         row.subscription_status,
         row.past_due_since,
+        row.trial_ends_at,
+        row.stripe_subscription_id,
       ),
       error: null,
     };
@@ -113,7 +134,9 @@ export async function getFacilityAccessLevelServer(
   try {
     const { data, error } = await db
       .from("facilities")
-      .select("subscription_status, past_due_since")
+      .select(
+        "subscription_status, past_due_since, trial_ends_at, stripe_subscription_id",
+      )
       .eq("id", facilityId)
       .maybeSingle();
 
@@ -124,11 +147,15 @@ export async function getFacilityAccessLevelServer(
     const row = data as {
       subscription_status: string;
       past_due_since: string | null;
+      trial_ends_at: string | null;
+      stripe_subscription_id: string | null;
     };
 
     return computeFacilityAccessLevel(
       row.subscription_status,
       row.past_due_since,
+      row.trial_ends_at,
+      row.stripe_subscription_id,
     );
   } catch {
     return FULL_ACCESS;

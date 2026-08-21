@@ -1,12 +1,31 @@
-import { mapBookingRowToBooking } from "@/lib/bookings";
+import {
+  assembleDogBookingHistoryPage,
+  mapBookingRowToBooking,
+  mapBookingSeriesRowToBookingSeries,
+} from "@/lib/bookings";
 import { portalFetch } from "@/lib/portal/api";
 import {
   requireClientAccount,
   verifyLinkedClient,
 } from "@/lib/portal/auth";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { BookingRow, ClientRow, DogRow } from "@/lib/supabase/types";
-import type { Booking, BookingFormData } from "@/lib/types";
+import type {
+  BookingRow,
+  BookingSeriesRow,
+  ClientRow,
+  DogRow,
+} from "@/lib/supabase/types";
+import type {
+  Booking,
+  BookingFormData,
+  BookingSeries,
+  BookingSeriesCancelScope,
+  CancelBookingSeriesResult,
+  DogBookingHistoryPage,
+  EditBookingSeriesFields,
+  EditBookingSeriesResult,
+  RecurringBookingInput,
+} from "@/lib/types";
 
 export type PortalBookingsErrorCode =
   | "incomplete_setup"
@@ -161,6 +180,135 @@ export async function getPortalBookingById(
   return { data: booking, error: null };
 }
 
+export async function getDogBookingHistory(
+  dogId: string,
+  clientId: string,
+  facilityId: string,
+  options: { limit?: number; offset?: number } = {},
+): Promise<PortalBookingsResult<DogBookingHistoryPage>> {
+  const accountResult = await requireClientAccount();
+  if (accountResult.error) {
+    return { data: null, error: accountResult.error };
+  }
+
+  const linkResult = await verifyLinkedClient(clientId, facilityId);
+  if (linkResult.error) {
+    return { data: null, error: linkResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("facility_id", facilityId)
+    .eq("client_id", clientId)
+    .eq("dog_id", dogId)
+    .order("start_date", { ascending: false });
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  const bookingRows = (data ?? []) as BookingRow[];
+  const seriesIds = [
+    ...new Set(
+      bookingRows
+        .map((row) => row.series_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+
+  const seriesById = new Map<string, BookingSeries>();
+  if (seriesIds.length > 0) {
+    const { data: seriesData, error: seriesError } = await supabase
+      .from("booking_series")
+      .select("*")
+      .eq("facility_id", facilityId)
+      .eq("client_id", clientId)
+      .in("id", seriesIds);
+
+    if (seriesError) {
+      return { data: null, error: toError(seriesError.message) };
+    }
+
+    for (const row of (seriesData ?? []) as BookingSeriesRow[]) {
+      seriesById.set(row.id, mapBookingSeriesRowToBookingSeries(row));
+    }
+  }
+
+  return {
+    data: await assembleDogBookingHistoryPage(
+      bookingRows,
+      seriesById,
+      facilityId,
+      {
+        limit: options.limit ?? 2,
+        offset: options.offset ?? 0,
+      },
+      enrichPortalBookings,
+    ),
+    error: null,
+  };
+}
+
+export async function getPortalBookingSeriesOccurrences(
+  seriesId: string,
+  clientId: string,
+  facilityId: string,
+): Promise<
+  PortalBookingsResult<{ series: BookingSeries; occurrences: Booking[] }>
+> {
+  const accountResult = await requireClientAccount();
+  if (accountResult.error) {
+    return { data: null, error: accountResult.error };
+  }
+
+  const linkResult = await verifyLinkedClient(clientId, facilityId);
+  if (linkResult.error) {
+    return { data: null, error: linkResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data: seriesData, error: seriesError } = await supabase
+    .from("booking_series")
+    .select("*")
+    .eq("id", seriesId)
+    .eq("facility_id", facilityId)
+    .eq("client_id", clientId)
+    .maybeSingle();
+
+  if (seriesError) {
+    return { data: null, error: toError(seriesError.message) };
+  }
+
+  if (!seriesData) {
+    return { data: null, error: toError("Series not found", "not_found") };
+  }
+
+  const { data: occurrenceData, error: occurrenceError } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("facility_id", facilityId)
+    .eq("client_id", clientId)
+    .eq("series_id", seriesId)
+    .order("start_date", { ascending: true });
+
+  if (occurrenceError) {
+    return { data: null, error: toError(occurrenceError.message) };
+  }
+
+  return {
+    data: {
+      series: mapBookingSeriesRowToBookingSeries(seriesData as BookingSeriesRow),
+      occurrences: await enrichPortalBookings(
+        (occurrenceData ?? []) as BookingRow[],
+        facilityId,
+      ),
+    },
+    error: null,
+  };
+}
+
 export async function createPortalBooking(
   input: PortalCreateBookingInput,
 ): Promise<PortalBookingsResult<Booking>> {
@@ -228,6 +376,38 @@ export async function createPortalBookings(
   return { data: data.bookings, error: null };
 }
 
+export interface PortalCreateRecurringBookingInput extends RecurringBookingInput {
+  facilityId: string;
+}
+
+export async function createPortalRecurringBooking(
+  input: PortalCreateRecurringBookingInput,
+): Promise<PortalBookingsResult<Booking[]>> {
+  const response = await portalFetch("/api/portal/bookings/recurring", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  const data = (await response.json()) as CreatePortalBookingsResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to create recurring booking";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403 ? "unauthorized" : "unknown",
+      ),
+    };
+  }
+
+  return { data: data.bookings, error: null };
+}
+
 export interface CancelPortalBookingSuccessResponse {
   ok: true;
   data: true;
@@ -269,4 +449,87 @@ export async function cancelPortalBooking(
   }
 
   return { data: true, error: null };
+}
+
+export interface CancelPortalBookingSeriesSuccessResponse {
+  ok: true;
+  data: CancelBookingSeriesResult;
+}
+
+export type CancelPortalBookingSeriesResponse =
+  | CancelPortalBookingSeriesSuccessResponse
+  | CancelPortalBookingErrorResponse;
+
+export async function cancelPortalBookingSeries(
+  bookingId: string,
+  scope: BookingSeriesCancelScope,
+): Promise<PortalBookingsResult<CancelBookingSeriesResult>> {
+  const response = await portalFetch(
+    `/api/portal/bookings/${bookingId}/cancel-series`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scope }),
+    },
+  );
+
+  const data = (await response.json()) as CancelPortalBookingSeriesResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to cancel bookings";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403 ? "unauthorized" : "unknown",
+      ),
+    };
+  }
+
+  return { data: data.data, error: null };
+}
+
+export interface EditPortalBookingSeriesSuccessResponse {
+  ok: true;
+  data: EditBookingSeriesResult;
+}
+
+export type EditPortalBookingSeriesResponse =
+  | EditPortalBookingSeriesSuccessResponse
+  | CancelPortalBookingErrorResponse;
+
+export async function editPortalBookingSeries(
+  bookingId: string,
+  scope: BookingSeriesCancelScope,
+  fields: EditBookingSeriesFields,
+): Promise<PortalBookingsResult<EditBookingSeriesResult>> {
+  const response = await portalFetch(
+    `/api/portal/bookings/${bookingId}/edit-series`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scope, ...fields }),
+    },
+  );
+
+  const data = (await response.json()) as EditPortalBookingSeriesResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to update bookings";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403 ? "unauthorized" : "unknown",
+      ),
+    };
+  }
+
+  return { data: data.data, error: null };
 }

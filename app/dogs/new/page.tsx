@@ -43,7 +43,7 @@ export default function NewDogPage() {
       <DogForm
         initialClientId={initialClientId}
         submitPhase={submitPhase}
-        onSubmit={async (data, photo, vaccinationFiles = []) => {
+        onSubmit={async (data, photo, vaccinationFiles = [], vaccinationUploadExpiryDate) => {
           if (submitPhase !== "idle") return;
 
           setError(null);
@@ -83,6 +83,7 @@ export default function NewDogPage() {
                   result.data.id,
                   file,
                   "vaccination",
+                  vaccinationUploadExpiryDate,
                 );
                 if (uploadResult.error) {
                   setError(uploadResult.error.message);

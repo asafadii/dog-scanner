@@ -5,7 +5,7 @@ import {
   type BookingFormSubmitPhase,
 } from "@/components/bookings/BookingForm";
 import { Button } from "@/components/ui/Button";
-import { createBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
+import { createBookings, createRecurringBooking, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { BookingFormData } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -41,6 +41,22 @@ export default function NewBookingPage() {
       <BookingForm
         initialClientId={initialClientId}
         submitPhase={submitPhase}
+        onSubmitRecurring={async (input) => {
+          if (submitPhase !== "idle") return;
+
+          setError(null);
+          setSubmitPhase("saving");
+
+          const result = await createRecurringBooking(input);
+          if (result.error) {
+            setError(result.error.message);
+            setSubmitPhase("idle");
+            return;
+          }
+
+          router.push("/bookings");
+          router.refresh();
+        }}
         onSubmit={async (data) => {
           if (submitPhase !== "idle") return;
 

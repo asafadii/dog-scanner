@@ -4,6 +4,9 @@ import {
   DOCUMENT_MAX_BYTES,
   extensionForMimeType,
   mapDogDocumentRowToDogDocument,
+  parseVaccinationExpiryDate,
+  VACCINATION_EXPIRY_REQUIRED_MESSAGE,
+  VACCINATION_NOTIFICATION_RESET,
 } from "@/lib/portal/documents";
 import { verifyStaffAccessToken } from "@/lib/staff/server";
 import { VACCINATION_DOCUMENTS_BUCKET } from "@/lib/supabase/types";
@@ -39,6 +42,9 @@ export async function POST(request: Request) {
   const documentType = String(
     formData.get("documentType") ?? "",
   ).trim() as DogDocumentType;
+  const vaccinationExpiryDate = parseVaccinationExpiryDate(
+    formData.get("vaccinationExpiryDate"),
+  );
   const file = formData.get("file");
 
   if (!dogId) {
@@ -51,6 +57,13 @@ export async function POST(request: Request) {
   if (!DOCUMENT_TYPES.includes(documentType)) {
     return NextResponse.json(
       { ok: false, error: "Invalid document type" },
+      { status: 400 },
+    );
+  }
+
+  if (documentType === "vaccination" && !vaccinationExpiryDate) {
+    return NextResponse.json(
+      { ok: false, error: VACCINATION_EXPIRY_REQUIRED_MESSAGE },
       { status: 400 },
     );
   }
@@ -151,6 +164,25 @@ export async function POST(request: Request) {
       },
       { status: 500 },
     );
+  }
+
+  if (documentType === "vaccination" && vaccinationExpiryDate) {
+    const { error: expiryError } = await db
+      .from("dogs")
+      .update({
+        vaccination_expiry_date: vaccinationExpiryDate,
+        ...VACCINATION_NOTIFICATION_RESET,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", dogId)
+      .eq("facility_id", dog.facility_id);
+
+    if (expiryError) {
+      return NextResponse.json(
+        { ok: false, error: expiryError.message },
+        { status: 500 },
+      );
+    }
   }
 
   return NextResponse.json(

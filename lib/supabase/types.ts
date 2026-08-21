@@ -2,6 +2,8 @@ import type { User } from "@supabase/supabase-js";
 
 export type UserRole = "admin" | "staff";
 export type DbDogSize = "small" | "medium" | "large";
+export type DbDogSex = "male" | "female";
+export type DbFoodSource = "own" | "facility";
 
 export interface DogRow {
   id: string;
@@ -11,7 +13,7 @@ export interface DogRow {
   breed: string;
   age: string;
   size: DbDogSize;
-  sex: string | null;
+  sex: DbDogSex | null;
   photo_url: string | null;
   owner_name: string;
   owner_phone: string;
@@ -35,6 +37,11 @@ export interface DogRow {
   feeding_source: "own" | "facility" | null;
   feeding_meals_per_day: number | null;
   feeding_notes: string | null;
+  vaccination_expiry_date: string | null;
+  vaccination_owner_week_before_email_sent_at: string | null;
+  vaccination_owner_expired_email_sent_at: string | null;
+  vaccination_facility_week_before_email_sent_at: string | null;
+  vaccination_facility_expired_email_sent_at: string | null;
   is_active: boolean;
   archived_at: string | null;
   created_at: string;
@@ -49,7 +56,7 @@ export type DogInsert = {
   breed: string;
   age: string;
   size: DbDogSize;
-  sex?: string | null;
+  sex?: DbDogSex | null;
   photo_url?: string | null;
   owner_name: string;
   owner_phone: string;
@@ -73,6 +80,11 @@ export type DogInsert = {
   feeding_source?: "own" | "facility" | null;
   feeding_meals_per_day?: number | null;
   feeding_notes?: string | null;
+  vaccination_expiry_date?: string | null;
+  vaccination_owner_week_before_email_sent_at?: string | null;
+  vaccination_owner_expired_email_sent_at?: string | null;
+  vaccination_facility_week_before_email_sent_at?: string | null;
+  vaccination_facility_expired_email_sent_at?: string | null;
   is_active?: boolean;
   archived_at?: string | null;
   created_at?: string;
@@ -87,7 +99,7 @@ export type DogUpdate = {
   breed?: string;
   age?: string;
   size?: DbDogSize;
-  sex?: string | null;
+  sex?: DbDogSex | null;
   photo_url?: string | null;
   owner_name?: string;
   owner_phone?: string;
@@ -111,6 +123,11 @@ export type DogUpdate = {
   feeding_source?: "own" | "facility" | null;
   feeding_meals_per_day?: number | null;
   feeding_notes?: string | null;
+  vaccination_expiry_date?: string | null;
+  vaccination_owner_week_before_email_sent_at?: string | null;
+  vaccination_owner_expired_email_sent_at?: string | null;
+  vaccination_facility_week_before_email_sent_at?: string | null;
+  vaccination_facility_expired_email_sent_at?: string | null;
   is_active?: boolean;
   archived_at?: string | null;
   created_at?: string;
@@ -348,6 +365,7 @@ export interface DogCheckinRow {
   dog_id: string;
   facility_id: string;
   booking_id: string | null;
+  current_service_type: DbBookingServiceType | null;
   checked_in_at: string;
   checked_out_at: string | null;
   notes: string | null;
@@ -359,6 +377,7 @@ export type DogCheckinInsert = {
   dog_id: string;
   facility_id: string;
   booking_id?: string | null;
+  current_service_type?: DbBookingServiceType | null;
   checked_in_at?: string;
   checked_out_at?: string | null;
   notes?: string | null;
@@ -370,6 +389,7 @@ export type DogCheckinUpdate = {
   dog_id?: string;
   facility_id?: string;
   booking_id?: string | null;
+  current_service_type?: DbBookingServiceType | null;
   checked_in_at?: string;
   checked_out_at?: string | null;
   notes?: string | null;
@@ -385,6 +405,13 @@ export type DbBookingStatus =
   | "cancelled";
 
 export type DbBookingCancelledBy = "staff" | "client";
+export type DbRecurrenceFrequency = "weekly" | "biweekly";
+export type DbBookingSeriesStatus = "active" | "cancelled";
+export type DbClientPassStatus =
+  | "active"
+  | "exhausted"
+  | "expired"
+  | "cancelled";
 
 export interface BookingRow {
   id: string;
@@ -394,11 +421,16 @@ export interface BookingRow {
   service_type: DbBookingServiceType;
   start_date: string;
   end_date: string;
+  arrival_time: string | null;
+  end_time: string | null;
   transport_required: boolean;
   status: DbBookingStatus;
   cancelled_by: DbBookingCancelledBy | null;
   notes: string | null;
   pending_account_link: boolean;
+  series_id: string | null;
+  series_occurrence_date: string | null;
+  food_source: DbFoodSource | null;
   created_at: string;
   updated_at: string;
 }
@@ -411,11 +443,16 @@ export type BookingInsert = {
   service_type: DbBookingServiceType;
   start_date: string;
   end_date: string;
+  arrival_time?: string | null;
+  end_time?: string | null;
   transport_required?: boolean;
   status?: DbBookingStatus;
   cancelled_by?: DbBookingCancelledBy | null;
   notes?: string | null;
   pending_account_link?: boolean;
+  series_id?: string | null;
+  series_occurrence_date?: string | null;
+  food_source?: DbFoodSource | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -428,11 +465,76 @@ export type BookingUpdate = {
   service_type?: DbBookingServiceType;
   start_date?: string;
   end_date?: string;
+  arrival_time?: string | null;
+  end_time?: string | null;
   transport_required?: boolean;
   status?: DbBookingStatus;
   cancelled_by?: DbBookingCancelledBy | null;
   notes?: string | null;
   pending_account_link?: boolean;
+  series_id?: string | null;
+  series_occurrence_date?: string | null;
+  food_source?: DbFoodSource | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface BookingSeriesRow {
+  id: string;
+  facility_id: string;
+  client_id: string;
+  dog_id: string;
+  service_type: DbBookingServiceType;
+  recurrence_freq: DbRecurrenceFrequency;
+  recurrence_days_of_week: number[];
+  recurrence_start_date: string;
+  recurrence_end_date: string;
+  arrival_time: string | null;
+  end_time: string | null;
+  transport_required: boolean;
+  food_source: DbFoodSource | null;
+  notes: string | null;
+  status: DbBookingSeriesStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export type BookingSeriesInsert = {
+  id?: string;
+  facility_id: string;
+  client_id: string;
+  dog_id: string;
+  service_type: DbBookingServiceType;
+  recurrence_freq: DbRecurrenceFrequency;
+  recurrence_days_of_week: number[];
+  recurrence_start_date: string;
+  recurrence_end_date: string;
+  arrival_time?: string | null;
+  end_time?: string | null;
+  transport_required?: boolean;
+  food_source?: DbFoodSource | null;
+  notes?: string | null;
+  status?: DbBookingSeriesStatus;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type BookingSeriesUpdate = {
+  id?: string;
+  facility_id?: string;
+  client_id?: string;
+  dog_id?: string;
+  service_type?: DbBookingServiceType;
+  recurrence_freq?: DbRecurrenceFrequency;
+  recurrence_days_of_week?: number[];
+  recurrence_start_date?: string;
+  recurrence_end_date?: string;
+  arrival_time?: string | null;
+  end_time?: string | null;
+  transport_required?: boolean;
+  food_source?: DbFoodSource | null;
+  notes?: string | null;
+  status?: DbBookingSeriesStatus;
   created_at?: string;
   updated_at?: string;
 };
@@ -457,6 +559,33 @@ export type FacilityCapacityUpdate = {
   facility_id?: string;
   daycare_capacity?: number;
   boarding_capacity?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface FacilityNotificationPreferencesRow {
+  facility_id: string;
+  notify_new_booking: boolean;
+  notify_returning_dog_booking: boolean;
+  notify_booking_cancelled_by_client: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type FacilityNotificationPreferencesInsert = {
+  facility_id: string;
+  notify_new_booking?: boolean;
+  notify_returning_dog_booking?: boolean;
+  notify_booking_cancelled_by_client?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type FacilityNotificationPreferencesUpdate = {
+  facility_id?: string;
+  notify_new_booking?: boolean;
+  notify_returning_dog_booking?: boolean;
+  notify_booking_cancelled_by_client?: boolean;
   created_at?: string;
   updated_at?: string;
 };
@@ -555,7 +684,7 @@ export type PricingRulesUpdate = {
   updated_at?: string;
 };
 
-export type DbPaymentMethod = "cash" | "card" | "transfer";
+export type DbPaymentMethod = "cash" | "card" | "transfer" | "pass";
 
 export interface PaymentRow {
   id: string;
@@ -573,6 +702,7 @@ export interface PaymentRow {
   payment_method: DbPaymentMethod;
   paid_at: string;
   recorded_by: string;
+  client_pass_id: string | null;
 }
 
 export type PaymentInsert = {
@@ -591,6 +721,112 @@ export type PaymentInsert = {
   payment_method: DbPaymentMethod;
   paid_at?: string;
   recorded_by: string;
+  client_pass_id?: string | null;
+};
+
+export interface PassTypeRow {
+  id: string;
+  facility_id: string;
+  name: string;
+  service_type: DbBookingServiceType;
+  price: number;
+  occasions: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PassTypeInsert = {
+  id?: string;
+  facility_id: string;
+  name: string;
+  service_type: DbBookingServiceType;
+  price: number;
+  occasions: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PassTypeUpdate = {
+  id?: string;
+  facility_id?: string;
+  name?: string;
+  service_type?: DbBookingServiceType;
+  price?: number;
+  occasions?: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface ClientPassRow {
+  id: string;
+  facility_id: string;
+  client_id: string;
+  pass_type_id: string;
+  service_type: DbBookingServiceType;
+  price: number;
+  occasions_total: number;
+  occasions_used: number;
+  expiry_date: string;
+  status: DbClientPassStatus;
+  assigned_at: string;
+  assigned_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ClientPassInsert = {
+  id?: string;
+  facility_id: string;
+  client_id: string;
+  pass_type_id: string;
+  service_type: DbBookingServiceType;
+  price: number;
+  occasions_total: number;
+  occasions_used?: number;
+  expiry_date: string;
+  status?: DbClientPassStatus;
+  assigned_at?: string;
+  assigned_by: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ClientPassUpdate = {
+  id?: string;
+  facility_id?: string;
+  client_id?: string;
+  pass_type_id?: string;
+  service_type?: DbBookingServiceType;
+  price?: number;
+  occasions_total?: number;
+  occasions_used?: number;
+  expiry_date?: string;
+  status?: DbClientPassStatus;
+  assigned_at?: string;
+  assigned_by?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface PassUsageRow {
+  id: string;
+  client_pass_id: string;
+  payment_id: string;
+  facility_id: string;
+  units_consumed: number;
+  used_at: string;
+}
+
+export type PassUsageInsert = {
+  id?: string;
+  client_pass_id: string;
+  payment_id: string;
+  facility_id: string;
+  units_consumed?: number;
+  used_at?: string;
 };
 
 export interface BookingItemRow {
@@ -768,10 +1004,22 @@ export type Database = {
         Update: BookingUpdate;
         Relationships: [];
       };
+      booking_series: {
+        Row: BookingSeriesRow;
+        Insert: BookingSeriesInsert;
+        Update: BookingSeriesUpdate;
+        Relationships: [];
+      };
       facility_capacity: {
         Row: FacilityCapacityRow;
         Insert: FacilityCapacityInsert;
         Update: FacilityCapacityUpdate;
+        Relationships: [];
+      };
+      facility_notification_preferences: {
+        Row: FacilityNotificationPreferencesRow;
+        Insert: FacilityNotificationPreferencesInsert;
+        Update: FacilityNotificationPreferencesUpdate;
         Relationships: [];
       };
       dog_checkins: {
@@ -810,12 +1058,48 @@ export type Database = {
         Update: Partial<BookingItemInsert>;
         Relationships: [];
       };
+      pass_types: {
+        Row: PassTypeRow;
+        Insert: PassTypeInsert;
+        Update: PassTypeUpdate;
+        Relationships: [];
+      };
+      client_passes: {
+        Row: ClientPassRow;
+        Insert: ClientPassInsert;
+        Update: ClientPassUpdate;
+        Relationships: [];
+      };
+      pass_usages: {
+        Row: PassUsageRow;
+        Insert: PassUsageInsert;
+        Update: Partial<PassUsageInsert>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      record_pass_payment: {
+        Args: {
+          p_checkin_id: string;
+          p_booking_id: string | null;
+          p_facility_id: string;
+          p_service_type: DbBookingServiceType;
+          p_units: number;
+          p_rate: number;
+          p_transport_fee: number;
+          p_food_fee: number;
+          p_surcharge_percent: number;
+          p_subtotal: number;
+          p_total: number;
+          p_recorded_by: string;
+          p_client_pass_id: string;
+          p_client_id: string;
+        };
+        Returns: PaymentRow;
+      };
     };
     Enums: {
       [_ in never]: never;

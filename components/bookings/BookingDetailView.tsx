@@ -4,20 +4,26 @@ import {
   useFacilityAccess,
   WRITE_LOCKED_TITLE,
 } from "@/components/app/FacilityAccessContext";
+import { SeriesCancelDialog } from "@/components/bookings/SeriesCancelDialog";
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
+import { RecurringBookingStrip } from "@/components/bookings/RecurringBookingStrip";
 import { DogSnapshotCard } from "@/components/dogs/DogSnapshotCard";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
+  cancelBookingSeries,
+  formatSeriesCancelResult,
+  formatSeriesEditResult,
   getBookingById,
+  getBookingSeriesOccurrences,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/bookings";
 import { canApproveBooking } from "@/lib/capacity";
 import { checkInDog, getDogActiveCheckin } from "@/lib/checkins";
 import { slideUp } from "@/lib/motion";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { Booking } from "@/lib/types";
-import { formatBookingDateRange } from "@/lib/utils";
+import type { Booking, BookingSeriesCancelScope } from "@/lib/types";
+import { formatBookingDate, formatBookingDateRange } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calendar,
@@ -34,13 +40,17 @@ import { useCallback, useEffect, useState } from "react";
 
 interface BookingDetailViewProps {
   bookingId: string;
+  seriesEditResult?: { updatedCount: number; skippedCount: number } | null;
 }
 
 function formatServiceType(serviceType: Booking["serviceType"]): string {
   return serviceType === "daycare" ? "Daycare" : "Boarding";
 }
 
-export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
+export function BookingDetailView({
+  bookingId,
+  seriesEditResult = null,
+}: BookingDetailViewProps) {
   const { accessLevel } = useFacilityAccess();
   const writeLocked = accessLevel !== "full";
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -52,9 +62,26 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   const [capacityMessage, setCapacityMessage] = useState<string | null>(null);
   const [dogCheckedIn, setDogCheckedIn] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [cancelChooserOpen, setCancelChooserOpen] = useState(false);
+  const [cancelResult, setCancelResult] = useState<string | null>(null);
+  const [editResult] = useState<string | null>(
+    seriesEditResult
+      ? formatSeriesEditResult(
+          seriesEditResult.updatedCount,
+          seriesEditResult.skippedCount,
+        )
+      : null,
+  );
 
-  const loadBooking = useCallback(async () => {
-    setLoading(true);
+  const loadSeries = useCallback(
+    (id: string) => getBookingSeriesOccurrences(id),
+    [],
+  );
+
+  const loadBooking = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setError(null);
     setCapacityBlocked(false);
     setCapacityMessage(null);
@@ -95,6 +122,11 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
   ) {
     if (!booking || updating) return;
 
+    if (status === "cancelled" && booking.seriesId) {
+      setCancelChooserOpen(true);
+      return;
+    }
+
     if (status === "cancelled") {
       const confirmed = window.confirm(
         "Cancel this booking? The client will be notified by email.",
@@ -134,6 +166,67 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
       setActionError(!result.ok ? result.error : "Failed to update booking");
     } else {
       setBooking(result.data);
+    }
+
+    setUpdating(false);
+  }
+
+  async function handleSeriesCancel(scope: BookingSeriesCancelScope) {
+    if (!booking || updating) return;
+
+    setCancelChooserOpen(false);
+    setUpdating(true);
+    setActionError(null);
+    setCancelResult(null);
+
+    if (scope === "this") {
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const accessToken = session?.access_token;
+      if (!accessToken) {
+        setActionError("Not signed in");
+        setUpdating(false);
+        return;
+      }
+
+      const response = await fetch(`/api/bookings/${bookingId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
+
+      const result = (await response.json()) as
+        | { ok: true; data: Booking }
+        | { ok: false; error: string };
+
+      if (!response.ok || !result.ok) {
+        setActionError(!result.ok ? result.error : "Failed to update booking");
+      } else {
+        setBooking(result.data);
+        setCancelResult(formatSeriesCancelResult(1, 0));
+      }
+
+      setUpdating(false);
+      return;
+    }
+
+    const result = await cancelBookingSeries(bookingId, scope);
+    if (result.error) {
+      setActionError(result.error.message);
+    } else {
+      setCancelResult(
+        formatSeriesCancelResult(
+          result.data.cancelledCount,
+          result.data.skippedCount,
+        ),
+      );
+      await loadBooking({ silent: true });
     }
 
     setUpdating(false);
@@ -242,6 +335,28 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
         )}
       </AnimatePresence>
 
+      {cancelResult && (
+        <div
+          className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm font-medium text-success"
+          role="status"
+        >
+          {cancelResult}
+        </div>
+      )}
+
+      {editResult && (
+        <div
+          className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm font-medium text-success"
+          role="status"
+        >
+          {editResult}
+        </div>
+      )}
+
+      {booking.seriesId && (
+        <RecurringBookingStrip seriesId={booking.seriesId} load={loadSeries} />
+      )}
+
       <DogSnapshotCard
         dogName={booking.dogName}
         dogBreed={booking.dogBreed}
@@ -284,7 +399,10 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
               Dates
             </span>
             <span className="font-medium text-foreground">
-              {formatBookingDateRange(booking.startDate, booking.endDate)}
+              {formatBookingDateRange(booking.startDate, booking.endDate, {
+                arrivalTime: booking.arrivalTime,
+                endTime: booking.endTime,
+              })}
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
@@ -415,6 +533,14 @@ export function BookingDetailView({ bookingId }: BookingDetailViewProps) {
       )}
 
       <BookingStatusFlow status={booking.status} checkedIn={dogCheckedIn} />
+
+      <SeriesCancelDialog
+        open={cancelChooserOpen}
+        dateLabel={formatBookingDate(booking.startDate)}
+        submitting={updating}
+        onSelect={(scope) => void handleSeriesCancel(scope)}
+        onClose={() => setCancelChooserOpen(false)}
+      />
     </div>
   );
 }

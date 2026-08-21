@@ -8,7 +8,7 @@ import { formatAmount } from "@/lib/currency";
 import { getFacilitySettings } from "@/lib/facility";
 import { getRevenueReport, INCOMPLETE_SETUP_MESSAGE } from "@/lib/reports";
 import { getSubscriptionInfo } from "@/lib/subscription";
-import type { RevenueReport, SubscriptionInfo } from "@/lib/types";
+import type { PaymentMethod, RevenueReport, SubscriptionInfo } from "@/lib/types";
 import {
   cn,
   currentMonthDateRange,
@@ -19,11 +19,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 
-const PAYMENT_METHOD_LABELS = {
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   cash: "Cash",
   card: "Card",
   transfer: "Transfer",
-} as const;
+  pass: "Pass",
+};
 
 export function ReportsView() {
   const defaultRange = useMemo(() => currentMonthDateRange(), []);
@@ -87,6 +88,7 @@ export function ReportsView() {
       report.paymentBreakdown.cash,
       report.paymentBreakdown.card,
       report.paymentBreakdown.transfer,
+      report.paymentBreakdown.pass,
       1,
     );
   }, [report]);
@@ -251,6 +253,7 @@ export function ReportsView() {
                         method === "cash" && "bg-success",
                         method === "card" && "bg-primary",
                         method === "transfer" && "bg-marker",
+                        method === "pass" && "bg-info",
                       )}
                       style={{ width: `${(total / maxBreakdown) * 100}%` }}
                     />

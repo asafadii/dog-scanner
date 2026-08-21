@@ -527,3 +527,128 @@ export function buildPaymentConfirmedHtml({
 
   return emailShell("You're all set!", body);
 }
+
+export function buildVaccinationExpiringOwnerHtml({
+  clientName,
+  dogName,
+  facilityName,
+  expiryDate,
+  uploadUrl,
+}: {
+  clientName: string;
+  dogName: string;
+  facilityName: string;
+  expiryDate: string;
+  uploadUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      Just a friendly heads-up —
+      <strong>${dogName}</strong>'s vaccination record on file with
+      <strong>${facilityName}</strong> expires on
+      <strong>${expiryDate}</strong>. No rush, but it's a good
+      moment to book that check-up if it isn't already on the
+      calendar.<br><br>
+      Once you have the new stamp in hand, you can upload it
+      straight from ${dogName}'s profile — takes less than a
+      minute, no emailing PDFs back and forth.
+    </p>
+    ${emailButton(uploadUrl, "Upload the new stamp →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Wags & wiggles,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Expires in a week 🐾", body);
+}
+
+export function buildVaccinationExpiredOwnerHtml({
+  clientName,
+  dogName,
+  facilityName,
+  expiryDate,
+  uploadUrl,
+}: {
+  clientName: string;
+  dogName: string;
+  facilityName: string;
+  expiryDate: string;
+  uploadUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      <strong>${dogName}</strong>'s vaccination record on file with
+      <strong>${facilityName}</strong> expired today,
+      <strong>${expiryDate}</strong>. To keep upcoming daycare or
+      boarding stays running smoothly, please upload an updated
+      vaccination stamp as soon as you can —
+      ${facilityName} will be able to see it right away once
+      it's in.
+    </p>
+    ${emailButton(uploadUrl, "Upload the new stamp →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Wags & wiggles,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Vaccination stamp expired", body);
+}
+
+export function buildVaccinationExpiringFacilityHtml({
+  dogName,
+  clientName,
+  expiryDate,
+  dogUrl,
+}: {
+  dogName: string;
+  clientName: string;
+  expiryDate: string;
+  dogUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Heads up — <strong>${dogName}</strong>'s (${clientName})
+      vaccination record is set to expire on
+      <strong>${expiryDate}</strong>. The owner has been notified
+      by email as well and asked to upload an updated stamp.
+      Nothing you need to do right now — just flagging it in
+      case it affects an upcoming stay.
+    </p>
+    ${emailButton(dogUrl, `View ${dogName}'s profile →`)}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Vaccination expiring soon", body);
+}
+
+export function buildVaccinationExpiredFacilityHtml({
+  dogName,
+  clientName,
+  expiryDate,
+  dogUrl,
+}: {
+  dogName: string;
+  clientName: string;
+  expiryDate: string;
+  dogUrl: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      <strong>${dogName}</strong>'s (${clientName}) vaccination
+      record expired today, <strong>${expiryDate}</strong>. The
+      owner has been notified by email as well and asked to
+      upload an updated stamp. You may want to confirm the new
+      document is in place before ${dogName}'s next visit.
+    </p>
+    ${emailButton(dogUrl, `View ${dogName}'s profile →`)}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Vaccination expired", body);
+}

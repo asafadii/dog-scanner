@@ -3,7 +3,9 @@ import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import {
   getDocumentValidationMessage,
   mapDogDocumentRowToDogDocument,
+  parseVaccinationExpiryDate,
   validateDocumentFile,
+  VACCINATION_EXPIRY_REQUIRED_MESSAGE,
 } from "@/lib/portal/documents";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DogDocumentRow, ProfileRow } from "@/lib/supabase/types";
@@ -89,10 +91,40 @@ export async function getStaffDogDocuments(
   };
 }
 
+export async function getCurrentVaccinationDocument(
+  dogId: string,
+): Promise<DocumentsResult<DogDocument | null>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("dog_documents")
+    .select("*")
+    .eq("dog_id", dogId)
+    .eq("facility_id", profileResult.data.facility_id)
+    .eq("document_type", "vaccination")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  return {
+    data: data ? mapDogDocumentRowToDogDocument(data as DogDocumentRow) : null,
+    error: null,
+  };
+}
+
 export async function uploadStaffDogDocument(
   dogId: string,
   file: File,
   documentType: DogDocumentType = "vaccination",
+  vaccinationExpiryDate?: string,
 ): Promise<DocumentsResult<DogDocument>> {
   const validation = validateDocumentFile(file);
   if (!validation.ok) {
@@ -102,10 +134,21 @@ export async function uploadStaffDogDocument(
     };
   }
 
+  const expiryDate = parseVaccinationExpiryDate(vaccinationExpiryDate ?? "");
+  if (documentType === "vaccination" && !expiryDate) {
+    return {
+      data: null,
+      error: toError(VACCINATION_EXPIRY_REQUIRED_MESSAGE),
+    };
+  }
+
   const formData = new FormData();
   formData.append("dogId", dogId);
   formData.append("documentType", documentType);
   formData.append("file", file);
+  if (documentType === "vaccination" && expiryDate) {
+    formData.append("vaccinationExpiryDate", expiryDate);
+  }
 
   const response = await staffFetch("/api/documents", {
     method: "POST",

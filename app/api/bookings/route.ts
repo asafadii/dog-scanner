@@ -1,4 +1,5 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
+import { validateBookingFormData } from "@/lib/bookings";
 import {
   createBookingServer,
   getBookingEmailContext,
@@ -43,9 +44,10 @@ export async function POST(request: Request) {
     );
   }
 
-  if (formData.endDate < formData.startDate) {
+  const validationError = validateBookingFormData(formData);
+  if (validationError) {
     return NextResponse.json(
-      { ok: false, error: "End date must be on or after start date" },
+      { ok: false, error: validationError.message },
       { status: 400 },
     );
   }

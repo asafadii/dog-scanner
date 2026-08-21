@@ -10,7 +10,14 @@ import {
   getDogPhotoValidationMessage,
   validateDogPhotoFile,
 } from "@/lib/storage";
-import type { Dog, DogAlerts, DogSize, FeedingSource, NewDogFormData } from "@/lib/types";
+import type {
+  Dog,
+  DogAlerts,
+  DogGender,
+  DogSize,
+  FeedingSource,
+  NewDogFormData,
+} from "@/lib/types";
 
 export type PortalDogsErrorCode =
   | "incomplete_setup"
@@ -42,6 +49,7 @@ export interface PortalCreateDogInput {
   breed: string;
   age: string;
   size: DogSize;
+  gender: DogGender | null;
   ownerName: string;
   ownerPhone: string;
   ownerEmail: string;
@@ -52,6 +60,7 @@ export interface PortalCreateDogInput {
   microchipNumber: string;
   isNeutered: boolean | null;
   healthCertificateNumber: string;
+  vaccinationExpiryDate: string;
   aggressionTowardsPeople: boolean | null;
   aggressionTowardsDogs: boolean | null;
   separationAnxiety: boolean | null;
@@ -85,6 +94,24 @@ export interface CreatePortalDogErrorResponse {
 export type CreatePortalDogResponse =
   | CreatePortalDogSuccessResponse
   | CreatePortalDogErrorResponse;
+
+export type UpdatePortalDogSuccessResponse = CreatePortalDogSuccessResponse;
+export type UpdatePortalDogErrorResponse = CreatePortalDogErrorResponse;
+export type UpdatePortalDogResponse = CreatePortalDogResponse;
+
+export interface ArchivePortalDogSuccessResponse {
+  ok: true;
+  data: true;
+}
+
+export interface ArchivePortalDogErrorResponse {
+  ok: false;
+  error: string;
+}
+
+export type ArchivePortalDogResponse =
+  | ArchivePortalDogSuccessResponse
+  | ArchivePortalDogErrorResponse;
 
 export interface UploadPortalDogPhotoSuccessResponse {
   ok: true;
@@ -196,6 +223,69 @@ export async function createPortalDog(
   return { data: data.dog, error: null };
 }
 
+export async function updatePortalDog(
+  dogId: string,
+  input: PortalCreateDogInput,
+): Promise<PortalDogsResult<Dog>> {
+  const response = await portalFetch(`/api/portal/dogs/${dogId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  const data = (await response.json()) as UpdatePortalDogResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to update dog profile";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403 ? "unauthorized" : "unknown",
+      ),
+    };
+  }
+
+  return { data: data.dog, error: null };
+}
+
+export async function archivePortalDog(
+  dogId: string,
+  clientId: string,
+  facilityId: string,
+): Promise<PortalDogsResult<true>> {
+  const response = await portalFetch(`/api/portal/dogs/${dogId}/archive`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ clientId, facilityId }),
+  });
+
+  const data = (await response.json()) as ArchivePortalDogResponse;
+
+  if (!response.ok || !data.ok) {
+    const message =
+      !data.ok && "error" in data
+        ? data.error
+        : "Failed to delete dog profile";
+    return {
+      data: null,
+      error: toError(
+        message,
+        response.status === 403
+          ? "unauthorized"
+          : response.status === 404
+            ? "not_found"
+            : "unknown",
+      ),
+    };
+  }
+
+  return { data: true, error: null };
+}
+
 export async function uploadPortalDogPhoto(
   dogId: string,
   file: File,
@@ -244,6 +334,7 @@ export function portalCreateDogInputFromForm(
     breed: form.breed,
     age: form.age,
     size: form.size,
+    gender: form.gender,
     ownerName: form.ownerName,
     ownerPhone: form.ownerPhone,
     ownerEmail: form.ownerEmail,
@@ -254,6 +345,7 @@ export function portalCreateDogInputFromForm(
     microchipNumber: form.microchipNumber,
     isNeutered: form.isNeutered,
     healthCertificateNumber: form.healthCertificateNumber,
+    vaccinationExpiryDate: form.vaccinationExpiryDate,
     aggressionTowardsPeople: form.aggressionTowardsPeople,
     aggressionTowardsDogs: form.aggressionTowardsDogs,
     separationAnxiety: form.separationAnxiety,

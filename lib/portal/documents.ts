@@ -1,10 +1,39 @@
 import { portalFetch } from "@/lib/portal/api";
 import { getLinkedClients, requireClientAccount } from "@/lib/portal/auth";
+import {
+  formatLocalDateString,
+  parseLocalDateString,
+} from "@/lib/recurrence";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DogDocumentRow } from "@/lib/supabase/types";
 import type { DogDocument, DogDocumentType } from "@/lib/types";
 
 export const DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
+
+export const VACCINATION_EXPIRY_REQUIRED_MESSAGE =
+  "New expiry date is required for vaccination uploads.";
+
+export const VACCINATION_NOTIFICATION_RESET = {
+  vaccination_owner_week_before_email_sent_at: null,
+  vaccination_owner_expired_email_sent_at: null,
+  vaccination_facility_week_before_email_sent_at: null,
+  vaccination_facility_expired_email_sent_at: null,
+} as const;
+
+export function parseVaccinationExpiryDate(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const parsed = parseLocalDateString(value);
+  return parsed ? formatLocalDateString(parsed) : null;
+}
+
+export function findCurrentVaccinationDocument(
+  documents: DogDocument[],
+): DogDocument | null {
+  return (
+    documents.find((document) => document.documentType === "vaccination") ??
+    null
+  );
+}
 
 export const DOCUMENT_ALLOWED_TYPES = [
   "application/pdf",
@@ -165,6 +194,7 @@ export async function uploadPortalDocument(
   dogId: string,
   file: File,
   documentType: DogDocumentType,
+  vaccinationExpiryDate?: string,
 ): Promise<PortalDocumentsResult<DogDocument>> {
   const validation = validateDocumentFile(file);
   if (!validation.ok) {
@@ -174,10 +204,21 @@ export async function uploadPortalDocument(
     };
   }
 
+  const expiryDate = parseVaccinationExpiryDate(vaccinationExpiryDate ?? "");
+  if (documentType === "vaccination" && !expiryDate) {
+    return {
+      data: null,
+      error: toError(VACCINATION_EXPIRY_REQUIRED_MESSAGE),
+    };
+  }
+
   const formData = new FormData();
   formData.append("dogId", dogId);
   formData.append("documentType", documentType);
   formData.append("file", file);
+  if (documentType === "vaccination" && expiryDate) {
+    formData.append("vaccinationExpiryDate", expiryDate);
+  }
 
   const response = await portalFetch("/api/portal/documents", {
     method: "POST",
@@ -221,6 +262,34 @@ export async function getDogDocuments(
 
   return {
     data: (data as DogDocumentRow[]).map(mapDogDocumentRowToDogDocument),
+    error: null,
+  };
+}
+
+export async function getCurrentVaccinationDocument(
+  dogId: string,
+): Promise<PortalDocumentsResult<DogDocument | null>> {
+  const accountResult = await requireClientAccount();
+  if (accountResult.error) {
+    return { data: null, error: accountResult.error };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("dog_documents")
+    .select("*")
+    .eq("dog_id", dogId)
+    .eq("document_type", "vaccination")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  return {
+    data: data ? mapDogDocumentRowToDogDocument(data as DogDocumentRow) : null,
     error: null,
   };
 }

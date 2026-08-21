@@ -52,7 +52,12 @@ export function PortalBookingCard({
       <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
         <p className="flex items-center gap-2">
           <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <span>{formatBookingDateRange(booking.startDate, booking.endDate)}</span>
+          <span>
+            {formatBookingDateRange(booking.startDate, booking.endDate, {
+              arrivalTime: booking.arrivalTime,
+              endTime: booking.endTime,
+            })}
+          </span>
         </p>
         <p>
           <span className="font-medium text-foreground">Service:</span>{" "}

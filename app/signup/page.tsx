@@ -8,7 +8,47 @@ import { runAuthSetup } from "@/lib/authSetup";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+
+type PendingInvite = {
+  facilityName: string;
+};
+
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+async function fetchPendingInvite(rawEmail: string): Promise<PendingInvite | null> {
+  const trimmed = normalizeEmail(rawEmail);
+  if (!trimmed.includes("@")) return null;
+
+  try {
+    const response = await fetch(
+      `/api/staff/invite/check-pending?email=${encodeURIComponent(trimmed)}`,
+    );
+    if (!response.ok) return null;
+
+    const body: unknown = await response.json();
+    if (!body || typeof body !== "object") return null;
+
+    const record = body as {
+      pending?: unknown;
+      facilityName?: unknown;
+    };
+    if (record.pending !== true) {
+      return null;
+    }
+
+    const facilityName =
+      typeof record.facilityName === "string" && record.facilityName.trim()
+        ? record.facilityName.trim()
+        : "a facility";
+
+    return { facilityName };
+  } catch {
+    return null;
+  }
+}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,18 +59,51 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pendingInvite, setPendingInvite] = useState<PendingInvite | null>(null);
+  const dismissedForEmailRef = useRef<string | null>(null);
+
+  async function handleEmailBlur() {
+    const trimmedEmail = normalizeEmail(email);
+    if (!trimmedEmail.includes("@")) {
+      setPendingInvite(null);
+      return;
+    }
+    if (dismissedForEmailRef.current === trimmedEmail) return;
+
+    const pending = await fetchPendingInvite(trimmedEmail);
+    if (normalizeEmail(email) !== trimmedEmail) return;
+    setPendingInvite(pending);
+  }
+
+  function handleDismissInvite() {
+    dismissedForEmailRef.current = normalizeEmail(email);
+    setPendingInvite(null);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setInfo(null);
-    setLoading(true);
 
-    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedEmail = normalizeEmail(email);
     const trimmedFullName = fullName.trim();
     const trimmedFacilityName = facilityName.trim();
 
+    if (dismissedForEmailRef.current !== trimmedEmail && pendingInvite) {
+      return;
+    }
+
+    setLoading(true);
+
     try {
+      if (dismissedForEmailRef.current !== trimmedEmail) {
+        const pending = await fetchPendingInvite(trimmedEmail);
+        if (pending) {
+          setPendingInvite(pending);
+          return;
+        }
+      }
+
       const supabase = createSupabaseBrowserClient();
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: trimmedEmail,
@@ -125,7 +198,13 @@ export default function SignupPage() {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (pendingInvite) setPendingInvite(null);
+                }}
+                onBlur={() => {
+                  void handleEmailBlur();
+                }}
                 placeholder="you@facility.com"
               />
               <Input
@@ -138,6 +217,24 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
               />
+
+              {pendingInvite && (
+                <div
+                  className="rounded-xl border border-warning/25 bg-warning/10 px-4 py-3 text-sm text-warning"
+                  role="status"
+                >
+                  <p>
+                    You have a pending invite to join {pendingInvite.facilityName}. Check your email for the invite link to accept it.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleDismissInvite}
+                    className="mt-2 text-xs font-medium text-warning/80 underline underline-offset-2 hover:text-warning"
+                  >
+                    Continue creating a new facility
+                  </button>
+                </div>
+              )}
 
               {error && (
                 <p

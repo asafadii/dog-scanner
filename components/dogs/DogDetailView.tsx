@@ -15,6 +15,8 @@ import { DogVisitBadge } from "@/components/dogs/DogVisitBadge";
 import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
+import { BookingHistorySection } from "@/components/bookings/BookingHistorySection";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -27,13 +29,15 @@ import {
   getStaffDocumentUrl,
   getStaffDogDocuments,
 } from "@/lib/documents";
+import { findCurrentVaccinationDocument } from "@/lib/portal/documents";
 import {
   getDogById,
   INCOMPLETE_SETUP_MESSAGE,
 } from "@/lib/dogs";
+import { getDogBookingHistory } from "@/lib/bookings";
 import { slideUp } from "@/lib/motion";
 import type { CareTask, Dog, DogDocument, KennelAssignment, Payment, TimelineEvent } from "@/lib/types";
-import { cn, formatCheckInTime, formatTime } from "@/lib/utils";
+import { cn, formatBookingDate, formatCheckInTime, formatTime } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightLeft,
@@ -146,6 +150,12 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
 
     setLoading(false);
   }, [dogId]);
+
+  const loadHistoryPage = useCallback(
+    (offset: number, limit: number) =>
+      getDogBookingHistory(dogId, { offset, limit }),
+    [dogId],
+  );
 
   useEffect(() => {
     void loadDog();
@@ -376,7 +386,18 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             <div>
               <h2 className="text-3xl font-bold tracking-tight">{dog.name}</h2>
               <p className="mt-1 text-sm text-white/90">
-                {dog.breed} · {dog.age} ·{" "}
+                {[
+                  dog.breed,
+                  dog.age,
+                  dog.gender === "male"
+                    ? "Male"
+                    : dog.gender === "female"
+                      ? "Female"
+                      : null,
+                ]
+                  .filter((part): part is string => Boolean(part))
+                  .join(" · ")}
+                {" · "}
                 <span className="capitalize">{dog.size}</span>
               </p>
             </div>
@@ -450,7 +471,10 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               <CardTitle className="text-base">Care Alerts</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              <DogAlertBadges alerts={dog.alerts} />
+              <DogAlertBadges
+                alerts={dog.alerts}
+                vaccinationExpiryDate={dog.vaccinationExpiryDate}
+              />
             </CardContent>
           </Card>
         )}
@@ -469,6 +493,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   aggressionTowardsPeople: false,
                   aggressionTowardsDogs: false,
                 }}
+                vaccinationExpiryDate={dog.vaccinationExpiryDate}
               />
             </CardContent>
           </Card>
@@ -676,6 +701,18 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   <TriStateAnswer value={dog.kennelTrained} />
                 </dd>
               </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Vaccination expiry date
+                </dt>
+                <dd className="mt-1 text-sm font-medium">
+                  {dog.vaccinationExpiryDate ? (
+                    formatBookingDate(dog.vaccinationExpiryDate)
+                  ) : (
+                    <span className="text-muted-foreground">Not recorded</span>
+                  )}
+                </dd>
+              </div>
             </dl>
             <div className="mt-4 space-y-4">
               {dog.alerts.medication && (
@@ -750,31 +787,27 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 text-sm">
-            {dog.feedingSource ? (
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Food source
+                </dt>
+                <dd className="mt-1 text-sm font-medium text-foreground">
+                  Set per booking
+                </dd>
+              </div>
+              {dog.feedingMealsPerDay !== null && (
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Food source
+                    Meals
                   </dt>
                   <dd className="mt-1 text-sm font-medium text-foreground">
-                    {dog.feedingSource === "own" ? "Own food" : "Facility food"}
+                    {dog.feedingMealsPerDay} meal
+                    {dog.feedingMealsPerDay === 1 ? "" : "s"} per day
                   </dd>
                 </div>
-                {dog.feedingMealsPerDay !== null && (
-                  <div>
-                    <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Meals
-                    </dt>
-                    <dd className="mt-1 text-sm font-medium text-foreground">
-                      {dog.feedingMealsPerDay} meal
-                      {dog.feedingMealsPerDay === 1 ? "" : "s"} per day
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            ) : (
-              <p className="text-muted-foreground">Not recorded</p>
-            )}
+              )}
+            </dl>
             {dog.care.feedingNotes !== "None" && (
               <div className="mt-4">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -825,7 +858,10 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
               <p className="text-sm text-muted-foreground">No documents yet</p>
             ) : (
               <ul className="space-y-2">
-                {documents.map((doc) => (
+                {documents.map((doc) => {
+                  const isCurrent =
+                    findCurrentVaccinationDocument(documents)?.id === doc.id;
+                  return (
                   <li key={doc.id}>
                     <button
                       type="button"
@@ -836,12 +872,16 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                       <span className="min-w-0 flex-1 truncate">
                         Vaccination stamp
                       </span>
+                      {isCurrent ? (
+                        <Badge variant="teal">Current</Badge>
+                      ) : null}
                       <span className="shrink-0 text-xs text-muted-foreground">
                         {formatDocumentDate(doc.createdAt)}
                       </span>
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </CardContent>
@@ -945,6 +985,11 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           </CardContent>
         </Card>
 
+        <BookingHistorySection
+          loadPage={loadHistoryPage}
+          hrefForEntry={(entry) => `/bookings/${entry.booking.id}`}
+        />
+
         <p className="text-center text-xs text-muted-foreground">
           Last check-in: {formatCheckInTime(dog.lastCheckIn)}
         </p>
@@ -956,7 +1001,6 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
           {checkoutOpen && isCheckedIn && dog.activeCheckinId ? (
             <CheckoutPicker
               checkinId={dog.activeCheckinId}
-              feedingSource={dog.feedingSource}
               onComplete={(payment: Payment) => {
                 setDog((current) =>
                   current

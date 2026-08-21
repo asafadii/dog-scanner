@@ -113,7 +113,7 @@ export async function getRevenueReport(
   }
 
   const rows = (data ?? []) as PaymentReportRowDb[];
-  const paymentBreakdown = { cash: 0, card: 0, transfer: 0 };
+  const paymentBreakdown = { cash: 0, card: 0, transfer: 0, pass: 0 };
   let totalRevenue = 0;
   let daycareVisits = 0;
   let boardingStays = 0;
@@ -140,7 +140,7 @@ export async function getRevenueReport(
       serviceType: row.service_type,
       paidAt: row.paid_at,
       total,
-      paymentMethod: row.payment_method,
+      paymentMethod: row.payment_method as PaymentMethod,
     };
   });
 
@@ -154,6 +154,7 @@ export async function getRevenueReport(
         cash: Math.round(paymentBreakdown.cash * 100) / 100,
         card: Math.round(paymentBreakdown.card * 100) / 100,
         transfer: Math.round(paymentBreakdown.transfer * 100) / 100,
+        pass: Math.round(paymentBreakdown.pass * 100) / 100,
       },
       payments,
     },

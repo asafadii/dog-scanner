@@ -93,23 +93,30 @@ export function ClientsListView() {
             {filtered.length} of {clients.length} client profiles
           </p>
         </div>
-        {writeLocked ? (
-          <Button
-            className="w-full sm:w-auto"
-            disabled
-            title={WRITE_LOCKED_TITLE}
-          >
-            <Plus className="h-4 w-4" aria-hidden />
-            Add Client
-          </Button>
-        ) : (
-          <Link href="/clients/new">
-            <Button className="w-full sm:w-auto">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/passes" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto">
+              Manage Passes
+            </Button>
+          </Link>
+          {writeLocked ? (
+            <Button
+              className="w-full sm:w-auto"
+              disabled
+              title={WRITE_LOCKED_TITLE}
+            >
               <Plus className="h-4 w-4" aria-hidden />
               Add Client
             </Button>
-          </Link>
-        )}
+          ) : (
+            <Link href="/clients/new" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">
+                <Plus className="h-4 w-4" aria-hidden />
+                Add Client
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="relative">

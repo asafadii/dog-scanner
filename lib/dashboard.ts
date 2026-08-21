@@ -1,4 +1,4 @@
-import { getActiveCheckins } from "@/lib/checkins";
+import { getActiveCheckins, resolveStoredCheckinServiceType } from "@/lib/checkins";
 import { getTodaysBookings } from "@/lib/bookings";
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -99,8 +99,7 @@ export async function getDashboardKpiStats(): Promise<
     ),
   ];
 
-  let daycareToday = 0;
-  let overnight = 0;
+  const serviceByBookingId = new Map<string, "daycare" | "boarding">();
 
   if (bookingIds.length > 0) {
     const supabase = createSupabaseBrowserClient();
@@ -114,28 +113,26 @@ export async function getDashboardKpiStats(): Promise<
       return { data: null, error: toError(error.message) };
     }
 
-    const serviceByBookingId = new Map(
-      (data as Pick<BookingRow, "id" | "service_type">[]).map((row) => [
-        row.id,
-        row.service_type,
-      ]),
-    );
-
-    for (const checkin of activeCheckins) {
-      if (!checkin.booking_id) {
-        daycareToday += 1;
-        continue;
-      }
-
-      const serviceType = serviceByBookingId.get(checkin.booking_id);
-      if (serviceType === "boarding") {
-        overnight += 1;
-      } else {
-        daycareToday += 1;
-      }
+    for (const row of data as Pick<BookingRow, "id" | "service_type">[]) {
+      serviceByBookingId.set(row.id, row.service_type);
     }
-  } else if (activeCheckins.length > 0) {
-    daycareToday = activeCheckins.length;
+  }
+
+  let daycareToday = 0;
+  let overnight = 0;
+
+  for (const checkin of activeCheckins) {
+    const serviceType = resolveStoredCheckinServiceType(
+      checkin.current_service_type,
+      checkin.booking_id
+        ? serviceByBookingId.get(checkin.booking_id)
+        : undefined,
+    );
+    if (serviceType === "boarding") {
+      overnight += 1;
+    } else {
+      daycareToday += 1;
+    }
   }
 
   return {

@@ -44,6 +44,8 @@ function mapFacilityToSubscriptionInfo(row: FacilityRow): SubscriptionInfo {
   const access = computeFacilityAccessLevel(
     row.subscription_status,
     row.past_due_since,
+    row.trial_ends_at,
+    row.stripe_subscription_id,
   );
 
   return {

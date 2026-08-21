@@ -85,7 +85,7 @@ const initialForm: FormState = {
   separationAnxiety: null,
   chewingRisk: null,
   kennelTrained: null,
-  feedingSource: null,
+  feedingSource: "facility",
   feedingMealsPerDay: 2,
   feedingNotes: "",
   behavior: "",

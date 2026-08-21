@@ -10,6 +10,7 @@ const emptyProfileFields = {
   dietaryNotes: "",
   feedingSource: null as Dog["feedingSource"],
   feedingMealsPerDay: null as number | null,
+  vaccinationExpiryDate: null as string | null,
 };
 
 export const MOCK_DOGS: Dog[] = [
@@ -199,6 +200,7 @@ export const MOCK_DOGS: Dog[] = [
     microchipNumber: null,
     isNeutered: null,
     healthCertificateNumber: null,
+    vaccinationExpiryDate: null,
     aggressionTowardsPeople: true,
     aggressionTowardsDogs: true,
     separationAnxiety: null,

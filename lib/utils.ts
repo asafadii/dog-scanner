@@ -57,14 +57,50 @@ export function formatBookingDate(value: string): string {
   }).format(date);
 }
 
+export function formatBookingClockTime(
+  value: string | null | undefined,
+): string | null {
+  if (!value) return null;
+  const match = value.trim().match(/^([01]\d|2[0-3]):([0-5]\d)/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const date = new Date(1970, 0, 1, hours, minutes);
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function formatBookingDateWithOptionalTime(
+  date: string,
+  time?: string | null,
+): string {
+  const formattedTime = formatBookingClockTime(time);
+  const formattedDate = formatBookingDate(date);
+  return formattedTime ? `${formattedDate} · ${formattedTime}` : formattedDate;
+}
+
 export function formatBookingDateRange(
   startDate: string,
   endDate: string,
+  times?: { arrivalTime?: string | null; endTime?: string | null },
 ): string {
+  const arrivalTime = times?.arrivalTime ?? null;
+  const endTime = times?.endTime ?? null;
+
   if (startDate === endDate) {
-    return formatBookingDate(startDate);
+    const start = formatBookingClockTime(arrivalTime);
+    const end = formatBookingClockTime(endTime);
+    const date = formatBookingDate(startDate);
+    if (start && end) return `${date} · ${start} – ${end}`;
+    if (start) return `${date} · ${start}`;
+    if (end) return `${date} · ${end}`;
+    return date;
   }
-  return `${formatBookingDate(startDate)} – ${formatBookingDate(endDate)}`;
+
+  return `${formatBookingDateWithOptionalTime(startDate, arrivalTime)} – ${formatBookingDateWithOptionalTime(endDate, endTime)}`;
 }
 
 export function formatCurrency(value: number, currency = "EUR"): string {

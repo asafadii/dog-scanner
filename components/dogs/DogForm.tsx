@@ -5,6 +5,7 @@ import {
   WRITE_LOCKED_TITLE,
 } from "@/components/app/FacilityAccessContext";
 import { DogPhotoUpload } from "@/components/dogs/DogPhotoUpload";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -17,12 +18,17 @@ import {
   getStaffDocumentUrl,
   uploadStaffDogDocument,
 } from "@/lib/documents";
+import {
+  findCurrentVaccinationDocument,
+  parseVaccinationExpiryDate,
+  VACCINATION_EXPIRY_REQUIRED_MESSAGE,
+} from "@/lib/portal/documents";
 import type {
   Client,
   DogAlerts,
   DogDocument,
+  DogGender,
   DogSize,
-  FeedingSource,
   NewDogFormData,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -30,9 +36,9 @@ import { FileText, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 const SIZES: DogSize[] = ["small", "medium", "large"];
-const FEEDING_SOURCES: { value: FeedingSource; label: string }[] = [
-  { value: "own", label: "Own" },
-  { value: "facility", label: "Facility" },
+const GENDERS: { value: DogGender; label: string }[] = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
 ];
 
 const defaultAlerts: DogAlerts = {
@@ -50,6 +56,7 @@ const defaultForm: NewDogFormData = {
   breed: "",
   age: "",
   size: "medium",
+  gender: null,
   clientId: null,
   ownerName: "",
   ownerPhone: "",
@@ -61,6 +68,7 @@ const defaultForm: NewDogFormData = {
   microchipNumber: "",
   isNeutered: null,
   healthCertificateNumber: "",
+  vaccinationExpiryDate: "",
   aggressionTowardsPeople: null,
   aggressionTowardsDogs: null,
   separationAnxiety: null,
@@ -88,6 +96,7 @@ interface DogFormProps {
     data: NewDogFormData,
     photo?: File | null,
     vaccinationFiles?: File[],
+    vaccinationUploadExpiryDate?: string,
   ) => void | Promise<void>;
   submitLabel?: string;
   initialData?: NewDogFormData;
@@ -210,6 +219,7 @@ export function DogForm({
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [documentError, setDocumentError] = useState<string | null>(null);
   const [deletingDocumentId, setDeletingDocumentId] = useState<string | null>(null);
+  const [uploadExpiryDate, setUploadExpiryDate] = useState("");
 
   const isSubmitting = submitPhase !== "idle";
 
@@ -332,7 +342,14 @@ export function DogForm({
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (isSubmitting || writeLocked) return;
-    void onSubmit(form, photoFile, vaccinationFiles);
+    if (
+      vaccinationFiles.length > 0 &&
+      !parseVaccinationExpiryDate(uploadExpiryDate)
+    ) {
+      setDocumentError(VACCINATION_EXPIRY_REQUIRED_MESSAGE);
+      return;
+    }
+    void onSubmit(form, photoFile, vaccinationFiles, uploadExpiryDate);
   }
 
   const buttonLabel =
@@ -417,6 +434,30 @@ export function DogForm({
               ))}
             </div>
           </div>
+          <div>
+            <span className="mb-2 block text-sm font-medium text-foreground">
+              Gender
+            </span>
+            <div className="flex gap-2">
+              {GENDERS.map((gender) => (
+                <button
+                  key={gender.value}
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => updateField("gender", gender.value)}
+                  className={cn(
+                    "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
+                    form.gender === gender.value
+                      ? "border-primary bg-mint-wash text-primary"
+                      : "border-border bg-surface text-muted-foreground hover:bg-muted",
+                    isSubmitting && "cursor-not-allowed opacity-60",
+                  )}
+                >
+                  {gender.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -450,6 +491,16 @@ export function DogForm({
               updateField("healthCertificateNumber", e.target.value)
             }
             placeholder="Certificate or passport number"
+            disabled={isSubmitting}
+          />
+          <Input
+            type="date"
+            label="Vaccination expiry date"
+            value={form.vaccinationExpiryDate}
+            onChange={(e) =>
+              updateField("vaccinationExpiryDate", e.target.value)
+            }
+            hint="When does the current vaccination stamp expire?"
             disabled={isSubmitting}
           />
         </CardContent>
@@ -682,30 +733,6 @@ export function DogForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <span className="mb-2 block text-sm font-medium text-foreground">
-              Own food or facility food?
-            </span>
-            <div className="flex gap-2">
-              {FEEDING_SOURCES.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => updateField("feedingSource", value)}
-                  className={cn(
-                    "min-h-[44px] flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                    form.feedingSource === value
-                      ? "border-primary bg-primary text-white"
-                      : "border-border bg-surface text-muted-foreground hover:bg-muted",
-                    isSubmitting && "cursor-not-allowed opacity-60",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
             <label
               htmlFor="meals-per-day"
               className="mb-2 block text-sm font-medium text-foreground"
@@ -787,7 +814,11 @@ export function DogForm({
           ) : (
             existingDocuments.length > 0 && (
               <ul className="space-y-2">
-                {existingDocuments.map((doc) => (
+                {existingDocuments.map((doc) => {
+                  const isCurrent =
+                    findCurrentVaccinationDocument(existingDocuments)?.id ===
+                    doc.id;
+                  return (
                   <li
                     key={doc.id}
                     className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted px-3 py-2"
@@ -801,6 +832,9 @@ export function DogForm({
                       <span className="truncate">
                         Vaccination stamp · {formatDocumentDate(doc.createdAt)}
                       </span>
+                      {isCurrent ? (
+                        <Badge variant="teal">Current</Badge>
+                      ) : null}
                     </button>
                     <button
                       type="button"
@@ -816,10 +850,21 @@ export function DogForm({
                       )}
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )
           )}
+
+          <Input
+            type="date"
+            id="vaccination-upload-expiry"
+            label="New expiry date"
+            value={uploadExpiryDate}
+            onChange={(e) => setUploadExpiryDate(e.target.value)}
+            required={vaccinationFiles.length > 0}
+            disabled={isSubmitting}
+          />
 
           {dogId && (
             <div>
@@ -834,21 +879,31 @@ export function DogForm({
                 type="file"
                 accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                 multiple
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting || !parseVaccinationExpiryDate(uploadExpiryDate)
+                }
                 onChange={async (e) => {
                   const files = e.target.files;
                   if (!files?.length) return;
+                  const expiryDate = parseVaccinationExpiryDate(uploadExpiryDate);
+                  if (!expiryDate) {
+                    setDocumentError(VACCINATION_EXPIRY_REQUIRED_MESSAGE);
+                    e.target.value = "";
+                    return;
+                  }
                   setDocumentError(null);
                   for (const file of Array.from(files)) {
                     const result = await uploadStaffDogDocument(
                       dogId,
                       file,
                       "vaccination",
+                      expiryDate,
                     );
                     if (result.error) {
                       setDocumentError(result.error.message);
                     } else {
                       setExistingDocuments((prev) => [result.data, ...prev]);
+                      updateField("vaccinationExpiryDate", expiryDate);
                     }
                   }
                   e.target.value = "";

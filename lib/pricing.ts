@@ -1,4 +1,4 @@
-import { checkOutDog, getEffectiveServiceType } from "@/lib/checkins";
+import { checkOutDog, getEffectiveServiceType, resolveStoredCheckinServiceType } from "@/lib/checkins";
 import { clarity } from "@/lib/clarity";
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -12,6 +12,7 @@ import type {
 } from "@/lib/supabase/types";
 import type {
   BookingServiceType,
+  FoodSource,
   Payment,
   PaymentMethod,
   PricingRules,
@@ -52,6 +53,7 @@ export interface UpdatePricingRulesInput {
 export interface RecordPaymentInput {
   paymentMethod: PaymentMethod;
   foodAddon?: boolean;
+  clientPassId?: string;
 }
 
 export interface CalculateStayPriceOptions {
@@ -71,6 +73,8 @@ type PricingRulesUpdatePayload = {
 export type StayPriceResult = StayPriceBreakdown & {
   foodAddonOnBooking: boolean;
   configuredFoodFee: number;
+  bookingFoodSource: FoodSource | null;
+  clientId: string | null;
 };
 
 function toError(
@@ -82,6 +86,24 @@ function toError(
 
 function toNumber(value: number | string): number {
   return typeof value === "number" ? value : Number(value);
+}
+
+function passPaymentErrorMessage(message: string | undefined): string {
+  if (!message) {
+    return "This pass cannot be used for this checkout.";
+  }
+  const lowered = message.toLowerCase();
+  if (
+    lowered.includes("cannot be used") ||
+    lowered.includes("does not belong") ||
+    lowered.includes("exhausted")
+  ) {
+    if (lowered.includes("does not belong")) {
+      return "This pass does not belong to this client or facility.";
+    }
+    return "This pass cannot be used for this checkout.";
+  }
+  return message;
 }
 
 function roundMoney(value: number): number {
@@ -115,7 +137,7 @@ function mapPaymentRow(row: PaymentRow): Payment {
     surchargePercent: toNumber(row.surcharge_percent),
     subtotal: toNumber(row.subtotal),
     total: toNumber(row.total),
-    paymentMethod: row.payment_method,
+    paymentMethod: row.payment_method as PaymentMethod,
     paidAt: row.paid_at,
   };
 }
@@ -343,6 +365,7 @@ async function loadStayContext(
     booking: BookingRow | null;
     bookingItem: BookingItemRow | null;
     rules: PricingRules;
+    clientId: string | null;
   }>
 > {
   const supabase = createSupabaseBrowserClient();
@@ -401,12 +424,29 @@ async function loadStayContext(
     bookingItem = (itemData as BookingItemRow | null) ?? null;
   }
 
+  let clientId = booking?.client_id ?? null;
+  if (!clientId) {
+    const { data: dog, error: dogError } = await supabase
+      .from("dogs")
+      .select("client_id")
+      .eq("id", checkin.dog_id)
+      .eq("facility_id", facilityId)
+      .maybeSingle();
+
+    if (dogError) {
+      return { data: null, error: toError(dogError.message) };
+    }
+
+    clientId = (dog as { client_id: string | null } | null)?.client_id ?? null;
+  }
+
   return {
     data: {
       checkin: checkin as DogCheckinRow,
       booking,
       bookingItem,
       rules: rulesResult.data,
+      clientId,
     },
     error: null,
   };
@@ -431,12 +471,15 @@ export async function calculateStayPrice(
 
   const { checkin, booking, bookingItem, rules } = contextResult.data;
   const checkoutAt = new Date();
-  const bookedServiceType = booking?.service_type ?? "daycare";
+  const storedServiceType = resolveStoredCheckinServiceType(
+    checkin.current_service_type,
+    booking?.service_type,
+  );
   // Effective type is calculation-only — stored booking.service_type is unchanged.
   // Same-calendar-day checkout → daycare (52a); 24h+ → boarding (§18.3).
   const serviceType: BookingServiceType = getEffectiveServiceType(
     checkin.checked_in_at,
-    bookedServiceType,
+    storedServiceType,
     checkoutAt,
   );
   const units = computeUnits(
@@ -461,6 +504,8 @@ export async function calculateStayPrice(
       ...breakdown,
       foodAddonOnBooking,
       configuredFoodFee: rules.foodFee,
+      bookingFoodSource: booking?.food_source ?? null,
+      clientId: contextResult.data.clientId,
     },
     error: null,
   };
@@ -611,28 +656,82 @@ export async function recordPayment(
   }
 
   const breakdown = priceResult.data;
-  const { data: paymentRow, error: paymentError } = await supabase
-    .from("payments")
-    .insert({
-      checkin_id: checkinId,
-      booking_id: bookingId,
-      facility_id: profileResult.data.facility_id,
-      service_type: breakdown.serviceType,
-      units: breakdown.units,
-      rate: breakdown.rate,
-      transport_fee: breakdown.transportFee,
-      food_fee: breakdown.foodFee,
-      surcharge_percent: breakdown.surchargePercent,
-      subtotal: breakdown.subtotal,
-      total: breakdown.total,
-      payment_method: input.paymentMethod,
-      recorded_by: profileResult.data.id,
-    })
-    .select("*")
-    .single();
+  let paymentRow: PaymentRow | null = null;
 
-  if (paymentError) {
-    return { data: null, error: toError(paymentError.message) };
+  if (input.paymentMethod === "pass") {
+    if (!input.clientPassId) {
+      return {
+        data: null,
+        error: toError("Select a pass to pay with.", "validation"),
+      };
+    }
+
+    const clientId = contextResult.data.clientId;
+    if (!clientId) {
+      return {
+        data: null,
+        error: toError(
+          "This stay is not linked to a client, so a pass cannot be used.",
+          "validation",
+        ),
+      };
+    }
+
+    const { data: rpcRow, error: rpcError } = await supabase.rpc(
+      "record_pass_payment",
+      {
+        p_checkin_id: checkinId,
+        p_booking_id: bookingId,
+        p_facility_id: facilityId,
+        p_service_type: breakdown.serviceType,
+        p_units: breakdown.units,
+        p_rate: breakdown.rate,
+        p_transport_fee: breakdown.transportFee,
+        p_food_fee: breakdown.foodFee,
+        p_surcharge_percent: breakdown.surchargePercent,
+        p_subtotal: breakdown.subtotal,
+        p_total: breakdown.total,
+        p_recorded_by: profileResult.data.id,
+        p_client_pass_id: input.clientPassId,
+        p_client_id: clientId,
+      },
+    );
+
+    const resolvedRow = Array.isArray(rpcRow) ? rpcRow[0] : rpcRow;
+    if (rpcError || !resolvedRow) {
+      return {
+        data: null,
+        error: toError(passPaymentErrorMessage(rpcError?.message), "validation"),
+      };
+    }
+
+    paymentRow = resolvedRow as PaymentRow;
+  } else {
+    const insertResult = await supabase
+      .from("payments")
+      .insert({
+        checkin_id: checkinId,
+        booking_id: bookingId,
+        facility_id: profileResult.data.facility_id,
+        service_type: breakdown.serviceType,
+        units: breakdown.units,
+        rate: breakdown.rate,
+        transport_fee: breakdown.transportFee,
+        food_fee: breakdown.foodFee,
+        surcharge_percent: breakdown.surchargePercent,
+        subtotal: breakdown.subtotal,
+        total: breakdown.total,
+        payment_method: input.paymentMethod,
+        recorded_by: profileResult.data.id,
+      })
+      .select("*")
+      .single();
+
+    if (insertResult.error) {
+      return { data: null, error: toError(insertResult.error.message) };
+    }
+
+    paymentRow = insertResult.data as PaymentRow;
   }
 
   const bookingCompleteResult = await completeLinkedBooking(

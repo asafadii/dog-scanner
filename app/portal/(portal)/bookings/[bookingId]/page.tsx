@@ -1,11 +1,23 @@
 "use client";
 
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
+import { RecurringBookingStrip } from "@/components/bookings/RecurringBookingStrip";
+import { SeriesCancelDialog } from "@/components/bookings/SeriesCancelDialog";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import {
+  formatSeriesCancelResult,
+  formatSeriesEditResult,
+  validateBookingTimes,
+} from "@/lib/bookings";
 import {
   cancelPortalBooking,
+  cancelPortalBookingSeries,
+  editPortalBookingSeries,
   getPortalBookingById,
+  getPortalBookingSeriesOccurrences,
 } from "@/lib/portal/bookings";
 import {
   formatCheckinTokenForDisplay,
@@ -13,13 +25,17 @@ import {
   isBookingCheckInAvailableToday,
   requestCheckinToken,
 } from "@/lib/portal/checkinToken";
-import type { Booking } from "@/lib/types";
-import { formatBookingDateRange } from "@/lib/utils";
+import type {
+  Booking,
+  BookingSeriesCancelScope,
+  EditBookingSeriesFields,
+} from "@/lib/types";
+import { formatBookingDate, formatBookingDateRange } from "@/lib/utils";
 import { Calendar, Loader2, QrCode } from "lucide-react";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { useSearchParams } from "next/navigation";
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState, type FormEvent } from "react";
 
 export default function PortalBookingDetailPage({
   params,
@@ -62,15 +78,27 @@ function PortalBookingDetailInner({
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelChooserOpen, setCancelChooserOpen] = useState(false);
+  const [cancelResult, setCancelResult] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [tokenLoading, setTokenLoading] = useState(false);
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState(0);
+  const [arrivalTime, setArrivalTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [transportRequired, setTransportRequired] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [editChooserOpen, setEditChooserOpen] = useState(false);
+  const [editResult, setEditResult] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const loadBooking = useCallback(async () => {
-    setLoading(true);
+  const loadBooking = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setError(null);
 
     const result = await getPortalBookingById(bookingId, clientId, facilityId);
@@ -84,12 +112,31 @@ function PortalBookingDetailInner({
     setLoading(false);
   }, [bookingId, clientId, facilityId]);
 
+  const loadSeries = useCallback(
+    (id: string) =>
+      getPortalBookingSeriesOccurrences(id, clientId, facilityId),
+    [clientId, facilityId],
+  );
+
   useEffect(() => {
     void loadBooking();
   }, [loadBooking]);
 
+  useEffect(() => {
+    if (!booking) return;
+    setArrivalTime(booking.arrivalTime ?? "");
+    setEndTime(booking.endTime ?? "");
+    setTransportRequired(booking.transportRequired);
+    setNotes(booking.notes ?? "");
+  }, [booking]);
+
   async function handleCancelBooking() {
     if (!booking || cancelling) return;
+
+    if (booking.seriesId) {
+      setCancelChooserOpen(true);
+      return;
+    }
 
     const confirmed = window.confirm(
       "Cancel this booking? The facility will be notified by email.",
@@ -111,6 +158,112 @@ function PortalBookingDetailInner({
     }
 
     setCancelling(false);
+  }
+
+  async function handleSeriesCancel(scope: BookingSeriesCancelScope) {
+    if (!booking || cancelling) return;
+
+    setCancelChooserOpen(false);
+    setCancelling(true);
+    setCancelError(null);
+    setCancelResult(null);
+
+    if (scope === "this") {
+      const result = await cancelPortalBooking(bookingId);
+      if (result.error) {
+        setCancelError(result.error.message);
+      } else {
+        setBooking({
+          ...booking,
+          status: "cancelled",
+          cancelledBy: "client",
+        });
+        setCancelResult(formatSeriesCancelResult(1, 0));
+      }
+      setCancelling(false);
+      return;
+    }
+
+    const result = await cancelPortalBookingSeries(bookingId, scope);
+    if (result.error) {
+      setCancelError(result.error.message);
+    } else {
+      setCancelResult(
+        formatSeriesCancelResult(
+          result.data.cancelledCount,
+          result.data.skippedCount,
+        ),
+      );
+      await loadBooking({ silent: true });
+    }
+
+    setCancelling(false);
+  }
+
+  function currentEditFields(): EditBookingSeriesFields {
+    return {
+      arrivalTime,
+      endTime,
+      transportRequired,
+      notes,
+    };
+  }
+
+  function seriesFieldsChanged(): boolean {
+    if (!booking) return false;
+    return (
+      (booking.arrivalTime ?? "") !== arrivalTime ||
+      (booking.endTime ?? "") !== endTime ||
+      booking.transportRequired !== transportRequired ||
+      (booking.notes ?? "") !== notes
+    );
+  }
+
+  function handleEditSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!booking || saving || !seriesFieldsChanged()) return;
+
+    const timeError = validateBookingTimes({
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      arrivalTime,
+      endTime,
+    });
+    if (timeError) {
+      setEditError(timeError.message);
+      return;
+    }
+
+    setEditError(null);
+    setEditChooserOpen(true);
+  }
+
+  async function handleSeriesEdit(scope: BookingSeriesCancelScope) {
+    if (!booking || saving) return;
+
+    setEditChooserOpen(false);
+    setSaving(true);
+    setEditError(null);
+    setEditResult(null);
+
+    const result = await editPortalBookingSeries(
+      bookingId,
+      scope,
+      currentEditFields(),
+    );
+    if (result.error) {
+      setEditError(result.error.message);
+    } else {
+      setEditResult(
+        formatSeriesEditResult(
+          result.data.updatedCount,
+          result.data.skippedCount,
+        ),
+      );
+      await loadBooking({ silent: true });
+    }
+
+    setSaving(false);
   }
 
   const generateToken = useCallback(async () => {
@@ -198,6 +351,7 @@ function PortalBookingDetailInner({
   const seconds = secondsRemaining % 60;
   const canCancel =
     booking.status === "pending" || booking.status === "approved";
+  const canEditSeries = Boolean(booking.seriesId) && canCancel;
 
   return (
     <div className="space-y-6">
@@ -223,6 +377,37 @@ function PortalBookingDetailInner({
         </p>
       )}
 
+      {editError && (
+        <p
+          className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
+          role="alert"
+        >
+          {editError}
+        </p>
+      )}
+
+      {cancelResult && (
+        <p
+          className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm font-medium text-success"
+          role="status"
+        >
+          {cancelResult}
+        </p>
+      )}
+
+      {editResult && (
+        <p
+          className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm font-medium text-success"
+          role="status"
+        >
+          {editResult}
+        </p>
+      )}
+
+      {booking.seriesId && (
+        <RecurringBookingStrip seriesId={booking.seriesId} load={loadSeries} />
+      )}
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center justify-between gap-3 text-base">
@@ -233,7 +418,10 @@ function PortalBookingDetailInner({
         <CardContent className="space-y-3 pt-0 text-sm text-muted-foreground">
           <p className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden />
-            {formatBookingDateRange(booking.startDate, booking.endDate)}
+            {formatBookingDateRange(booking.startDate, booking.endDate, {
+              arrivalTime: booking.arrivalTime,
+              endTime: booking.endTime,
+            })}
           </p>
           <p>
             <span className="font-medium text-foreground">Service:</span>{" "}
@@ -247,6 +435,112 @@ function PortalBookingDetailInner({
           )}
         </CardContent>
       </Card>
+
+      {canEditSeries && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Edit booking</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <form className="space-y-4" onSubmit={handleEditSubmit}>
+              <p className="text-sm text-muted-foreground">
+                Date changes aren&apos;t supported for recurring bookings yet
+              </p>
+              {booking.serviceType === "daycare" ? (
+                <>
+                  <Input
+                    label="Date"
+                    type="date"
+                    value={booking.startDate}
+                    disabled
+                  />
+                  <Input
+                    label="Arrival time"
+                    type="time"
+                    value={arrivalTime}
+                    onChange={(e) => setArrivalTime(e.target.value)}
+                    disabled={saving}
+                  />
+                  <Input
+                    label="Expected pickup (optional)"
+                    type="time"
+                    labelClassName="text-xs font-medium text-muted-foreground"
+                    className="h-9 min-h-[36px] text-sm"
+                    value={endTime}
+                    min={arrivalTime || undefined}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    disabled={saving}
+                  />
+                </>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <Input
+                      label="Start date"
+                      type="date"
+                      value={booking.startDate}
+                      disabled
+                    />
+                    <Input
+                      label="Arrival time"
+                      type="time"
+                      value={arrivalTime}
+                      onChange={(e) => setArrivalTime(e.target.value)}
+                      disabled={saving}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Input
+                      label="End date"
+                      type="date"
+                      value={booking.endDate}
+                      disabled
+                    />
+                    <Input
+                      label="Pickup time"
+                      type="time"
+                      value={endTime}
+                      min={
+                        booking.startDate === booking.endDate
+                          ? arrivalTime || undefined
+                          : undefined
+                      }
+                      onChange={(e) => setEndTime(e.target.value)}
+                      disabled={saving}
+                    />
+                  </div>
+                </div>
+              )}
+              <label className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-xl border border-border px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={transportRequired}
+                  disabled={saving}
+                  onChange={(e) => setTransportRequired(e.target.checked)}
+                  className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
+                />
+                <span className="text-sm font-medium text-foreground">
+                  Transport required
+                </span>
+              </label>
+              <Textarea
+                label="Notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Pickup instructions, special requests..."
+                rows={3}
+                disabled={saving}
+              />
+              <Button type="submit" disabled={saving || !seriesFieldsChanged()}>
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : null}
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {canCancel && (
         <Card>
@@ -352,6 +646,23 @@ function PortalBookingDetailInner({
           )}
         </CardContent>
       </Card>
+      <SeriesCancelDialog
+        open={cancelChooserOpen}
+        dateLabel={formatBookingDate(booking.startDate)}
+        submitting={cancelling}
+        onSelect={(scope) => void handleSeriesCancel(scope)}
+        onClose={() => setCancelChooserOpen(false)}
+      />
+      <SeriesCancelDialog
+        open={editChooserOpen}
+        action="edit"
+        dateLabel={formatBookingDate(booking.startDate)}
+        submitting={saving}
+        onSelect={(scope) => void handleSeriesEdit(scope)}
+        onClose={() => {
+          if (!saving) setEditChooserOpen(false);
+        }}
+      />
     </div>
   );
 }

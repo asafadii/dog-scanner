@@ -3,11 +3,13 @@ import { forwardRef, type InputHTMLAttributes } from "react";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  labelClassName?: string;
   error?: string;
+  hint?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, id, ...props }, ref) => {
+  ({ className, label, labelClassName, error, hint, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
@@ -15,7 +17,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-sm font-medium text-foreground"
+            className={cn("text-sm font-medium text-foreground", labelClassName)}
           >
             {label}
           </label>
@@ -34,6 +36,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && <p className="text-sm text-danger">{error}</p>}
+        {hint && !error && (
+          <p className="text-xs text-muted-foreground">{hint}</p>
+        )}
       </div>
     );
   },

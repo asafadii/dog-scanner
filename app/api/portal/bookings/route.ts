@@ -1,5 +1,5 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
-import { mapBookingRowToBooking } from "@/lib/bookings";
+import { mapBookingRowToBooking, normalizeBookingTime, parseFoodSource, validateBookingFormData } from "@/lib/bookings";
 import { getFacilityNotificationRecipients } from "@/lib/bookings/server";
 import {
   DEFAULT_BOARDING_CAPACITY,
@@ -124,6 +124,25 @@ export async function POST(request: Request) {
     );
   }
 
+  const validationError = validateBookingFormData({
+    clientId,
+    dogId,
+    serviceType,
+    startDate,
+    endDate,
+    arrivalTime: body.arrivalTime,
+    endTime: body.endTime,
+    transportRequired: Boolean(body.transportRequired),
+    foodSource: parseFoodSource(body.foodSource),
+    notes: body.notes ?? "",
+  });
+  if (validationError) {
+    return NextResponse.json(
+      { ok: false, error: validationError.message },
+      { status: 400 },
+    );
+  }
+
   const linked = await verifyClientAccountLink(db, user.id, clientId, facilityId);
   if (!linked) {
     return NextResponse.json(
@@ -186,7 +205,10 @@ export async function POST(request: Request) {
       service_type: serviceType,
       start_date: startDate,
       end_date: endDate,
+      arrival_time: normalizeBookingTime(body.arrivalTime),
+      end_time: normalizeBookingTime(body.endTime),
       transport_required: Boolean(body.transportRequired),
+      food_source: parseFoodSource(body.foodSource),
       status: autoApprove ? "approved" : "pending",
       notes: body.notes?.trim() || null,
     })

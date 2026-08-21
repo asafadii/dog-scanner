@@ -8,10 +8,11 @@ import {
 } from "@/lib/pricing";
 import { formatAmount } from "@/lib/currency";
 import { getFacilitySettings } from "@/lib/facility";
-import type { FeedingSource, Payment, PaymentMethod } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { Banknote, CreditCard, Landmark, Loader2, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { getApplicablePasses } from "@/lib/passes";
+import type { ClientPassListItem, Payment, PaymentMethod } from "@/lib/types";
+import { cn, formatBookingDate } from "@/lib/utils";
+import { Banknote, CreditCard, Landmark, Loader2, Ticket, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const PAYMENT_METHODS: {
   value: PaymentMethod;
@@ -25,7 +26,6 @@ const PAYMENT_METHODS: {
 
 interface CheckoutPickerProps {
   checkinId: string;
-  feedingSource?: FeedingSource | null;
   onComplete: (payment: Payment) => void;
   onClose: () => void;
   className?: string;
@@ -40,7 +40,6 @@ function unitLabel(serviceType: StayPriceResult["serviceType"], units: number) {
 
 export function CheckoutPicker({
   checkinId,
-  feedingSource = null,
   onComplete,
   onClose,
   className,
@@ -55,13 +54,11 @@ export function CheckoutPicker({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currency, setCurrency] = useState("EUR");
-
-  useEffect(() => {
-    if (feedingSource === "facility") {
-      setFoodAddon(true);
-      setFoodPrefilled(true);
-    }
-  }, [feedingSource]);
+  const [applicablePasses, setApplicablePasses] = useState<
+    ClientPassListItem[]
+  >([]);
+  const [selectedPassId, setSelectedPassId] = useState<string | null>(null);
+  const didPrefillFood = useRef(false);
 
   useEffect(() => {
     void (async () => {
@@ -84,6 +81,16 @@ export function CheckoutPicker({
       setBreakdown(null);
     } else {
       setBreakdown(result.data);
+      if (
+        !didPrefillFood.current &&
+        result.data.bookingFoodSource === "facility"
+      ) {
+        didPrefillFood.current = true;
+        setFoodAddon(true);
+        setFoodPrefilled(true);
+      } else {
+        didPrefillFood.current = true;
+      }
     }
 
     setLoading(false);
@@ -93,8 +100,41 @@ export function CheckoutPicker({
     void loadPrice();
   }, [loadPrice]);
 
+  useEffect(() => {
+    if (!breakdown?.clientId) {
+      setApplicablePasses([]);
+      setSelectedPassId(null);
+      return;
+    }
+
+    const clientId = breakdown.clientId;
+    const serviceType = breakdown.serviceType;
+
+    void getApplicablePasses(clientId, serviceType).then((result) => {
+      if (result.error) {
+        setApplicablePasses([]);
+        return;
+      }
+      setApplicablePasses(result.data);
+    });
+  }, [breakdown?.clientId, breakdown?.serviceType]);
+
+  useEffect(() => {
+    if (paymentMethod !== "pass") return;
+    if (applicablePasses.length === 0) {
+      setSelectedPassId(null);
+      return;
+    }
+    setSelectedPassId((current) =>
+      current && applicablePasses.some((pass) => pass.id === current)
+        ? current
+        : applicablePasses[0].id,
+    );
+  }, [paymentMethod, applicablePasses]);
+
   async function handleSubmit() {
     if (!paymentMethod) return;
+    if (paymentMethod === "pass" && !selectedPassId) return;
 
     setSubmitting(true);
     setError(null);
@@ -102,6 +142,8 @@ export function CheckoutPicker({
     const result = await recordPayment(checkinId, {
       paymentMethod,
       foodAddon: foodAddon || undefined,
+      clientPassId:
+        paymentMethod === "pass" ? selectedPassId ?? undefined : undefined,
     });
 
     if (result.error) {
@@ -126,7 +168,16 @@ export function CheckoutPicker({
     !breakdown.foodAddonOnBooking;
 
   const showFoodPrefillHint =
-    foodAddon && feedingSource === "facility" && foodPrefilled;
+    foodAddon &&
+    foodPrefilled &&
+    breakdown?.bookingFoodSource === "facility";
+
+  const selectedPass =
+    applicablePasses.find((pass) => pass.id === selectedPassId) ?? null;
+  const showPassOption = applicablePasses.length > 0;
+  const lastUseOnSelectedPass =
+    selectedPass !== null &&
+    selectedPass.occasionsUsed + 1 === selectedPass.occasionsTotal;
 
   return (
     <div
@@ -223,7 +274,7 @@ export function CheckoutPicker({
               </label>
               {showFoodPrefillHint && (
                 <p className="px-1 text-xs text-muted-foreground">
-                  Pre-filled from dog&apos;s feeding preference. Uncheck to
+                  Pre-filled from this visit&apos;s food source. Uncheck to
                   override.
                 </p>
               )}
@@ -234,7 +285,12 @@ export function CheckoutPicker({
             <p className="mb-2 text-sm font-medium text-foreground">
               Payment method
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div
+              className={cn(
+                "grid gap-2",
+                showPassOption ? "grid-cols-4" : "grid-cols-3",
+              )}
+            >
               {PAYMENT_METHODS.map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}
@@ -253,14 +309,95 @@ export function CheckoutPicker({
                   {label}
                 </button>
               ))}
+              {showPassOption && (
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("pass")}
+                  disabled={submitting}
+                  className={cn(
+                    "flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
+                    paymentMethod === "pass"
+                      ? "border-primary bg-mint-wash text-primary"
+                      : "border-border bg-surface text-foreground hover:border-primary/40",
+                  )}
+                  aria-pressed={paymentMethod === "pass"}
+                >
+                  <Ticket className="h-4 w-4" aria-hidden />
+                  Pass
+                </button>
+              )}
             </div>
+
+            {paymentMethod === "pass" && selectedPass && (
+              <div className="mt-3 space-y-2">
+                {applicablePasses.length === 1 ? (
+                  <div className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-foreground">
+                    {selectedPass.passTypeName}
+                    {" · "}
+                    {selectedPass.occasionsTotal - selectedPass.occasionsUsed} of{" "}
+                    {selectedPass.occasionsTotal} remaining
+                    {" · "}
+                    Expires {formatBookingDate(selectedPass.expiryDate)}
+                  </div>
+                ) : (
+                  <div
+                    className="space-y-2 rounded-xl border border-border bg-surface p-3"
+                    role="radiogroup"
+                    aria-label="Select a pass"
+                  >
+                    {applicablePasses.map((pass) => {
+                      const remaining = pass.occasionsTotal - pass.occasionsUsed;
+                      return (
+                        <label
+                          key={pass.id}
+                          className={cn(
+                            "flex min-h-[44px] cursor-pointer items-start gap-3 rounded-lg border px-3 py-2 text-sm",
+                            selectedPassId === pass.id
+                              ? "border-primary bg-mint-wash"
+                              : "border-border bg-surface",
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="checkout-pass"
+                            checked={selectedPassId === pass.id}
+                            onChange={() => setSelectedPassId(pass.id)}
+                            disabled={submitting}
+                            className="mt-1 h-4 w-4 border-border text-primary focus:ring-primary"
+                          />
+                          <span>
+                            <span className="block font-medium text-foreground">
+                              {pass.passTypeName}
+                            </span>
+                            <span className="mt-0.5 block text-muted-foreground">
+                              {remaining} of {pass.occasionsTotal} remaining
+                              {" · "}
+                              Expires {formatBookingDate(pass.expiryDate)}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                {lastUseOnSelectedPass && (
+                  <p className="px-1 text-xs text-muted-foreground">
+                    This is the last use on this pass.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <Button
             variant="danger"
             className="w-full"
             onClick={() => void handleSubmit()}
-            disabled={submitting || !paymentMethod}
+            disabled={
+              submitting ||
+              !paymentMethod ||
+              (paymentMethod === "pass" && !selectedPassId)
+            }
           >
             {submitting && (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

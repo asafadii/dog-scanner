@@ -1,6 +1,12 @@
 import "server-only";
 
-import { mapBookingRowToBooking } from "@/lib/bookings";
+import {
+  mapBookingRowToBooking,
+  normalizeBookingTime,
+  parseFoodSource,
+  validateBookingFormData,
+  validateBookingTimes,
+} from "@/lib/bookings";
 import {
   DEFAULT_BOARDING_CAPACITY,
   DEFAULT_DAYCARE_CAPACITY,
@@ -14,7 +20,16 @@ import type {
   ClientRow,
   DogRow,
 } from "@/lib/supabase/types";
-import type { Booking, BookingFormData, BookingStatus } from "@/lib/types";
+import type {
+  Booking,
+  BookingFormData,
+  BookingSeriesCancelScope,
+  BookingStatus,
+  CancelBookingSeriesResult,
+  EditBookingSeriesFields,
+  EditBookingSeriesResult,
+} from "@/lib/types";
+import { addCalendarDays } from "@/lib/recurrence";
 
 type ServerDb = NonNullable<
   ReturnType<
@@ -38,7 +53,10 @@ function toBookingInsert(
     service_type: input.serviceType,
     start_date: input.startDate,
     end_date: input.endDate,
+    arrival_time: normalizeBookingTime(input.arrivalTime),
+    end_time: normalizeBookingTime(input.endTime),
     transport_required: input.transportRequired,
+    food_source: input.foodSource ?? null,
     status: "pending",
     notes: input.notes.trim() || null,
     pending_account_link: options?.pendingAccountLink ?? false,
@@ -168,6 +186,10 @@ export function parseBookingFormData(body: unknown): BookingFormData | null {
   const endDate =
     typeof record.endDate === "string" ? record.endDate.trim() : "";
   const notes = typeof record.notes === "string" ? record.notes : "";
+  const arrivalTime =
+    typeof record.arrivalTime === "string" ? record.arrivalTime.trim() : "";
+  const endTime =
+    typeof record.endTime === "string" ? record.endTime.trim() : "";
 
   if (
     !clientId ||
@@ -185,7 +207,10 @@ export function parseBookingFormData(body: unknown): BookingFormData | null {
     serviceType,
     startDate,
     endDate,
+    arrivalTime,
+    endTime,
     transportRequired: Boolean(record.transportRequired),
+    foodSource: parseFoodSource(record.foodSource),
     notes,
   };
 }
@@ -196,6 +221,11 @@ export async function createBookingServer(
   input: BookingFormData,
   options?: { pendingAccountLink?: boolean },
 ): Promise<ServerResult<Booking>> {
+  const validationError = validateBookingFormData(input);
+  if (validationError) {
+    return { data: null, error: validationError.message };
+  }
+
   const [clientCheck, dogCheck] = await Promise.all([
     db
       .from("clients")
@@ -302,6 +332,421 @@ export async function updateBookingStatusServer(
 
   return {
     data: await enrichBooking(db, data as BookingRow),
+    error: null,
+  };
+}
+
+function todayDateString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function occurrenceDateOf(row: {
+  start_date: string;
+  series_occurrence_date: string | null;
+}): string {
+  return row.series_occurrence_date ?? row.start_date;
+}
+
+type SeriesScopeRow = Pick<
+  BookingRow,
+  "id" | "start_date" | "series_occurrence_date" | "status"
+>;
+
+async function selectUnprotectedSeriesOccurrences(
+  db: ServerDb,
+  facilityId: string,
+  origin: BookingRow,
+  scope: "future" | "all",
+): Promise<ServerResult<{ ids: string[]; skippedCount: number }>> {
+  const originOccurrenceDate = occurrenceDateOf(origin);
+  const today = todayDateString();
+
+  const { data: seriesRows, error: seriesError } = await db
+    .from("bookings")
+    .select("id, start_date, series_occurrence_date, status")
+    .eq("facility_id", facilityId)
+    .eq("series_id", origin.series_id);
+
+  if (seriesError) {
+    return { data: null, error: seriesError.message };
+  }
+
+  const inScope = ((seriesRows ?? []) as SeriesScopeRow[]).filter((row) => {
+    if (scope === "future") {
+      return occurrenceDateOf(row) >= originOccurrenceDate;
+    }
+    return true;
+  });
+
+  const candidates = inScope.filter(
+    (row) => row.status === "pending" || row.status === "approved",
+  );
+
+  const protectedIds = new Set<string>();
+  const candidateIds = candidates.map((row) => row.id);
+
+  if (candidateIds.length > 0) {
+    const [checkinsResult, paymentsResult] = await Promise.all([
+      db
+        .from("dog_checkins")
+        .select("booking_id")
+        .eq("facility_id", facilityId)
+        .in("booking_id", candidateIds),
+      db
+        .from("payments")
+        .select("booking_id")
+        .eq("facility_id", facilityId)
+        .in("booking_id", candidateIds),
+    ]);
+
+    for (const row of (checkinsResult.data ?? []) as {
+      booking_id: string | null;
+    }[]) {
+      if (row.booking_id) protectedIds.add(row.booking_id);
+    }
+    for (const row of (paymentsResult.data ?? []) as {
+      booking_id: string | null;
+    }[]) {
+      if (row.booking_id) protectedIds.add(row.booking_id);
+    }
+  }
+
+  const ids: string[] = [];
+  let skippedCount = 0;
+
+  for (const row of candidates) {
+    if (row.start_date < today || protectedIds.has(row.id)) {
+      skippedCount += 1;
+      continue;
+    }
+    ids.push(row.id);
+  }
+
+  return { data: { ids, skippedCount }, error: null };
+}
+
+function toOccurrenceFieldUpdate(fields: EditBookingSeriesFields): BookingUpdate {
+  const update: BookingUpdate = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (fields.arrivalTime !== undefined) {
+    update.arrival_time = normalizeBookingTime(fields.arrivalTime);
+  }
+  if (fields.endTime !== undefined) {
+    update.end_time = normalizeBookingTime(fields.endTime);
+  }
+  if (fields.transportRequired !== undefined) {
+    update.transport_required = fields.transportRequired;
+  }
+  if (fields.notes !== undefined) {
+    update.notes = fields.notes.trim() || null;
+  }
+
+  return update;
+}
+
+function hasOccurrenceFields(fields: EditBookingSeriesFields): boolean {
+  return (
+    fields.arrivalTime !== undefined ||
+    fields.endTime !== undefined ||
+    fields.transportRequired !== undefined ||
+    fields.notes !== undefined
+  );
+}
+
+function validateOccurrenceFieldTimes(
+  origin: BookingRow,
+  fields: EditBookingSeriesFields,
+): string | null {
+  if (fields.arrivalTime === undefined && fields.endTime === undefined) {
+    return null;
+  }
+
+  const timeError = validateBookingTimes({
+    startDate: origin.start_date,
+    endDate: origin.end_date,
+    arrivalTime:
+      fields.arrivalTime !== undefined
+        ? fields.arrivalTime
+        : (origin.arrival_time ?? ""),
+    endTime:
+      fields.endTime !== undefined ? fields.endTime : (origin.end_time ?? ""),
+  });
+
+  return timeError?.message ?? null;
+}
+
+export function parseEditBookingSeriesFields(
+  body: unknown,
+): EditBookingSeriesFields | null {
+  if (!body || typeof body !== "object") return null;
+
+  const record = body as Record<string, unknown>;
+  const fields: EditBookingSeriesFields = {};
+
+  if (typeof record.arrivalTime === "string") {
+    fields.arrivalTime = record.arrivalTime;
+  }
+  if (typeof record.endTime === "string") {
+    fields.endTime = record.endTime;
+  }
+  if (typeof record.transportRequired === "boolean") {
+    fields.transportRequired = record.transportRequired;
+  }
+  if (typeof record.notes === "string") {
+    fields.notes = record.notes;
+  }
+
+  return hasOccurrenceFields(fields) ? fields : null;
+}
+
+async function updateBookingOccurrenceFieldsServer(
+  db: ServerDb,
+  facilityId: string,
+  bookingId: string,
+  fields: EditBookingSeriesFields,
+): Promise<ServerResult<true>> {
+  const { data: existing, error: fetchError } = await db
+    .from("bookings")
+    .select("*")
+    .eq("id", bookingId)
+    .eq("facility_id", facilityId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { data: null, error: fetchError.message };
+  }
+
+  if (!existing) {
+    return { data: null, error: "Booking not found" };
+  }
+
+  const origin = existing as BookingRow;
+  const timeError = validateOccurrenceFieldTimes(origin, fields);
+  if (timeError) {
+    return { data: null, error: timeError };
+  }
+
+  const { error: updateError } = await db
+    .from("bookings")
+    .update(toOccurrenceFieldUpdate(fields))
+    .eq("id", bookingId)
+    .eq("facility_id", facilityId);
+
+  if (updateError) {
+    return { data: null, error: updateError.message };
+  }
+
+  return { data: true, error: null };
+}
+
+export async function cancelBookingSeriesServer(
+  db: ServerDb,
+  facilityId: string,
+  bookingId: string,
+  scope: BookingSeriesCancelScope,
+  cancelledBy: "staff" | "client",
+): Promise<ServerResult<CancelBookingSeriesResult>> {
+  if (scope === "this") {
+    const result = await updateBookingStatusServer(
+      db,
+      facilityId,
+      bookingId,
+      "cancelled",
+      { cancelledBy },
+    );
+    if (result.error || !result.data) {
+      return { data: null, error: result.error ?? "Failed to cancel booking" };
+    }
+    return { data: { cancelledCount: 1, skippedCount: 0 }, error: null };
+  }
+
+  const { data: existing, error: fetchError } = await db
+    .from("bookings")
+    .select("*")
+    .eq("id", bookingId)
+    .eq("facility_id", facilityId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { data: null, error: fetchError.message };
+  }
+
+  if (!existing) {
+    return { data: null, error: "Booking not found" };
+  }
+
+  const origin = existing as BookingRow;
+  if (!origin.series_id) {
+    return { data: null, error: "Booking is not part of a series" };
+  }
+
+  const selection = await selectUnprotectedSeriesOccurrences(
+    db,
+    facilityId,
+    origin,
+    scope,
+  );
+  if (selection.error || !selection.data) {
+    return { data: null, error: selection.error ?? "Failed to load series" };
+  }
+
+  const { ids: toCancel, skippedCount } = selection.data;
+
+  if (toCancel.length > 0) {
+    const { error: updateError } = await db
+      .from("bookings")
+      .update({
+        status: "cancelled",
+        cancelled_by: cancelledBy,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("facility_id", facilityId)
+      .in("id", toCancel);
+
+    if (updateError) {
+      return { data: null, error: updateError.message };
+    }
+  }
+
+  const originOccurrenceDate = occurrenceDateOf(origin);
+
+  const { data: series, error: seriesFetchError } = await db
+    .from("booking_series")
+    .select("id, recurrence_start_date")
+    .eq("id", origin.series_id)
+    .eq("facility_id", facilityId)
+    .maybeSingle();
+
+  if (seriesFetchError) {
+    return { data: null, error: seriesFetchError.message };
+  }
+
+  if (series) {
+    const seriesUpdate: {
+      recurrence_end_date?: string;
+      status?: "cancelled";
+      updated_at: string;
+    } = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (scope === "all") {
+      seriesUpdate.status = "cancelled";
+    } else {
+      const dayBefore = addCalendarDays(originOccurrenceDate, -1);
+      if (dayBefore >= series.recurrence_start_date) {
+        seriesUpdate.recurrence_end_date = dayBefore;
+      } else {
+        seriesUpdate.recurrence_end_date = series.recurrence_start_date;
+        seriesUpdate.status = "cancelled";
+      }
+    }
+
+    const { error: seriesUpdateError } = await db
+      .from("booking_series")
+      .update(seriesUpdate)
+      .eq("id", origin.series_id)
+      .eq("facility_id", facilityId);
+
+    if (seriesUpdateError) {
+      return { data: null, error: seriesUpdateError.message };
+    }
+  }
+
+  return {
+    data: {
+      cancelledCount: toCancel.length,
+      skippedCount,
+    },
+    error: null,
+  };
+}
+
+export async function editBookingSeriesServer(
+  db: ServerDb,
+  facilityId: string,
+  bookingId: string,
+  scope: BookingSeriesCancelScope,
+  fields: EditBookingSeriesFields,
+  editedBy: "staff" | "client",
+): Promise<ServerResult<EditBookingSeriesResult>> {
+  if (!hasOccurrenceFields(fields)) {
+    return { data: null, error: "No fields to update" };
+  }
+
+  if (scope === "this") {
+    const result = await updateBookingOccurrenceFieldsServer(
+      db,
+      facilityId,
+      bookingId,
+      fields,
+    );
+    if (result.error) {
+      return { data: null, error: result.error };
+    }
+    return { data: { updatedCount: 1, skippedCount: 0 }, error: null };
+  }
+
+  const { data: existing, error: fetchError } = await db
+    .from("bookings")
+    .select("*")
+    .eq("id", bookingId)
+    .eq("facility_id", facilityId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { data: null, error: fetchError.message };
+  }
+
+  if (!existing) {
+    return { data: null, error: "Booking not found" };
+  }
+
+  const origin = existing as BookingRow;
+  if (!origin.series_id) {
+    return { data: null, error: "Booking is not part of a series" };
+  }
+
+  const timeError = validateOccurrenceFieldTimes(origin, fields);
+  if (timeError) {
+    return { data: null, error: timeError };
+  }
+
+  const selection = await selectUnprotectedSeriesOccurrences(
+    db,
+    facilityId,
+    origin,
+    scope,
+  );
+  if (selection.error || !selection.data) {
+    return { data: null, error: selection.error ?? "Failed to load series" };
+  }
+
+  const { ids: toUpdate, skippedCount } = selection.data;
+
+  if (toUpdate.length > 0) {
+    const { error: updateError } = await db
+      .from("bookings")
+      .update(toOccurrenceFieldUpdate(fields))
+      .eq("facility_id", facilityId)
+      .in("id", toUpdate);
+
+    if (updateError) {
+      return { data: null, error: updateError.message };
+    }
+  }
+
+  return {
+    data: {
+      updatedCount: toUpdate.length,
+      skippedCount,
+    },
     error: null,
   };
 }

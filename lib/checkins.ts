@@ -41,6 +41,23 @@ function isSameCalendarDay(a: Date, b: Date): boolean {
 }
 
 /**
+ * Operational service type for a checked-in dog.
+ * current_service_type first, then the linked booking, then daycare.
+ */
+export function resolveStoredCheckinServiceType(
+  currentServiceType: string | null | undefined,
+  bookingServiceType?: string | null,
+): BookingServiceType {
+  if (currentServiceType === "daycare" || currentServiceType === "boarding") {
+    return currentServiceType;
+  }
+  if (bookingServiceType === "daycare" || bookingServiceType === "boarding") {
+    return bookingServiceType;
+  }
+  return "daycare";
+}
+
+/**
  * Effective service type for display and pricing (calculation-only — never persist).
  * - Same calendar day as check-in → daycare (Sprint 52a same-day pricing)
  * - 24+ hours since check-in → boarding / Overnight (§18.3 display flip)
@@ -80,12 +97,18 @@ export function enrichDogWithCheckin(
     };
   }
 
+  const currentServiceType = activeCheckin.current_service_type;
+
   return {
     ...dog,
     status: "checked_in",
     lastCheckIn: activeCheckin.checked_in_at,
     activeCheckinId: activeCheckin.id,
     activeBookingId: activeCheckin.booking_id,
+    serviceType:
+      currentServiceType === "daycare" || currentServiceType === "boarding"
+        ? currentServiceType
+        : dog.serviceType,
     currentAssignment: dog.currentAssignment ?? null,
   };
 }
@@ -132,8 +155,11 @@ export async function enrichDogsWithBookingServiceType(
 
   if (bookingIds.length === 0) {
     return dogs.map((dog) =>
-      dog.status === "checked_in" && !dog.activeBookingId
-        ? { ...dog, serviceType: "daycare" as BookingServiceType }
+      dog.status === "checked_in"
+        ? {
+            ...dog,
+            serviceType: resolveStoredCheckinServiceType(dog.serviceType),
+          }
         : dog,
     );
   }
@@ -161,11 +187,13 @@ export async function enrichDogsWithBookingServiceType(
       return dog;
     }
 
-    if (!dog.activeBookingId) {
-      return { ...dog, serviceType: "daycare" as BookingServiceType };
-    }
-
-    const serviceType = serviceByBookingId.get(dog.activeBookingId) ?? "daycare";
+    const bookingServiceType = dog.activeBookingId
+      ? serviceByBookingId.get(dog.activeBookingId)
+      : undefined;
+    const serviceType = resolveStoredCheckinServiceType(
+      dog.serviceType,
+      bookingServiceType,
+    );
     return { ...dog, serviceType };
   });
 }

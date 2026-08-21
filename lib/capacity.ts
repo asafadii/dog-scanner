@@ -1,4 +1,5 @@
 import { INCOMPLETE_SETUP_MESSAGE } from "@/lib/dogs";
+import { resolveStoredCheckinServiceType } from "@/lib/checkins";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   BookingRow,
@@ -8,6 +9,7 @@ import type {
 } from "@/lib/supabase/types";
 import type {
   BookingFormData,
+  BookingServiceType,
   CapacityFormData,
   CapacityUsage,
   FacilityCapacity,
@@ -176,7 +178,7 @@ async function countApprovedBookingsOnDate(
       .gte("end_date", date),
     supabase
       .from("dog_checkins")
-      .select("dog_id, booking_id, checked_in_at, checked_out_at")
+      .select("dog_id, booking_id, current_service_type, checked_in_at, checked_out_at")
       .eq("facility_id", facilityId)
       .lt("checked_in_at", `${dayAfter}T23:59:59.999`)
       .or(`checked_out_at.is.null,checked_out_at.gte.${date}T00:00:00`),
@@ -197,7 +199,11 @@ async function countApprovedBookingsOnDate(
   if (!checkinsResult.error && checkinsResult.data) {
     const checkins = checkinsResult.data as Pick<
       DogCheckinRow,
-      "dog_id" | "booking_id" | "checked_in_at" | "checked_out_at"
+      | "dog_id"
+      | "booking_id"
+      | "current_service_type"
+      | "checked_in_at"
+      | "checked_out_at"
     >[];
     const covering = checkins.filter((checkin) =>
       checkinCoversDate(
@@ -235,10 +241,16 @@ async function countApprovedBookingsOnDate(
     }
 
     for (const checkin of covering) {
-      // Walk-ins (no booking) count as daycare, matching check-in enrichment.
-      const checkinServiceType = checkin.booking_id
+      const bookingServiceType = checkin.booking_id
         ? (serviceByBookingId.get(checkin.booking_id) ?? "daycare")
         : "daycare";
+      const checkinServiceType =
+        date === today
+          ? resolveStoredCheckinServiceType(
+              checkin.current_service_type,
+              bookingServiceType,
+            )
+          : bookingServiceType;
 
       if (checkinServiceType === serviceType) {
         dogIds.add(checkin.dog_id);
@@ -521,6 +533,119 @@ export async function getBookingCapacityWarning(
   const percent = Math.round(utilization * 100);
   return {
     data: `${label.charAt(0).toUpperCase()}${label.slice(1)} is at ${percent}% capacity on ${formatCapacityDate(peakDate)} (${peakUsed}/${capacityLimit} spots) if this booking is approved. You can still submit the request.`,
+    error: null,
+  };
+}
+
+function formatCapacityDateList(dates: string[]): string {
+  const formatted = dates.map(formatCapacityDate);
+  if (formatted.length === 1) return formatted[0];
+  if (formatted.length === 2) return `${formatted[0]} and ${formatted[1]}`;
+  return `${formatted.slice(0, -1).join(", ")}, and ${formatted[formatted.length - 1]}`;
+}
+
+export async function getRecurringBookingCapacityWarning(input: {
+  serviceType: BookingServiceType;
+  occurrences: { startDate: string; endDate: string }[];
+}): Promise<CapacityResult<string | null>> {
+  const occurrences = input.occurrences.filter(
+    (occurrence) =>
+      occurrence.startDate &&
+      occurrence.endDate &&
+      occurrence.endDate >= occurrence.startDate,
+  );
+
+  if (occurrences.length === 0) {
+    return { data: null, error: null };
+  }
+
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const capacityResult = await getFacilityCapacity();
+  if (capacityResult.error) {
+    return { data: null, error: capacityResult.error };
+  }
+
+  const capacityLimit =
+    input.serviceType === "daycare"
+      ? capacityResult.data.daycareCapacity
+      : capacityResult.data.boardingCapacity;
+
+  if (capacityLimit <= 0) {
+    return { data: null, error: null };
+  }
+
+  const uniqueDates = [
+    ...new Set(
+      occurrences.flatMap((occurrence) =>
+        enumerateDates(occurrence.startDate, occurrence.endDate),
+      ),
+    ),
+  ];
+  const usedByDate = new Map<string, number>();
+
+  await Promise.all(
+    uniqueDates.map(async (date) => {
+      const used = await countApprovedBookingsOnDate(
+        profileResult.data.facility_id,
+        date,
+        input.serviceType,
+      );
+      usedByDate.set(date, used);
+    }),
+  );
+
+  const exceededDates: string[] = [];
+  let peakUsed = 0;
+  let peakDate = occurrences[0].startDate;
+
+  for (const occurrence of occurrences) {
+    const dates = enumerateDates(occurrence.startDate, occurrence.endDate);
+    let occurrenceExceeds = false;
+
+    for (const date of dates) {
+      const used = usedByDate.get(date) ?? 0;
+      const projected = used + 1;
+      if (projected > peakUsed) {
+        peakUsed = projected;
+        peakDate = date;
+      }
+      if (projected / capacityLimit > CAPACITY_WARNING_THRESHOLD) {
+        occurrenceExceeds = true;
+      }
+    }
+
+    if (occurrenceExceeds) {
+      exceededDates.push(occurrence.startDate);
+    }
+  }
+
+  if (exceededDates.length === 0) {
+    return { data: null, error: null };
+  }
+
+  const label = input.serviceType === "daycare" ? "Daycare" : "Boarding";
+
+  if (exceededDates.length > 3) {
+    return {
+      data: `${exceededDates.length} of ${occurrences.length} dates exceed capacity`,
+      error: null,
+    };
+  }
+
+  if (exceededDates.length === 1) {
+    const percent = Math.round((peakUsed / capacityLimit) * 100);
+    return {
+      data: `${label} is at ${percent}% capacity on ${formatCapacityDate(peakDate)} (${peakUsed}/${capacityLimit} spots) if this booking is approved. You can still submit the request.`,
+      error: null,
+    };
+  }
+
+  return {
+    data: `${label} is near capacity on ${formatCapacityDateList(exceededDates)} if this series is approved. You can still submit the request.`,
     error: null,
   };
 }
