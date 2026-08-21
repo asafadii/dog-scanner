@@ -8,6 +8,7 @@ import { CapacitySettingsSection } from "@/components/settings/CapacitySettingsS
 import { KennelsSettingsSection } from "@/components/settings/KennelsSettingsSection";
 import { PricingSettingsSection } from "@/components/settings/PricingSettingsSection";
 import { StaffAccountsSection } from "@/components/settings/StaffAccountsSection";
+import { NotificationSettingsSection } from "@/components/settings/NotificationSettingsSection";
 import { Card, CardContent } from "@/components/ui/Card";
 import { isClarityEnabled } from "@/lib/clarity";
 
@@ -36,6 +37,8 @@ export default function SettingsPage() {
       <PricingSettingsSection />
 
       <StaffAccountsSection />
+
+      <NotificationSettingsSection />
 
       {isClarityEnabled() ? (
         <Card>

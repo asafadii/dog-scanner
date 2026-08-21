@@ -12,6 +12,10 @@ import {
   DEFAULT_DAYCARE_CAPACITY,
   enumerateDates,
 } from "@/lib/capacity";
+import {
+  defaultNotificationPreferences,
+  mapFacilityNotificationPreferencesRowToFacilityNotificationPreferences,
+} from "@/lib/notifications";
 import type { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type {
   BookingInsert,
@@ -19,6 +23,7 @@ import type {
   BookingUpdate,
   ClientRow,
   DogRow,
+  FacilityNotificationPreferencesRow,
 } from "@/lib/supabase/types";
 import type {
   Booking,
@@ -28,6 +33,7 @@ import type {
   CancelBookingSeriesResult,
   EditBookingSeriesFields,
   EditBookingSeriesResult,
+  FacilityNotificationPreferences,
 } from "@/lib/types";
 import { addCalendarDays } from "@/lib/recurrence";
 
@@ -807,4 +813,23 @@ export async function getFacilityNotificationRecipients(
   return data
     .map((row) => (row as { email: string }).email?.trim())
     .filter((email): email is string => Boolean(email));
+}
+
+export async function getFacilityNotificationPreferences(
+  db: ServerDb,
+  facilityId: string,
+): Promise<FacilityNotificationPreferences> {
+  const { data, error } = await db
+    .from("facility_notification_preferences")
+    .select("*")
+    .eq("facility_id", facilityId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return defaultNotificationPreferences(facilityId);
+  }
+
+  return mapFacilityNotificationPreferencesRowToFacilityNotificationPreferences(
+    data as FacilityNotificationPreferencesRow,
+  );
 }

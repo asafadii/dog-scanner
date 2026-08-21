@@ -77,6 +77,23 @@ export async function requireClientAccount(): Promise<
     };
   }
 
+  const authEmail = user.email?.trim().toLowerCase() ?? "";
+  if (authEmail && accountRow.email.trim().toLowerCase() !== authEmail) {
+    const { data: synced, error: syncError } = await supabase
+      .from("client_accounts")
+      .update({
+        email: authEmail,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id)
+      .select("*")
+      .maybeSingle();
+
+    if (!syncError && synced) {
+      return { data: synced as ClientAccountRow, error: null };
+    }
+  }
+
   return { data: accountRow, error: null };
 }
 

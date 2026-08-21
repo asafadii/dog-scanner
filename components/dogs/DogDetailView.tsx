@@ -75,20 +75,28 @@ function formatDocumentDate(value: string): string {
   }).format(new Date(value));
 }
 
-function TriStateAnswer({ value }: { value: boolean | null }) {
-  if (value === true) {
-    return (
-      <span className="inline-flex items-center gap-1.5 font-medium text-danger">
-        <span className="h-2 w-2 rounded-full bg-danger" aria-hidden />
-        Yes
-      </span>
-    );
-  }
-  if (value === false) {
+function TriStateAnswer({
+  value,
+  invert = false,
+}: {
+  value: boolean | null;
+  invert?: boolean;
+}) {
+  const isPositive = invert ? value === false : value === true;
+
+  if (value === true || value === false) {
+    if (isPositive) {
+      return (
+        <span className="inline-flex items-center gap-1.5 font-medium text-danger">
+          <span className="h-2 w-2 rounded-full bg-danger" aria-hidden />
+          {value ? "Yes" : "No"}
+        </span>
+      );
+    }
     return (
       <span className="inline-flex items-center gap-1.5 font-medium text-success">
         <span className="h-2 w-2 rounded-full bg-success" aria-hidden />
-        No
+        {value ? "Yes" : "No"}
       </span>
     );
   }
@@ -333,7 +341,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
   return (
     <div className="-mx-4 -mt-6 md:mx-0 md:mt-0">
       {/* Hero */}
-      <div className="relative h-56 bg-gradient-to-br from-mint to-primary sm:h-64">
+      <div className="relative h-64 bg-gradient-to-br from-mint to-primary sm:h-72 rounded-b-3xl md:rounded-3xl">
         <Image
           src={getDogPhotoSrc(dog.photoUrl)}
           alt={dog.name}
@@ -698,7 +706,7 @@ export function DogDetailView({ dogId }: DogDetailViewProps) {
                   Kennel trained
                 </dt>
                 <dd className="mt-1 text-sm font-medium">
-                  <TriStateAnswer value={dog.kennelTrained} />
+                  <TriStateAnswer value={dog.kennelTrained} invert />
                 </dd>
               </div>
               <div>

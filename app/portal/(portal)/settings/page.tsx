@@ -11,9 +11,8 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { isClarityEnabled } from "@/lib/clarity";
-import { deletePortalAccount } from "@/lib/portal/account";
+import { deletePortalAccount, requestEmailChange } from "@/lib/portal/account";
 import { getLinkedClients, requireClientAccount } from "@/lib/portal/auth";
-import { unlinkFacility } from "@/lib/portal/facilities";
 import {
   getNotificationPreferences,
   updateNotificationPreferences,
@@ -22,7 +21,7 @@ import {
   getPortalProfile,
   updatePortalProfile,
 } from "@/lib/portal/profile";
-import { KeyRound, Loader2 } from "lucide-react";
+import { KeyRound, Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -68,12 +67,11 @@ export default function PortalSettingsPage() {
   const [prefsSaving, setPrefsSaving] = useState(false);
   const [prefsError, setPrefsError] = useState<string | null>(null);
 
-  const [unlinkingFacilityId, setUnlinkingFacilityId] = useState<string | null>(
-    null,
-  );
-  const [unlinkError, setUnlinkError] = useState<string | null>(null);
-
   const [accountLabel, setAccountLabel] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSuccessFor, setEmailSuccessFor] = useState<string | null>(null);
 
   const selectedFacility = useMemo(
     () =>
@@ -218,24 +216,23 @@ export default function PortalSettingsPage() {
     setPrefsSaving(false);
   }
 
-  async function handleUnlink(facility: FacilityOption) {
-    const confirmed = window.confirm(
-      `Unlink from ${facility.facilityName}? You can re-link anytime using their facility code.`,
-    );
-    if (!confirmed) return;
+  async function handleEmailChange(e: FormEvent) {
+    e.preventDefault();
+    if (emailSaving) return;
 
-    setUnlinkingFacilityId(facility.facilityId);
-    setUnlinkError(null);
+    setEmailSaving(true);
+    setEmailError(null);
+    setEmailSuccessFor(null);
 
-    const result = await unlinkFacility(facility.facilityId);
+    const result = await requestEmailChange(newEmail);
     if (result.error) {
-      setUnlinkError(result.error.message);
-      setUnlinkingFacilityId(null);
+      setEmailError(result.error.message);
+      setEmailSaving(false);
       return;
     }
 
-    await loadLinks();
-    setUnlinkingFacilityId(null);
+    setEmailSuccessFor(result.data.email);
+    setEmailSaving(false);
   }
 
   return (
@@ -248,46 +245,6 @@ export default function PortalSettingsPage() {
           Manage your portal account.
         </p>
       </div>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Notifications</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-0">
-          {prefsLoading ? (
-            <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              Loading preferences...
-            </div>
-          ) : (
-            <label className="flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border border-border px-4 py-3">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/30"
-                checked={emailRemindersEnabled}
-                disabled={prefsSaving}
-                onChange={(e) => void handleToggleReminders(e.target.checked)}
-              />
-              <span>
-                <span className="block text-sm font-medium text-foreground">
-                  Email me the day before my dog&apos;s stay
-                </span>
-                <span className="mt-1 block text-sm text-muted-foreground">
-                  Reminder emails go to the contact email on your booking.
-                </span>
-              </span>
-            </label>
-          )}
-          {prefsError && (
-            <p
-              className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
-              role="alert"
-            >
-              {prefsError}
-            </p>
-          )}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader className="pb-2">
@@ -430,47 +387,39 @@ export default function PortalSettingsPage() {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Linked Facilities</CardTitle>
+          <CardTitle className="text-base">Notifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 pt-0">
-          {facilityOptions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No facilities linked yet.
-            </p>
+          {prefsLoading ? (
+            <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              Loading preferences...
+            </div>
           ) : (
-            <ul className="space-y-2">
-              {facilityOptions.map((facility) => (
-                <li
-                  key={facility.facilityId}
-                  className="flex flex-col gap-2 rounded-xl border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <p className="text-sm font-medium text-foreground">
-                    {facility.facilityName}
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="shrink-0 border-danger/40 text-danger hover:bg-danger/10"
-                    disabled={unlinkingFacilityId === facility.facilityId}
-                    onClick={() => void handleUnlink(facility)}
-                  >
-                    {unlinkingFacilityId === facility.facilityId ? (
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    ) : null}
-                    {unlinkingFacilityId === facility.facilityId
-                      ? "Unlinking..."
-                      : "Unlink"}
-                  </Button>
-                </li>
-              ))}
-            </ul>
+            <label className="flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border border-border px-4 py-3">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/30"
+                checked={emailRemindersEnabled}
+                disabled={prefsSaving}
+                onChange={(e) => void handleToggleReminders(e.target.checked)}
+              />
+              <span>
+                <span className="block text-sm font-medium text-foreground">
+                  Email me the day before my dog&apos;s stay
+                </span>
+                <span className="mt-1 block text-sm text-muted-foreground">
+                  Reminder emails go to the contact email on your booking.
+                </span>
+              </span>
+            </label>
           )}
-          {unlinkError && (
+          {prefsError && (
             <p
               className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
               role="alert"
             >
-              {unlinkError}
+              {prefsError}
             </p>
           )}
         </CardContent>
@@ -488,6 +437,48 @@ export default function PortalSettingsPage() {
             <KeyRound className="h-4 w-4 text-primary" aria-hidden />
             Change password
           </Link>
+          <form
+            onSubmit={(event) => void handleEmailChange(event)}
+            className="space-y-3 rounded-xl border border-border px-4 py-3"
+          >
+            <p className="flex items-center gap-3 text-sm font-medium text-foreground">
+              <Mail className="h-4 w-4 text-primary" aria-hidden />
+              Change email
+            </p>
+            <Input
+              label="New email"
+              type="email"
+              required
+              value={newEmail}
+              onChange={(event) => setNewEmail(event.target.value)}
+              placeholder="you@email.com"
+              disabled={emailSaving}
+              autoComplete="email"
+            />
+            {emailError ? (
+              <p
+                className="rounded-xl border border-danger/25 bg-[#FEF2F2] px-4 py-3 text-sm text-danger"
+                role="alert"
+              >
+                {emailError}
+              </p>
+            ) : null}
+            {emailSuccessFor ? (
+              <p
+                className="rounded-xl border border-success/25 bg-[#ECFDF5] px-4 py-3 text-sm text-success"
+                role="status"
+              >
+                Check {emailSuccessFor} for a confirmation link — your email
+                won&apos;t change until you confirm it.
+              </p>
+            ) : null}
+            <Button type="submit" disabled={emailSaving || !newEmail.trim()}>
+              {emailSaving && (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              )}
+              {emailSaving ? "Sending..." : "Send confirmation"}
+            </Button>
+          </form>
           {isClarityEnabled() ? (
             <CookiePreferencesButton className="px-4 text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:ring-ring focus-visible:ring-offset-background" />
           ) : null}

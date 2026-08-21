@@ -4,6 +4,7 @@ import { DogCard } from "@/components/dogs/DogCard";
 import { BookingStatusBadge } from "@/components/bookings/BookingStatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
+import { FilterPanel } from "@/components/ui/FilterPanel";
 import {
   checkInDog,
   enrichDogsWithCheckins,
@@ -19,7 +20,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ClipboardCheck, Dog as DogIcon, Loader2, ScanLine, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Input } from "@/components/ui/Input";
 
 const SERVICE_FILTERS = [
   { value: "all" as const, label: "All" },
@@ -255,7 +255,7 @@ export function CheckinsView() {
           </div>
         </div>
         <Link href="/checkins/scan">
-          <Button size="md">
+          <Button size="md" className="w-full sm:w-auto">
             <ScanLine className="h-4 w-4" aria-hidden />
             Scan to Check In
           </Button>
@@ -331,24 +331,14 @@ export function CheckinsView() {
 
       <section className="space-y-3">
         {checkedIn.length > 0 && (
-          <>
-            <div className="relative max-w-md">
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                aria-hidden
-              />
-              <Input
-                type="search"
-                placeholder="Search by dog or owner name..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="pl-10"
-                aria-label="Search checked-in dogs"
-              />
-            </div>
-
+          <FilterPanel
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Search by dog or owner name..."
+            activeCount={serviceFilter !== "all" ? 1 : 0}
+          >
             <div
-              className="flex max-w-md gap-2"
+              className="flex gap-2"
               role="group"
               aria-label="Filter by service type"
             >
@@ -368,7 +358,7 @@ export function CheckinsView() {
                 </button>
               ))}
             </div>
-          </>
+          </FilterPanel>
         )}
 
         <h3 className="font-display text-lg text-foreground">On site now</h3>

@@ -68,7 +68,7 @@ export function PortalShell({
             className="flex items-center gap-2 transition-opacity hover:opacity-90"
             aria-label="DORA home"
           >
-            <Logo size={32} />
+            <Logo size={32} variant="purple" />
           </Link>
           <div ref={containerRef} className="relative shrink-0">
             <button

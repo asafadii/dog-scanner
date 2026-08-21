@@ -12,6 +12,7 @@ import type {
   BookingServiceType,
   CapacityFormData,
   CapacityUsage,
+  CapacityDayDog,
   FacilityCapacity,
 } from "@/lib/types";
 
@@ -157,12 +158,36 @@ function checkinCoversDate(
   return date <= today;
 }
 
-async function countApprovedBookingsOnDate(
+type NestedDogName = { name: string } | { name: string }[] | null;
+
+type BookingCapacityRow = Pick<BookingRow, "id" | "dog_id"> & {
+  dogs: NestedDogName;
+};
+
+type CheckinCapacityRow = Pick<
+  DogCheckinRow,
+  | "id"
+  | "dog_id"
+  | "booking_id"
+  | "current_service_type"
+  | "checked_in_at"
+  | "checked_out_at"
+> & {
+  dogs: NestedDogName;
+};
+
+function nestedDogName(dogs: NestedDogName | undefined): string {
+  if (!dogs) return "";
+  if (Array.isArray(dogs)) return dogs[0]?.name ?? "";
+  return dogs.name ?? "";
+}
+
+async function listCapacityDayDogs(
   facilityId: string,
   date: string,
   serviceType: "daycare" | "boarding",
   excludeBookingId?: string,
-): Promise<number> {
+): Promise<CapacityDayDog[]> {
   const supabase = createSupabaseBrowserClient();
   const today = todayDateString();
   const dayAfter = addOneCalendarDay(date);
@@ -170,7 +195,7 @@ async function countApprovedBookingsOnDate(
   const [bookingsResult, checkinsResult] = await Promise.all([
     supabase
       .from("bookings")
-      .select("id, dog_id")
+      .select("id, dog_id, dogs ( name )")
       .eq("facility_id", facilityId)
       .eq("status", "approved")
       .eq("service_type", serviceType)
@@ -178,33 +203,33 @@ async function countApprovedBookingsOnDate(
       .gte("end_date", date),
     supabase
       .from("dog_checkins")
-      .select("dog_id, booking_id, current_service_type, checked_in_at, checked_out_at")
+      .select(
+        "id, dog_id, booking_id, current_service_type, checked_in_at, checked_out_at, dogs ( name )",
+      )
       .eq("facility_id", facilityId)
       .lt("checked_in_at", `${dayAfter}T23:59:59.999`)
       .or(`checked_out_at.is.null,checked_out_at.gte.${date}T00:00:00`),
   ]);
 
-  const dogIds = new Set<string>();
+  const byDogId = new Map<string, CapacityDayDog>();
 
   if (!bookingsResult.error && bookingsResult.data) {
-    const rows = bookingsResult.data as Pick<BookingRow, "id" | "dog_id">[];
+    const rows = bookingsResult.data as BookingCapacityRow[];
     for (const row of rows) {
       if (excludeBookingId && row.id === excludeBookingId) {
         continue;
       }
-      dogIds.add(row.dog_id);
+      byDogId.set(row.dog_id, {
+        dogId: row.dog_id,
+        dogName: nestedDogName(row.dogs),
+        bookingId: row.id,
+        checkinId: null,
+      });
     }
   }
 
   if (!checkinsResult.error && checkinsResult.data) {
-    const checkins = checkinsResult.data as Pick<
-      DogCheckinRow,
-      | "dog_id"
-      | "booking_id"
-      | "current_service_type"
-      | "checked_in_at"
-      | "checked_out_at"
-    >[];
+    const checkins = checkinsResult.data as CheckinCapacityRow[];
     const covering = checkins.filter((checkin) =>
       checkinCoversDate(
         checkin.checked_in_at,
@@ -253,12 +278,50 @@ async function countApprovedBookingsOnDate(
           : bookingServiceType;
 
       if (checkinServiceType === serviceType) {
-        dogIds.add(checkin.dog_id);
+        byDogId.set(checkin.dog_id, {
+          dogId: checkin.dog_id,
+          dogName: nestedDogName(checkin.dogs),
+          bookingId: checkin.booking_id,
+          checkinId: checkin.id,
+        });
       }
     }
   }
 
-  return dogIds.size;
+  return [...byDogId.values()];
+}
+
+export async function getDogsForCapacityDate(
+  date: string,
+  serviceType: "daycare" | "boarding",
+): Promise<CapacityResult<CapacityDayDog[]>> {
+  const profileResult = await requireProfile();
+  if (profileResult.error) {
+    return { data: null, error: profileResult.error };
+  }
+
+  const dogs = await listCapacityDayDogs(
+    profileResult.data.facility_id,
+    date,
+    serviceType,
+  );
+
+  return { data: dogs, error: null };
+}
+
+async function countApprovedBookingsOnDate(
+  facilityId: string,
+  date: string,
+  serviceType: "daycare" | "boarding",
+  excludeBookingId?: string,
+): Promise<number> {
+  const dogs = await listCapacityDayDogs(
+    facilityId,
+    date,
+    serviceType,
+    excludeBookingId,
+  );
+  return dogs.length;
 }
 
 export async function getFacilityCapacity(): Promise<

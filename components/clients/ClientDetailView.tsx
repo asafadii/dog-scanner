@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
-  generateClientInviteCode,
   getClientById,
   getClientDogs,
   INCOMPLETE_SETUP_MESSAGE,
@@ -32,7 +31,6 @@ import {
   Pencil,
   Phone,
   Plus,
-  RefreshCw,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -108,8 +106,6 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
   const [passesError, setPassesError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [inviteLoading, setInviteLoading] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
   const [inactiveOpen, setInactiveOpen] = useState(false);
 
@@ -147,20 +143,6 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
   useEffect(() => {
     void loadClient();
   }, [loadClient]);
-
-  async function handleGenerateInviteCode() {
-    setInviteLoading(true);
-    setInviteError(null);
-
-    const result = await generateClientInviteCode(clientId);
-    if (result.error) {
-      setInviteError(result.error.message);
-    } else {
-      await loadClient();
-    }
-
-    setInviteLoading(false);
-  }
 
   if (loading) {
     return (
@@ -313,52 +295,6 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
                 {client.emergencyContact}
               </p>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Client Portal</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-0">
-          <p className="text-sm text-muted-foreground">
-            Share an invite code so this client can link their portal account.
-          </p>
-          {client.inviteCode ? (
-            // mint-wash #EAF4F1 tint = documented D-04 exception (Wave-2 precedent)
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/25 bg-mint-wash/50 px-4 py-3">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Invite code
-                </p>
-                <p className="mt-1 font-mono text-lg font-semibold tracking-widest text-foreground">
-                  {client.inviteCode}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={inviteLoading}
-                onClick={() => void handleGenerateInviteCode()}
-              >
-                <RefreshCw className="h-4 w-4" aria-hidden />
-                Regenerate
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="outline"
-              disabled={inviteLoading}
-              onClick={() => void handleGenerateInviteCode()}
-            >
-              {inviteLoading ? "Generating..." : "Generate invite code"}
-            </Button>
-          )}
-          {inviteError && (
-            <p className="text-sm text-danger" role="alert">
-              {inviteError}
-            </p>
           )}
         </CardContent>
       </Card>

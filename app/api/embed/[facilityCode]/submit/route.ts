@@ -2,6 +2,7 @@ import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
 import { getFacilityAccessLevelServer } from "@/lib/billing/access";
 import {
   createBookingServer,
+  getFacilityNotificationPreferences,
   getFacilityNotificationRecipients,
 } from "@/lib/bookings/server";
 import { toDogInsert } from "@/lib/dogs";
@@ -631,7 +632,8 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const adminEmails = await getFacilityNotificationRecipients(db, facilityId);
-    if (adminEmails.length > 0) {
+    const prefs = await getFacilityNotificationPreferences(db, facilityId);
+    if (adminEmails.length > 0 && prefs.notifyNewBooking) {
       const bookingUrl = `${APP_URL}/bookings/${booking.id}`;
       const html = buildFacilityNewBookingRequestHtml({
         dogName,

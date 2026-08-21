@@ -9,6 +9,7 @@ import type { User } from "@supabase/supabase-js";
 export interface PortalAuthSuccess {
   user: User;
   db: NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
+  accessToken: string;
 }
 
 export type PortalAuthResult =
@@ -59,7 +60,7 @@ export async function verifyPortalAccessToken(
     };
   }
 
-  return { ok: true, data: { user, db } };
+  return { ok: true, data: { user, db, accessToken } };
 }
 
 export async function verifyClientAccountLink(

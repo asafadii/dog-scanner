@@ -784,6 +784,15 @@ export default function PortalNewBookingPage() {
           </p>
         )}
 
+        {selectedFacility ? (
+          <p className="text-sm text-muted-foreground">
+            Booking for:{" "}
+            <span className="font-medium text-foreground">
+              {selectedFacility.facilityName}
+            </span>
+          </p>
+        ) : null}
+
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
             type="submit"

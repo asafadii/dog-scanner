@@ -431,3 +431,54 @@ export async function checkOutDog(
 
   return { data: data as DogCheckinRow, error: null };
 }
+
+export async function updateCheckinServiceType(
+  checkinId: string,
+  serviceType: BookingServiceType,
+): Promise<CheckinsResult<DogCheckinRow>> {
+  const contextResult = await requireFacilityContext();
+  if (contextResult.error) {
+    return { data: null, error: contextResult.error };
+  }
+
+  if (serviceType !== "daycare" && serviceType !== "boarding") {
+    return { data: null, error: toError("Invalid service type") };
+  }
+
+  const supabase = createSupabaseBrowserClient();
+  const { data: existing, error: existingError } = await supabase
+    .from("dog_checkins")
+    .select("*")
+    .eq("id", checkinId)
+    .eq("facility_id", contextResult.data.facilityId)
+    .maybeSingle();
+
+  if (existingError) {
+    return { data: null, error: toError(existingError.message) };
+  }
+
+  if (!existing) {
+    return { data: null, error: toError("Check-in not found", "not_found") };
+  }
+
+  if (existing.checked_out_at) {
+    return {
+      data: null,
+      error: toError("Dog is not checked in", "not_checked_in"),
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("dog_checkins")
+    .update({ current_service_type: serviceType })
+    .eq("id", checkinId)
+    .eq("facility_id", contextResult.data.facilityId)
+    .select("*")
+    .single();
+
+  if (error) {
+    return { data: null, error: toError(error.message) };
+  }
+
+  return { data: data as DogCheckinRow, error: null };
+}

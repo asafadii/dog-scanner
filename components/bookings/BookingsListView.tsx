@@ -6,6 +6,7 @@ import {
   WRITE_LOCKED_TITLE,
 } from "@/components/app/FacilityAccessContext";
 import { Button } from "@/components/ui/Button";
+import { FilterPanel } from "@/components/ui/FilterPanel";
 import { Input } from "@/components/ui/Input";
 import { Pill } from "@/components/ui/Pills";
 import { getBookings, INCOMPLETE_SETUP_MESSAGE } from "@/lib/bookings";
@@ -51,7 +52,8 @@ export function BookingsListView() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [dateRangeStart, setDateRangeStart] = useState("");
+  const [dateRangeEnd, setDateRangeEnd] = useState("");
 
   const loadBookings = useCallback(async () => {
     setLoading(true);
@@ -77,12 +79,18 @@ export function BookingsListView() {
       if (statusFilter !== "all" && booking.status !== statusFilter) {
         return false;
       }
-      if (dateFilter && booking.startDate !== dateFilter) {
-        return false;
+      if (dateRangeStart) {
+        const effectiveRangeEnd = dateRangeEnd || dateRangeStart;
+        const overlaps =
+          booking.startDate <= effectiveRangeEnd &&
+          booking.endDate >= dateRangeStart;
+        if (!overlaps) {
+          return false;
+        }
       }
       return matchesSearch(booking, searchQuery);
     });
-  }, [bookings, statusFilter, searchQuery, dateFilter]);
+  }, [bookings, statusFilter, searchQuery, dateRangeStart, dateRangeEnd]);
 
   if (loading) {
     return (
@@ -155,52 +163,49 @@ export function BookingsListView() {
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-foreground">
-            Search bookings
-          </span>
-          <div className="relative">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
+      <FilterPanel
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search dog, owner, status, service..."
+        activeCount={
+          (statusFilter !== "all" ? 1 : 0) + (dateRangeStart !== "" ? 1 : 0)
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              type="date"
+              label="From"
+              value={dateRangeStart}
+              onChange={(event) => setDateRangeStart(event.target.value)}
             />
             <Input
-              type="search"
-              placeholder="Search dog, owner, status, service..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="pl-10"
-              aria-label="Search bookings"
+              type="date"
+              label="To"
+              value={dateRangeEnd}
+              onChange={(event) => setDateRangeEnd(event.target.value)}
             />
           </div>
-        </div>
-        <Input
-          type="date"
-          label="Filter by start date"
-          value={dateFilter}
-          onChange={(event) => setDateFilter(event.target.value)}
-        />
-      </div>
-
-      <div
-        className="flex gap-2 overflow-x-auto pb-1"
-        role="tablist"
-        aria-label="Filter bookings by status"
-      >
-        {FILTER_OPTIONS.map(({ value, label }) => (
-          <Pill
-            key={value}
-            role="tab"
-            aria-selected={statusFilter === value}
-            variant={statusFilter === value ? "active" : "inactive"}
-            onClick={() => setStatusFilter(value)}
-            className="min-h-[44px] shrink-0"
+          <div
+            className="flex gap-2 overflow-x-auto pb-1"
+            role="tablist"
+            aria-label="Filter bookings by status"
           >
-            {label}
-          </Pill>
-        ))}
-      </div>
+            {FILTER_OPTIONS.map(({ value, label }) => (
+              <Pill
+                key={value}
+                role="tab"
+                aria-selected={statusFilter === value}
+                variant={statusFilter === value ? "active" : "inactive"}
+                onClick={() => setStatusFilter(value)}
+                className="min-h-[44px] shrink-0"
+              >
+                {label}
+              </Pill>
+            ))}
+          </div>
+        </div>
+      </FilterPanel>
 
       {bookings.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border border-t-4 border-t-marker bg-surface py-16 text-center">
@@ -226,7 +231,8 @@ export function BookingsListView() {
             onClick={() => {
               setStatusFilter("all");
               setSearchQuery("");
-              setDateFilter("");
+              setDateRangeStart("");
+              setDateRangeEnd("");
             }}
             className="mt-2 text-sm font-medium text-primary hover:underline"
           >

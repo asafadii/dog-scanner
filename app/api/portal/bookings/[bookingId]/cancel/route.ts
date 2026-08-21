@@ -1,5 +1,5 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
-import { getFacilityNotificationRecipients } from "@/lib/bookings/server";
+import { getFacilityNotificationPreferences, getFacilityNotificationRecipients } from "@/lib/bookings/server";
 import { buildBookingCancelledByClientHtml } from "@/lib/email";
 import {
   verifyClientAccountLink,
@@ -126,8 +126,12 @@ export async function POST(
     db,
     bookingRow.facility_id,
   );
+  const prefs = await getFacilityNotificationPreferences(
+    db,
+    bookingRow.facility_id,
+  );
 
-  if (adminEmails.length > 0) {
+  if (adminEmails.length > 0 && prefs.notifyBookingCancelledByClient) {
     const bookingUrl = `${APP_URL}/bookings/${bookingRow.id}`;
     const html = buildBookingCancelledByClientHtml({
       dogName,

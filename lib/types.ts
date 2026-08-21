@@ -297,6 +297,15 @@ export interface FacilityCapacity {
   updatedAt: string | null;
 }
 
+export interface FacilityNotificationPreferences {
+  facilityId: string;
+  notifyNewBooking: boolean;
+  notifyReturningDogBooking: boolean;
+  notifyBookingCancelledByClient: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
 export interface CapacityFormData {
   daycareCapacity: number;
   boardingCapacity: number;
@@ -305,6 +314,13 @@ export interface CapacityFormData {
 export interface CapacityUsage {
   used: number;
   capacity: number;
+}
+
+export interface CapacityDayDog {
+  dogId: string;
+  dogName: string;
+  bookingId: string | null;
+  checkinId: string | null;
 }
 
 export type LocationType = "kennel" | "daycare" | "grooming" | "isolation";

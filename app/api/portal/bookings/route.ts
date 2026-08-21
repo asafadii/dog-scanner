@@ -1,6 +1,6 @@
 import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
 import { mapBookingRowToBooking, normalizeBookingTime, parseFoodSource, validateBookingFormData } from "@/lib/bookings";
-import { getFacilityNotificationRecipients } from "@/lib/bookings/server";
+import { getFacilityNotificationPreferences, getFacilityNotificationRecipients } from "@/lib/bookings/server";
 import {
   DEFAULT_BOARDING_CAPACITY,
   DEFAULT_DAYCARE_CAPACITY,
@@ -288,7 +288,12 @@ export async function POST(request: Request) {
   }
 
   const adminEmails = await getFacilityNotificationRecipients(db, facilityId);
-  if (adminEmails.length > 0) {
+  const prefs = await getFacilityNotificationPreferences(db, facilityId);
+  const notifyFacility = isReturningDog
+    ? prefs.notifyReturningDogBooking
+    : prefs.notifyNewBooking;
+
+  if (adminEmails.length > 0 && notifyFacility) {
     const bookingUrl = `${APP_URL}/bookings/${response.booking.id}`;
     const html = autoApprove
       ? buildFacilityAutoApprovedBookingHtml({

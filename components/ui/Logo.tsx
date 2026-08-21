@@ -4,13 +4,14 @@ import Image from "next/image";
 interface LogoProps {
   size?: number;
   className?: string;
+  variant?: "teal" | "purple";
 }
 
-export function Logo({ size = 32, className }: LogoProps) {
+export function Logo({ size = 32, className, variant = "teal" }: LogoProps) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Image
-        src="/dora-icon.svg"
+        src={variant === "purple" ? "/favicon-portal.svg" : "/dora-icon.svg"}
         alt=""
         width={size}
         height={size}

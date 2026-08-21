@@ -824,7 +824,6 @@ export function PortalDogForm({
         <Button
           type="submit"
           size="lg"
-          className="border-[2.5px] border-[#06342F] shadow-[4px_4px_0_#06342F] disabled:shadow-none"
           disabled={isSubmitting}
         >
           {isSubmitting && (

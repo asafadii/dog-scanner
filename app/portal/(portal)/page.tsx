@@ -120,6 +120,31 @@ export default function PortalPage() {
     return () => clearTimeout(timer);
   }, [claimSuccess]);
 
+  const refreshLinkedFacilities = useCallback(async () => {
+    const linkedResult = await getLinkedClients();
+    if (linkedResult.error) {
+      setLinkedClients([]);
+      setSelectedFacility(null);
+      return;
+    }
+
+    setLinkedClients(linkedResult.data);
+    const options = buildFacilityOptions(linkedResult.data);
+    setSelectedFacility((current) => {
+      if (
+        current &&
+        options.some((option) => option.facilityId === current.facilityId)
+      ) {
+        return (
+          options.find((option) => option.facilityId === current.facilityId) ??
+          options[0] ??
+          null
+        );
+      }
+      return options[0] ?? null;
+    });
+  }, []);
+
   async function handleClaim(e: FormEvent) {
     e.preventDefault();
     setClaimError(null);
@@ -349,6 +374,7 @@ export default function PortalPage() {
           selectedFacilityId={selectedFacility?.facilityId ?? ""}
           onChange={setSelectedFacility}
           showLabel={false}
+          onUnlinked={() => refreshLinkedFacilities()}
         />
       </section>
 

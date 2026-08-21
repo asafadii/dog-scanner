@@ -7,8 +7,10 @@ import { LocationChip } from "@/components/kennels/LocationChip";
 import { MoveKennelPicker } from "@/components/kennels/MoveKennelPicker";
 import { CheckoutPicker } from "@/components/payments/CheckoutPicker";
 import { Button } from "@/components/ui/Button";
-import { updateBookingServiceType } from "@/lib/bookings";
-import { getEffectiveServiceType } from "@/lib/checkins";
+import {
+  getEffectiveServiceType,
+  updateCheckinServiceType,
+} from "@/lib/checkins";
 import { getDogPhotoSrc } from "@/lib/dogAssets";
 import type { BookingServiceType, Dog, DogStatus, KennelAssignment, Payment } from "@/lib/types";
 import { cn, formatCheckInTime } from "@/lib/utils";
@@ -78,18 +80,18 @@ export function DogCard({
         ? "boarding"
         : getEffectiveServiceType(dog.lastCheckIn, storedServiceType)
       : storedServiceType;
-  const canChangeServiceType = isCheckedIn && Boolean(dog.activeBookingId);
+  const canChangeServiceType = isCheckedIn;
   const alternateServiceType: BookingServiceType =
     storedServiceType === "daycare" ? "boarding" : "daycare";
 
   async function handleConfirmServiceChange() {
-    if (!dog.activeBookingId) return;
+    if (!dog.activeCheckinId) return;
 
     setServiceChangeLoading(true);
     setServiceChangeError(null);
 
-    const result = await updateBookingServiceType(
-      dog.activeBookingId,
+    const result = await updateCheckinServiceType(
+      dog.activeCheckinId,
       alternateServiceType,
     );
 
@@ -290,7 +292,7 @@ export function DogCard({
           Profile
         </Button>
         <Button
-          variant={isCheckedIn ? "danger" : "primary"}
+          variant={isCheckedIn ? "danger-soft" : "primary"}
           size="md"
           className="col-span-3"
           disabled={isToggling}
