@@ -48,6 +48,42 @@ export function formatEmailDate(date: string): string {
   }).format(new Date(year, month - 1, day));
 }
 
+type BatchEmailDate = { startDate: string; endDate: string };
+
+function formatEmailDateRange(startDate: string, endDate: string): string {
+  const start = formatEmailDate(startDate);
+  const end = formatEmailDate(endDate);
+  return start === end ? start : `${start} – ${end}`;
+}
+
+function emailDatesOrPattern(
+  dates: BatchEmailDate[],
+  patternLabel?: string,
+): string {
+  if (patternLabel) {
+    return `<strong>Pattern:</strong> ${patternLabel}`;
+  }
+
+  const shown = dates.slice(0, 6);
+  const extra = dates.length - shown.length;
+  const items = shown
+    .map(
+      (range) =>
+        `<li>${formatEmailDateRange(range.startDate, range.endDate)}</li>`,
+    )
+    .join("");
+  const more =
+    extra > 0
+      ? `<li>+${extra} more — see them all in your portal</li>`
+      : "";
+
+  return `<strong>Dates:</strong>
+      <ul style="margin:12px 0;padding-left:20px;">
+        ${items}
+        ${more}
+      </ul>`;
+}
+
 export function buildInviteEmailHtml({
   clientName,
   facilityName,
@@ -424,6 +460,141 @@ export function buildFacilityAutoApprovedBookingHtml({
     </p>
   `;
   return emailShell("Booking auto-confirmed", body);
+}
+
+export function buildBatchBookingConfirmationHtml({
+  clientName,
+  dogName,
+  facilityName,
+  serviceType,
+  dates,
+  portalUrl,
+  patternLabel,
+}: {
+  clientName: string;
+  dogName: string;
+  facilityName: string;
+  serviceType: "daycare" | "boarding";
+  dates: Array<{ startDate: string; endDate: string }>;
+  portalUrl: string;
+  patternLabel?: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      Consider this your official "message received" bark —
+      <strong>${dogName}</strong>'s bookings at
+      <strong>${facilityName}</strong> have landed safely in our inbox
+      and are waiting for a paws-up from the team.<br><br>
+      <strong>Service:</strong> ${serviceType}<br>
+      ${emailDatesOrPattern(dates, patternLabel)}<br><br>
+      We'll email you the moment they're reviewed.
+    </p>
+    ${emailButton(portalUrl, "View your bookings →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Talk soon,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("Bookings received!", body);
+}
+
+export function buildBatchBookingApprovedHtml({
+  clientName,
+  dogName,
+  facilityName,
+  dates,
+  portalUrl,
+  patternLabel,
+}: {
+  clientName: string;
+  dogName: string;
+  facilityName: string;
+  dates: Array<{ startDate: string; endDate: string }>;
+  portalUrl: string;
+  patternLabel?: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Hi ${clientName},<br><br>
+      Great news travels fast: <strong>${dogName}</strong>'s bookings
+      at <strong>${facilityName}</strong> are officially
+      <strong>confirmed</strong>. Pawsitively locked in.<br><br>
+      ${emailDatesOrPattern(dates, patternLabel)}<br><br>
+      Nothing left for you to do — just count down the sleeps until
+      drop-off.
+    </p>
+    ${emailButton(portalUrl, "View bookings →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      See you both soon,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+
+  return emailShell("You're all set! 🎉", body);
+}
+
+export function buildFacilityBatchNewBookingRequestHtml({
+  dogName,
+  clientName,
+  serviceType,
+  dates,
+  bookingUrl,
+  patternLabel,
+}: {
+  dogName: string;
+  clientName: string;
+  serviceType: "daycare" | "boarding";
+  dates: Array<{ startDate: string; endDate: string }>;
+  bookingUrl: string;
+  patternLabel?: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Heads up — <strong>${dogName}</strong>'s owner
+      (${clientName}) just sent in new booking requests, and they're
+      waiting on you for a paws-up.<br><br>
+      <strong>Service:</strong> ${serviceType}<br>
+      ${emailDatesOrPattern(dates, patternLabel)}<br><br>
+      Take a look and approve or decline whenever you're ready.
+    </p>
+    ${emailButton(bookingUrl, "Review requests →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      Wags & wiggles,<br>The hello DORA Pack 🐾
+    </p>
+  `;
+  return emailShell("New booking requests", body);
+}
+
+export function buildFacilityBatchAutoApprovedBookingHtml({
+  dogName,
+  clientName,
+  serviceType,
+  dates,
+  bookingUrl,
+  patternLabel,
+}: {
+  dogName: string;
+  clientName: string;
+  serviceType: "daycare" | "boarding";
+  dates: Array<{ startDate: string; endDate: string }>;
+  bookingUrl: string;
+  patternLabel?: string;
+}): string {
+  const body = `
+    <p style="margin:0 0 24px;font-size:15px;color:#17211D;line-height:1.6;">
+      Just so you're in the loop — <strong>${dogName}</strong>
+      (owner: ${clientName}) has new bookings, and since they're a
+      returning pup with room on the calendar, they've already been
+      auto-confirmed. No action needed on your end.<br><br>
+      <strong>Service:</strong> ${serviceType}<br>
+      ${emailDatesOrPattern(dates, patternLabel)}
+    </p>
+    ${emailButton(bookingUrl, "View bookings →")}
+    <p style="margin:16px 0 0;font-size:15px;color:#17211D;">
+      The hello DORA Pack 🐾
+    </p>
+  `;
+  return emailShell("Bookings auto-confirmed", body);
 }
 
 export function buildTrialEndingSoonHtml({

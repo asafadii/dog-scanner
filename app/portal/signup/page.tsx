@@ -112,7 +112,7 @@ function PortalSignupContent() {
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-background">
+    <div className="portal-theme flex min-h-full flex-col bg-background">
       {/* Mint operational top bar (documented mint-wash literals #EAF4F1 / #D9EAE4), mirrors PortalShell (Plan 05) */}
       <header className="border-b border-[#D9EAE4] bg-[#EAF4F1] backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-lg items-center px-4">

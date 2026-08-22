@@ -36,12 +36,15 @@
 }
 
 /* ============================================================================
-   TIER 2 — Semantic role layer (@theme inline, D-01). Components consume ONLY
-   these, via Tailwind bg-*, text-*, border-*, ring-* utilities. Each maps to a
+   TIER 2 — Semantic role layer (@theme, D-01). Components consume ONLY these,
+   via Tailwind bg-*, text-*, border-*, ring-* utilities. Each maps to a
    Tier 1 primitive through the var() passthrough — Tier 2 names are stable
    (shadcn-compatible role names + DORA extras) even if Tier 1 hexes change.
+   Color tokens live in a plain @theme block (not inline) so generated
+   utilities reference var(--color-primary) and .portal-theme can override them.
+   Fonts stay @theme inline so they match next/font variable names.
    ========================================================================== */
-@theme inline {
+@theme {
   --color-background: var(--dora-cream);
   --color-foreground: var(--dora-ink-soft);
   --color-surface: #ffffff;
@@ -70,10 +73,13 @@
 
   --color-service-daycare: var(--dora-service-daycare);
   --color-service-boarding: var(--dora-service-boarding);
+}
 
+@theme inline {
   /* Font families — names MUST match the variable: names in app/layout.tsx
      (--font-display = Baloo 2, --font-sans = Plus Jakarta Sans). A mismatch
-     silently falls back to the system font (RESEARCH Pitfall 3 / A6). */
+     silently falls back to the system font (RESEARCH Pitfall 3 / A6).
+     inline is required here so utilities bind to the next/font CSS variables. */
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }

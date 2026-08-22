@@ -1,4 +1,4 @@
-import { sendTransactionalEmail } from "@/app/api/_lib/sendEmail";
+import { sendEmailsForCreatedBookings } from "@/app/api/portal/bookings/_notifyCreatedBookings";
 import { mapBookingRowToBooking, normalizeBookingTime, parseFoodSource, validateBookingFormData } from "@/lib/bookings";
 import { getFacilityNotificationPreferences, getFacilityNotificationRecipients } from "@/lib/bookings/server";
 import {
@@ -6,13 +6,6 @@ import {
   DEFAULT_DAYCARE_CAPACITY,
   enumerateDates,
 } from "@/lib/capacity";
-import {
-  buildBookingApprovedHtml,
-  buildBookingConfirmationHtml,
-  buildFacilityAutoApprovedBookingHtml,
-  buildFacilityNewBookingRequestHtml,
-  formatEmailDate,
-} from "@/lib/email";
 import type { CreatePortalBookingsSuccessResponse } from "@/lib/portal/bookings";
 import {
   verifyClientAccountLink,
@@ -21,8 +14,6 @@ import {
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { BookingFormData, BookingServiceType } from "@/lib/types";
 import { NextResponse } from "next/server";
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://hellodora.app";
 
 interface BatchBookingBody {
   bookings?: Array<BookingFormData & { facilityId?: string }>;
@@ -318,80 +309,35 @@ export async function POST(request: Request) {
   const clientNameForEmail = clientRow?.name ?? "A client";
   const adminEmails = await getFacilityNotificationRecipients(db, facilityId);
   const prefs = await getFacilityNotificationPreferences(db, facilityId);
+  const notifyFacility = isReturningDog
+    ? prefs.notifyReturningDogBooking
+    : prefs.notifyNewBooking;
 
-  for (const booking of bookings) {
-    const startDateFormatted = formatEmailDate(booking.startDate);
-    const endDateFormatted = formatEmailDate(booking.endDate);
-    const autoApprove = booking.status === "approved";
+  const approvedBookings = bookings.filter(
+    (booking) => booking.status === "approved",
+  );
+  const pendingBookings = bookings.filter(
+    (booking) => booking.status === "pending",
+  );
 
-    if (clientRow?.email?.trim()) {
-      const portalUrl = `${APP_URL}/portal/bookings/${booking.id}`;
-
-      if (autoApprove) {
-        await sendTransactionalEmail({
-          to: clientRow.email,
-          subject: `🎉🐾 ${booking.dogName}'s booking is officially confirmed!`,
-          html: buildBookingApprovedHtml({
-            clientName: clientRow.name,
-            dogName: booking.dogName,
-            facilityName,
-            startDate: startDateFormatted,
-            endDate: endDateFormatted,
-            portalUrl,
-          }),
-        });
-      } else {
-        await sendTransactionalEmail({
-          to: clientRow.email,
-          subject: `Booking received for ${booking.dogName} 🐾`,
-          html: buildBookingConfirmationHtml({
-            clientName: clientRow.name,
-            dogName: booking.dogName,
-            facilityName,
-            serviceType: booking.serviceType,
-            startDate: startDateFormatted,
-            endDate: endDateFormatted,
-            portalUrl,
-          }),
-        });
-      }
-    }
-
-    const notifyFacility = isReturningDog
-      ? prefs.notifyReturningDogBooking
-      : prefs.notifyNewBooking;
-
-    if (adminEmails.length > 0 && notifyFacility) {
-      const bookingUrl = `${APP_URL}/bookings/${booking.id}`;
-      const html = autoApprove
-        ? buildFacilityAutoApprovedBookingHtml({
-            dogName: booking.dogName,
-            clientName: clientNameForEmail,
-            serviceType: booking.serviceType,
-            startDate: startDateFormatted,
-            endDate: endDateFormatted,
-            bookingUrl,
-          })
-        : buildFacilityNewBookingRequestHtml({
-            dogName: booking.dogName,
-            clientName: clientNameForEmail,
-            serviceType: booking.serviceType,
-            startDate: startDateFormatted,
-            endDate: endDateFormatted,
-            bookingUrl,
-          });
-
-      for (const email of adminEmails) {
-        await sendTransactionalEmail({
-          to: email,
-          subject: autoApprove
-            ? `Booking auto-confirmed for ${booking.dogName}`
-            : `New booking request for ${booking.dogName}`,
-          html,
-        });
-      }
-    }
-  }
+  await sendEmailsForCreatedBookings({
+    group: approvedBookings,
+    approved: true,
+    clientRow,
+    facilityName,
+    clientNameForEmail,
+    adminEmails,
+    notifyFacility,
+  });
+  await sendEmailsForCreatedBookings({
+    group: pendingBookings,
+    approved: false,
+    clientRow,
+    facilityName,
+    clientNameForEmail,
+    adminEmails,
+    notifyFacility,
+  });
 
   return NextResponse.json(response, { status: 201 });
 }
