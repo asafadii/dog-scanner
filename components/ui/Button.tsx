@@ -17,7 +17,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-primary-foreground shadow-sm hover:bg-[var(--dora-primary-deep)] focus-visible:ring-ring",
+    "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover focus-visible:ring-ring",
   secondary:
     "bg-muted text-foreground hover:bg-muted/80 focus-visible:ring-ring",
   outline:
